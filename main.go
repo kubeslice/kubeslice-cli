@@ -45,7 +45,6 @@ func seamlessInstall() {
 	internal.PrintNextSteps(true)
 }
 
-
 func minimalInstall() {
 	basicInstall()
 	internal.GenerateSliceConfiguration()
@@ -66,22 +65,21 @@ func cleanup() {
 	internal.DeleteKubeSliceDirectory()
 }
 
-
 func basicInstall() {
 	internal.VerifyExecutables()
 	internal.GenerateKubeSliceDirectory()
 	internal.GenerateKindConfiguration()
 	internal.CreateKubeConfig()
 	internal.SetKubeConfigPath()
-	//internal.CreateKindClusters()
-	//internal.InstallCalico()
-	//internal.PopulateDockerNetworkMap()
-	//internal.AddHelmCharts()
-	//internal.InstallCertManager()
-	//internal.InstallKubeSliceController()
-	//internal.CreateKubeSliceProject()
-	//internal.RegisterWorkerClusters()
-	//internal.InstallKubeSliceWorker()
+	internal.CreateKindClusters()
+	internal.InstallCalico()
+	internal.PopulateDockerNetworkMap()
+	internal.AddHelmCharts()
+	internal.InstallCertManager()
+	internal.InstallKubeSliceController()
+	internal.CreateKubeSliceProject()
+	internal.RegisterWorkerClusters()
+	internal.InstallKubeSliceWorker()
 }
 
 func printHelp() {
