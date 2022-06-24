@@ -1,0 +1,30 @@
+configuration:
+  cluster_configuration:
+    kube_config_path: C:\Users\that-backend-guy\.kube\eks-config
+    controller:
+      name: controller
+      context_name: gke-preprod-1
+      kube_config_path: C:\Users\deepankar\.kube\gke-config
+    workers:
+      - name: eks-worker-1
+        context_name: eks-preprod-1
+      - name: gke-worker-2
+        context_name: eks-preprod-2
+      - name: gke-worker-3
+        context_name: eks-preprod-3
+      - name: gke-worker-4
+        context_name: eks-preprod-4
+      - name: aks-worker-1
+        context_name: aks-preprod-1
+        kube_config_path: C:\Users\that-backend-guy\.kube\aks-config
+  kubeslice_configuration:
+    project_name: preprod
+  helm_chart_configuration:
+    repo_alias: kubeslice
+    repo_url: https://kubeslice.github.io/charts/
+    cert_manager_chart:
+      chart_name: cert-manager
+    controller_chart:
+      chart_name: kubeslice-controller
+    worker_chart:
+      chart_name: kubeslice-worker
