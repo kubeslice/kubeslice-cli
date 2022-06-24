@@ -24,27 +24,34 @@ kubeslice:
 func InstallKubeSliceController() {
 	util.Printf("\nInstalling KubeSlice Controller...")
 
-	generateControllerValuesFile()
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
+	generateControllerValuesFile(cc.ControllerCluster)
 	util.Printf("%s Generated Helm Values file for Controller Installation %s", util.Tick, controllerValuesFileName)
 	time.Sleep(200 * time.Millisecond)
 
-	installKubeSliceController()
-	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, helmRepoAlias, controllerChartName)
+	installKubeSliceController(cc.ControllerCluster, hc)
+	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.ControllerChart.ChartName)
 	time.Sleep(200 * time.Millisecond)
 
 	util.Printf("%s Waiting for KubeSlice Controller Pods to be Healthy...", util.Wait)
-	util.PodVerification("Waiting for KubeSlice Controller Pods to be Healthy", controllerName, "kubeslice-controller")
+	PodVerification("Waiting for KubeSlice Controller Pods to be Healthy", cc.ControllerCluster, "kubeslice-controller")
 
 	util.Printf("%s Successfully installed KubeSlice Controller.\n", util.Tick)
 
 }
 
-func generateControllerValuesFile() {
-	util.DumpFile(fmt.Sprintf(controllerValuesTemplate, dockerNetworkMap[controllerName]), kubesliceDirectory+"/"+controllerValuesFileName)
+func generateControllerValuesFile(cluster Cluster) {
+	util.DumpFile(fmt.Sprintf(controllerValuesTemplate, dockerNetworkMap[cluster.Name]), kubesliceDirectory+"/"+controllerValuesFileName)
 }
 
-func installKubeSliceController() {
-	err := util.RunCommand("helm", "--kube-context", "kind-"+controllerName, "upgrade", "-i", "kubeslice-controller", fmt.Sprintf("%s/%s", helmRepoAlias, controllerChartName), "--namespace", "kubeslice-controller", "--create-namespace", "-f", kubesliceDirectory+"/"+controllerValuesFileName)
+func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {
+	args := make([]string, 0)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", "kubeslice-controller", fmt.Sprintf("%s/%s", hc.RepoAlias, hc.ControllerChart.ChartName), "--namespace", "kubeslice-controller", "--create-namespace", "-f", kubesliceDirectory+"/"+controllerValuesFileName)
+	if hc.ControllerChart.Version != "" {
+		args = append(args, "--version", hc.ControllerChart.Version)
+	}
+	err := util.RunCommand("helm", args...)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}

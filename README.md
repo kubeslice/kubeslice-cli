@@ -18,28 +18,40 @@ slicectl for KubeSlice Operations
 Usage
 
 ```
-slicectl [OPTIONS]
+slicectl <options> <command>
 ```
 
 Options:
 
 ```
---help
-        Prints the help menu
+  --profile=<profile-value>
+      The profile for installation/uninstallation.
+      Supported values:
+        - full-demo:
+            Showcases the KubeSlice inter-cluster connectivity by spawning
+            3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers,
+            and installing iPerf application to generate network traffic.
+        - minimal-demo:
+            Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers.
+            Generates the KubernetesManifests for user to manually apply, and verify
+            the functionality
 
---full-install
-        Creates 3 Kind Clusters, sets-up KubeSlice Controller, 
-        KubeSlice Worker,a demo slice, and iperf example application
+  --config=<path-to-topology-configuration-yaml>
+      The yaml file with topology configuration.
+      Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml
+```
 
---minimal-install
-        Creates 3 Kind Clusters, sets-up KubeSlice Controller, KubeSlice Worker,
-        and iperf example application.
-        Once the setup is done, prints the instructions on how to create a slice
-        and verify the connectivity.
+Commands:
+```
+  install
+      Creates 3 Kind Clusters, sets-up KubeSlice Controller, KubeSlice Worker,
+      and iperf example application.
+      Once the setup is done, prints the instructions on how to create a slice
+      and verify the connectivity.
 
---uninstall
-        Deletes the 3 Kind Clusters, but retains the kubeslice configuration directory.
+  uninstall
+      Deletes the Kind Clusters used for the demo.
 
---cleanup
-        Deletes the 3 Kind Clusters and kubeslice directory.
+  help
+      Prints this help menu.
 ```

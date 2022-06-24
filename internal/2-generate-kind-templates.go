@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -11,20 +12,12 @@ import (
 const (
 	kubesliceDirectory = "kubeslice"
 	kindSubDirectory   = "kind"
-
-	controllerFilename = "controller.yaml"
-	worker1Filename    = "worker-1.yaml"
-	worker2Filename    = "worker-2.yaml"
-
-	controllerName = "ks-ctrl"
-	worker1Name    = "ks-w-1"
-	worker2Name    = "ks-w-2"
 )
 
 const kubesliceControllerTemplate = `
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-name: ` + controllerName + `
+name: %s
 networking:
   disableDefaultCNI: true # disable kindnet
   podSubnet: 192.168.0.0/16 # set to Calico's default subnet
@@ -33,28 +26,10 @@ nodes:
     image: kindest/node:v1.22.9
 `
 
-const kubesliceWorker1Template = `
+const kubesliceWorkerTemplate = `
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-name: ` + worker1Name + `
-networking:
-  disableDefaultCNI: true # disable kindnet
-  podSubnet: 192.168.0.0/16 # set to Calico's default subnet
-nodes:
-  - role: control-plane
-    image: kindest/node:v1.22.9
-    kubeadmConfigPatches:
-      - |
-        kind: InitConfiguration
-        nodeRegistration:
-          kubeletExtraArgs:
-            node-labels: "kubeslice.io/node-type=gateway"
-`
-
-const kubesliceWorker2Template = `
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-name: ` + worker2Name + `
+name: %s
 networking:
   disableDefaultCNI: true # disable kindnet
   podSubnet: 192.168.0.0/16 # set to Calico's default subnet
@@ -81,21 +56,19 @@ func GenerateKubeSliceDirectory() {
 }
 
 func GenerateKindConfiguration() {
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	directory := kubesliceDirectory + "/" + kindSubDirectory
 	util.Printf("\nGenerating Kind configuration files to %s directory...", directory)
 
 	util.CreateDirectoryPath(directory)
 
-	util.DumpFile(kubesliceControllerTemplate, directory+"/"+controllerFilename)
-	util.Printf("%s Generated %s", util.Tick, controllerFilename)
+	util.DumpFile(fmt.Sprintf(kubesliceControllerTemplate, cc.ControllerCluster.Name), directory+"/"+cc.ControllerCluster.Name+".yaml")
+	util.Printf("%s Generated %s", util.Tick, directory+"/"+cc.ControllerCluster.Name+".yaml")
 	time.Sleep(200 * time.Millisecond)
 
-	util.DumpFile(kubesliceWorker1Template, directory+"/"+worker1Filename)
-	util.Printf("%s Generated %s", util.Tick, worker1Filename)
-	time.Sleep(200 * time.Millisecond)
-
-	util.DumpFile(kubesliceWorker2Template, directory+"/"+worker2Filename)
-	util.Printf("%s Generated %s", util.Tick, worker2Filename)
-	time.Sleep(200 * time.Millisecond)
-	util.Printf("Kind configuration files generated.")
+	for _, cluster := range cc.WorkerClusters {
+		util.DumpFile(fmt.Sprintf(kubesliceWorkerTemplate, cluster.Name), directory+"/"+cluster.Name+".yaml")
+		util.Printf("%s Generated %s", util.Tick, directory+"/"+cluster.Name+".yaml")
+		time.Sleep(200 * time.Millisecond)
+	}
 }

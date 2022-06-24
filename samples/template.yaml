@@ -1,31 +1,35 @@
 configuration:
-  executables:
-    kubectl:
-    kind:
-    helm:
-    docker:
   cluster_configuration:
-    kind_demo:
-    kube_config_path:
+    profile: #{the KubeSlice Profile for the demo. Possible values [full-demo, minimal-demo]}
+    kube_config_path: #{specify the kube config file to use for topology setup; for topology only}
     controller:
-      name:
-      context_name:
-      kube_config_path:
-    workers:
-    - name:
-      context_name:
-      kube_config_path:
-    - name:
-      context_name:
-      kube_config_path:
+      name: #{the user defined name of the controller cluster}
+      context_name: #{the name of the context to use from kubeconfig file; for topology only}
+      kube_config_path: #{the path to kube config file to use for controller installation; for topology only.
+                        # This takes precedence over configuration.cluster_configuration.kube_config_path}
+    workers: #{specify the list of worker clusters}
+    - name: #{the user defined name of the worker cluster}
+      context_name: #{the name of the context to use from the kubeconfig file; for topology only}
+      kube_config_path: #{the path to kube config file to use for worker installation; for topology only.}
+                        #{This takes precedence over configuration.cluster_configuration.kube_config_path}
+    - name: #{the user defined name of the worker cluster}
+      context_name: #{the name of the context to use from the kubeconfig file; for topology only}
+      kube_config_path: #{the path to kube config file to use for worker installation; for topology only.}
+      #{This takes precedence over configuration.cluster_configuration.kube_config_path}
   kubeslice_configuration:
-    project_name:
+    project_name: #{the name of the KubeSlice Project}
   helm_chart_configuration:
-    repo_alias:
-    repo_url:
+    repo_alias: #{The alias of the helm repo for KubeSlice Charts}
+    repo_url: #{The URL of the Helm Charts for KubeSlice}
     cert_manager_chart:
+      chart_name: #{The name of the Cert Manager Chart}
+      version: #{The version of the chart to use. Leave blank for latest version}
     controller_chart:
+      chart_name: #{The name of the Controller Chart}
+      version: #{The version of the chart to use. Leave blank for latest version}
     worker_chart:
-    helm_username:
-    helm_password:
-    image_pull_secret:
+      chart_name: #{The name of the Worker Chart}
+      version: #{The version of the chart to use. Leave blank for latest version}
+    helm_username: #{Helm Username if the repo is private}
+    helm_password: #{Helm Password if the repo is private}
+    image_pull_secret: #{Helm Username if the repo is private}

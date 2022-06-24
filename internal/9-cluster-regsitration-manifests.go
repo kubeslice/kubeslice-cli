@@ -20,13 +20,7 @@ metadata:
 spec:
   networkInterface: eth0
 ---
-apiVersion: controller.kubeslice.io/v1alpha1
-kind: Cluster
-metadata:
-  name: %s
-  namespace: kubeslice-demo
-spec:
-  networkInterface: eth0
+
 `
 
 func RegisterWorkerClusters() {
@@ -36,7 +30,7 @@ func RegisterWorkerClusters() {
 	util.Printf("%s Generated cluster registration manifest %s", util.Tick, clusterRegistrationFileName)
 	time.Sleep(200 * time.Millisecond)
 
-	util.ApplyKubectlManifest(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-demo", controllerName)
+	ApplyKubectlManifest(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-demo", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
 	util.Printf("%s Applied %s", util.Tick, clusterRegistrationFileName)
 	time.Sleep(200 * time.Millisecond)
 
@@ -44,5 +38,9 @@ func RegisterWorkerClusters() {
 }
 
 func generateClusterRegistrationManifest() {
-	util.DumpFile(fmt.Sprintf(clusterRegistrationTemplate, worker1Name, worker2Name), kubesliceDirectory+"/"+clusterRegistrationFileName)
+	var clusterRegistrationContent = ""
+	for _, cluster := range ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters {
+		clusterRegistrationContent = clusterRegistrationContent + fmt.Sprintf(clusterRegistrationTemplate, cluster.Name)
+	}
+	util.DumpFile(clusterRegistrationContent, kubesliceDirectory+"/"+clusterRegistrationFileName)
 }

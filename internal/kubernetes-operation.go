@@ -1,4 +1,4 @@
-package util
+package internal
 
 import (
 	"bytes"
@@ -6,23 +6,26 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kubeslice/slicectl/util"
 )
 
 type PodVerificationStatus int
+
 const (
 	PodVerificationStatusSuccess PodVerificationStatus = iota
 	PodVerificationStatusInProgress
 	PodVerificationStatusFailed
 )
 
-func PodVerification(message, clusterName, namespace string) {
+func PodVerification(message string, cluster Cluster, namespace string) {
 	var i = 0
 	var backoffCount = 0
 	var backoffLimit = 6
 	for {
 		i = i + 1
 		time.Sleep(5 * time.Second)
-		status, output := verifyPods(clusterName, namespace)
+		status, output := verifyPods(cluster, namespace)
 		if status == PodVerificationStatusSuccess {
 			break
 		} else if status == PodVerificationStatusFailed {
@@ -31,20 +34,20 @@ func PodVerification(message, clusterName, namespace string) {
 				log.Fatalf("Pod(s) in error state\n%s", output)
 			}
 		}
-		Printf("%s %s... %d seconds elapsed", Wait, message, i*5)
+		util.Printf("%s %s... %d seconds elapsed", util.Wait, message, i*5)
 	}
 }
 
-func ApplyKubectlManifest(fileName, namespace, clusterName string) {
-	err := RunCommand("kubectl", "--context=kind-"+clusterName, "apply", "-f", fileName, "-n", namespace)
+func ApplyKubectlManifest(fileName, namespace string, cluster Cluster) {
+	err := util.RunCommand("kubectl", "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath, "apply", "-f", fileName, "-n", namespace)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
 }
 
-func verifyPods(clusterName, namespace string) (PodVerificationStatus, string) {
+func verifyPods(cluster Cluster, namespace string) (PodVerificationStatus, string) {
 	var outB, errB bytes.Buffer
-	err := RunCommandCustomIO("kubectl", &outB, &errB, true, "--context=kind-"+clusterName, "get", "pods", "-n", namespace)
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath, "get", "pods", "-n", namespace)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}

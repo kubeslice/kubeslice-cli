@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/kubeslice/slicectl/util"
@@ -16,7 +17,7 @@ apiVersion: controller.kubeslice.io/v1alpha1
 kind: SliceConfig
 metadata:
   name: demo
-  namespace: kubeslice-demo
+  namespace: kubeslice-%s
 spec:
   sliceSubnet: 10.1.0.0/16
   sliceType: Application
@@ -24,9 +25,7 @@ spec:
     sliceGatewayType: OpenVPN
     sliceCaType: Local
   sliceIpamType: Local
-  clusters:
-    - %s
-    - %s
+  clusters: [%s]
   qosProfileDetails:
     queueType: HTB
     priority: 1
@@ -44,7 +43,13 @@ spec:
 func GenerateSliceConfiguration() {
 	util.Printf("\nGenerating Slice Configuration to %s directory", kubesliceDirectory)
 
-	util.DumpFile(fmt.Sprintf(sliceTemplate, worker1Name, worker2Name), kubesliceDirectory+"/"+sliceTemplateFileName)
+	wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
+	clusters := make([]string, 0, len(wc))
+	for _, cluster := range wc {
+		clusters = append(clusters, cluster.Name)
+	}
+	clusterString := strings.Join(clusters, ",")
+	util.DumpFile(fmt.Sprintf(sliceTemplate, ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName, clusterString), kubesliceDirectory+"/"+sliceTemplateFileName)
 	util.Printf("%s Generated %s", util.Tick, sliceTemplateFileName)
 	time.Sleep(200 * time.Millisecond)
 
@@ -52,9 +57,9 @@ func GenerateSliceConfiguration() {
 }
 
 func ApplySliceConfiguration() {
-	util.Printf("\nApplying Slice Manifest %s to %s cluster", sliceTemplateFileName, controllerName)
+	util.Printf("\nApplying Slice Manifest %s to %s cluster", sliceTemplateFileName, ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster.Name)
 
-	util.ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-demo", controllerName)
+	ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-demo", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
 
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }

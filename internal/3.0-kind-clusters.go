@@ -16,33 +16,23 @@ const kubeconfigPath = kubesliceDirectory + "/kubeconfig.yaml"
 
 func CreateKindClusters() {
 
-	controllerExist, worker1Exist, worker2Exist := getExistingClusters()
-
-	if controllerExist && worker1Exist && worker2Exist {
-		util.Printf("\nKind clusters already exist... Skipping\n")
-		return
-	}
+	clusters := getAllClusters()
+	existingClusters := getExistingClusters(clusters)
+	created := false
 	util.Printf("\nCreating Kind Clusters...")
-
-	if !controllerExist {
-		createKindCluster(controllerFilename)
-		util.Printf("%s Created Kind Cluster : %s", util.Tick, controllerName)
-		time.Sleep(200 * time.Millisecond)
+	for i, cluster := range clusters {
+		if !existingClusters[i] {
+			created = true
+			createKindCluster(cluster.Name + ".yaml")
+			util.Printf("%s Created Kind Cluster : %s", util.Tick, cluster.Name)
+			time.Sleep(200 * time.Millisecond)
+		}
 	}
-
-	if !worker1Exist {
-		createKindCluster(worker1Filename)
-		util.Printf("%s Created Kind Cluster : %s", util.Tick, worker1Name)
-		time.Sleep(200 * time.Millisecond)
+	if !created {
+		util.Printf("\nKind clusters already exist... Skipping\n")
+	} else {
+		util.Printf("Created required kind clusters")
 	}
-
-	if !worker2Exist {
-		createKindCluster(worker2Filename)
-		util.Printf("%s Created Kind Cluster : %s", util.Tick, worker2Name)
-		time.Sleep(200 * time.Millisecond)
-	}
-
-	util.Printf("Created required kind clusters")
 }
 
 func SetKubeConfigPath() {
@@ -57,28 +47,22 @@ func CreateKubeConfig() {
 	}
 }
 
-func getExistingClusters() (bool, bool, bool) {
-	controllerExist := false
-	worker1Exist := false
-	worker2Exist := false
-
+func getExistingClusters(clusters []Cluster) []bool {
+	result := make([]bool, len(clusters), len(clusters))
 	var outB, errB bytes.Buffer
 	err := util.RunCommandCustomIO("kind", &outB, &errB, true, "get", "clusters")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
-	for _, line := range strings.Split(outB.String(), "\n") {
-		if strings.Contains(line, controllerName) {
-			controllerExist = true
-		}
-		if strings.Contains(line, worker1Name) {
-			worker1Exist = true
-		}
-		if strings.Contains(line, worker2Name) {
-			worker2Exist = true
+	for i, cluster := range clusters {
+		for _, line := range strings.Split(outB.String(), "\n") {
+			if strings.Contains(line, cluster.Name) {
+				result[i] = true
+			}
 		}
 	}
-	return controllerExist, worker1Exist, worker2Exist
+
+	return result
 }
 
 func createKindCluster(configFile string) {
@@ -89,24 +73,31 @@ func createKindCluster(configFile string) {
 }
 
 func DeleteKindClusters() {
-	controllerExist, worker1Exist, worker2Exist := getExistingClusters()
+	clusters := getAllClusters()
+	existingClusters := getExistingClusters(clusters)
 	args := make([]string, 0, 0)
 	args = append(args, "delete", "clusters")
-	if !controllerExist && !worker1Exist && !worker2Exist {
+	cNames := make([]string, 0)
+	for i, cluster := range clusters {
+		if existingClusters[i] {
+			cNames = append(cNames, cluster.Name)
+		}
+	}
+	if len(cNames) == 0 {
 		util.Printf("No Kind Clusters found for deletion")
 		return
 	}
-	if controllerExist {
-		args = append(args, controllerName)
-	}
-	if worker1Exist {
-		args = append(args, worker1Name)
-	}
-	if worker2Exist {
-		args = append(args, worker2Name)
-	}
+	args = append(args, cNames...)
 	err := util.RunCommand("kind", args...)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
+}
+
+func getAllClusters() []Cluster {
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	clusters := make([]Cluster, 0, len(cc.WorkerClusters)+1)
+	clusters = append(clusters, cc.ControllerCluster)
+	clusters = append(clusters, cc.WorkerClusters...)
+	return clusters
 }

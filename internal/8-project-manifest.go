@@ -29,7 +29,7 @@ func CreateKubeSliceProject() {
 	util.Printf("%s Generated project manifest %s", util.Tick, projectFileName)
 	time.Sleep(200 * time.Millisecond)
 
-	util.ApplyKubectlManifest(kubesliceDirectory+"/"+projectFileName, "kubeslice-controller", controllerName)
+	ApplyKubectlManifest(kubesliceDirectory+"/"+projectFileName, "kubeslice-controller", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
 	util.Printf("%s Applied %s", util.Tick, projectFileName)
 	time.Sleep(200 * time.Millisecond)
 	util.Printf("Created KubeSlice Project.")

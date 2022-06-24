@@ -1,6 +1,9 @@
 package main
 
 import (
+	"flag"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/kubeslice/slicectl/internal"
@@ -8,30 +11,63 @@ import (
 )
 
 func main() {
-	/*args := os.Args
-	if len(args) != 2 {
-		util.Printf("Invalid arguments. Try running %s --help", args[0])
+	configPtr := flag.String("config", "", "The path to topology configuration yaml. Cannot be used with -profile option")
+	profile := flag.String("profile", "", "The profile for the installation. Cannot be used with -config option")
+
+	flag.Usage = printHelp
+	flag.Parse()
+
+	osArgs := os.Args
+	args := flag.Args()
+
+	if args[0] == "help" {
+		printHelp()
 		return
 	}
-	switch strings.Trim(args[1], "-") {
-	case "full-install":
-		seamlessInstall()
-	case "minimal-install":
-		minimalInstall()
+
+	if len(args) > 1 {
+		util.Fatalf("Invalid arguments %s. Exactly one command is required. Try running `%s help` for more information", args, osArgs[0])
+	}
+
+	if *profile != "" {
+		switch *profile {
+		case internal.ProfileFullDemo:
+		case internal.ProfileMinimalDemo:
+		default:
+			util.Fatalf("Unknown profile: %s. Possible values %s", *profile, []string{internal.ProfileFullDemo, internal.ProfileMinimalDemo})
+		}
+		internal.ReadAndValidateConfiguration("")
+		internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile = *profile
+	} else {
+		internal.ReadAndValidateConfiguration(*configPtr)
+	}
+
+	if len(args) == 0 {
+		util.Fatalf("Command is required. Try %s help", osArgs[0])
+	}
+	switch strings.TrimSpace(args[0]) {
+	case "install":
+		install()
 	case "uninstall":
 		uninstall()
-	case "cleanup":
-		cleanup()
 	case "help":
 		printHelp()
-	}*/
-	//specs := internal.ReadAndValidateConfiguration("M:\\avesha\\kind-poc\\samples\\kind-demo.yaml")
-	specs := internal.ReadAndValidateConfiguration("")
-	_ = specs
+	default:
+		util.Fatalf("Unknown Command %s", args[0])
+	}
 }
 
-func seamlessInstall() {
+func install() {
 	basicInstall()
+	switch internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
+	case internal.ProfileFullDemo:
+		fullDemo()
+	case internal.ProfileMinimalDemo:
+		minimalDemo()
+	}
+}
+
+func fullDemo() {
 	internal.GenerateSliceConfiguration()
 	internal.ApplySliceConfiguration()
 	util.Printf("%s Waiting for configuration propagation", util.Wait)
@@ -46,8 +82,7 @@ func seamlessInstall() {
 	internal.PrintNextSteps(true)
 }
 
-func minimalInstall() {
-	basicInstall()
+func minimalDemo() {
 	internal.GenerateSliceConfiguration()
 	internal.GenerateIPerfManifests()
 	internal.InstallIPerf()
@@ -56,25 +91,25 @@ func minimalInstall() {
 }
 
 func uninstall() {
+	if internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
+		util.Fatalf("%s Uninstallation of topology is not yet supported")
+	}
 	internal.VerifyExecutables()
 	internal.SetKubeConfigPath()
 	internal.DeleteKindClusters()
 }
 
-func cleanup() {
-	uninstall()
-	internal.DeleteKubeSliceDirectory()
-}
-
 func basicInstall() {
 	internal.VerifyExecutables()
 	internal.GenerateKubeSliceDirectory()
-	internal.GenerateKindConfiguration()
-	internal.CreateKubeConfig()
-	internal.SetKubeConfigPath()
-	internal.CreateKindClusters()
-	internal.InstallCalico()
-	internal.PopulateDockerNetworkMap()
+	if internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
+		internal.GenerateKindConfiguration()
+		internal.CreateKubeConfig()
+		internal.SetKubeConfigPath()
+		internal.CreateKindClusters()
+		internal.InstallCalico()
+		internal.PopulateDockerNetworkMap()
+	}
 	internal.AddHelmCharts()
 	internal.InstallCertManager()
 	internal.InstallKubeSliceController()
@@ -85,26 +120,39 @@ func basicInstall() {
 
 func printHelp() {
 	util.Printf(`
-KubeSlice CLI for KubeSlice Operations
+slicectl for KubeSlice Operations
+
+Usage:
+slicectl <options> <command>
 
 Options:
-  --help				
-		Prints this help menu
+  --profile=<profile-value>
+      The profile for installation/uninstallation.
+      Supported values:
+        - full-demo:
+            Showcases the KubeSlice inter-cluster connectivity by spawning
+            3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers, 
+            and installing iPerf application to generate network traffic.
+        - minimal-demo:
+            Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers. 
+            Generates the KubernetesManifests for user to manually apply, and verify 
+            the functionality
 
-  --full-install		
-		Creates 3 Kind Clusters, sets-up KubeSlice Controller, KubeSlice Worker,
-		a demo slice, and iperf example application
+  --config=<path-to-topology-configuration-yaml>
+      The yaml file with topology configuration. 
+      Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml
 
-  --minimal-install	
-		Creates 3 Kind Clusters, sets-up KubeSlice Controller, KubeSlice Worker,
-		and iperf example application.
-		Once the setup is done, prints the instructions on how to create a slice
-		and verify the connectivity.
+Commands:
+  install
+      Creates 3 Kind Clusters, sets-up KubeSlice Controller, KubeSlice Worker,
+      and iperf example application.
+      Once the setup is done, prints the instructions on how to create a slice
+      and verify the connectivity.
 
-  --uninstall			
-		Deletes the 3 Kind Clusters, but retains the kubeslice configuration directory.
+  uninstall
+      Deletes the Kind Clusters used for the demo.
 
-  --cleanup
-		Deletes the 3 Kind Clusters and kubeslice directory.
+  help
+      Prints this help menu.
 `)
 }
