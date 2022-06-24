@@ -1,16 +1,14 @@
 package main
 
 import (
-	"os"
-	"strings"
 	"time"
 
-	"github.com/kubeslice/kubeslice-installer/internal"
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/internal"
+	"github.com/kubeslice/slicectl/util"
 )
 
 func main() {
-	args := os.Args
+	/*args := os.Args
 	if len(args) != 2 {
 		util.Printf("Invalid arguments. Try running %s --help", args[0])
 		return
@@ -26,7 +24,10 @@ func main() {
 		cleanup()
 	case "help":
 		printHelp()
-	}
+	}*/
+	//specs := internal.ReadAndValidateConfiguration("M:\\avesha\\kind-poc\\samples\\kind-demo.yaml")
+	specs := internal.ReadAndValidateConfiguration("")
+	_ = specs
 }
 
 func seamlessInstall() {

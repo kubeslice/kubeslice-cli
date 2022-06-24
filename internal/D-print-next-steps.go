@@ -5,18 +5,18 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/util"
 )
 
 const windowsEnvSet = `
 PowerShell(ps):
-	$env:KUBECONFIG=`+kubeconfigPath+`
+	$env:KUBECONFIG=` + kubeconfigPath + `
 
 Command Prompt(cmd):
-	set KUBECONFIG=`+kubeconfigPath+`
+	set KUBECONFIG=` + kubeconfigPath + `
 `
 
-const linuxEnvSet = `export KUBECONFIG=`+ kubeconfigPath
+const linuxEnvSet = `export KUBECONFIG=` + kubeconfigPath
 
 const printVerificationStepsTemplate = `
 ========================================================================
@@ -110,7 +110,7 @@ func printVerificationSteps() {
 	template := fmt.Sprintf(printVerificationStepsTemplate,
 		util.Run, configCommand,
 		util.Run, iperfCommand.String(),
-		)
+	)
 	util.Printf(template)
 }
 

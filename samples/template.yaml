@@ -1,0 +1,31 @@
+configuration:
+  executables:
+    kubectl:
+    kind:
+    helm:
+    docker:
+  cluster_configuration:
+    kind_demo:
+    kube_config_path:
+    controller:
+      name:
+      context_name:
+      kube_config_path:
+    workers:
+    - name:
+      context_name:
+      kube_config_path:
+    - name:
+      context_name:
+      kube_config_path:
+  kubeslice_configuration:
+    project_name:
+  helm_chart_configuration:
+    repo_alias:
+    repo_url:
+    cert_manager_chart:
+    controller_chart:
+    worker_chart:
+    helm_username:
+    helm_password:
+    image_pull_secret:

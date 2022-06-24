@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/util"
 )
 
 const (
@@ -99,4 +99,3 @@ func GenerateKindConfiguration() {
 	time.Sleep(200 * time.Millisecond)
 	util.Printf("Kind configuration files generated.")
 }
-

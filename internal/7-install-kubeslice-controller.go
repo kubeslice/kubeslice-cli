@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/util"
 )
 
 const (

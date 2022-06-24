@@ -4,15 +4,15 @@ import (
 	"log"
 	"time"
 
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/util"
 )
 
 const (
-	helmRepo = "https://kubeslice.github.io/charts/"
-	helmRepoAlias = "kubeslice-demo"
+	helmRepo             = "https://kubeslice.github.io/charts/"
+	helmRepoAlias        = "kubeslice-demo"
 	certManagerChartName = "cert-manager"
-	controllerChartName = "kubeslice-controller"
-	workerChartName = "kubeslice-worker"
+	controllerChartName  = "kubeslice-controller"
+	workerChartName      = "kubeslice-worker"
 )
 
 func AddHelmCharts() {

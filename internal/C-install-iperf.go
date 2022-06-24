@@ -4,12 +4,12 @@ import (
 	"log"
 	"time"
 
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/util"
 )
 
 const (
-	iPerfClientFileName = "iperf-client-worker-1.yaml"
-	iPerfServerFileName = "iperf-server-worker-2.yaml"
+	iPerfClientFileName              = "iperf-client-worker-1.yaml"
+	iPerfServerFileName              = "iperf-server-worker-2.yaml"
 	iPerfServerServiceExportFileName = "iperf-server-service-export-worker-2.yaml"
 )
 

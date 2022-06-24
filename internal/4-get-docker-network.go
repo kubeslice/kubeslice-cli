@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/util"
 )
 
 var dockerNetworkMap = map[string]string{
 	controllerName: "",
-	worker1Name: "",
-	worker2Name: "",
+	worker1Name:    "",
+	worker2Name:    "",
 }
 
 func PopulateDockerNetworkMap() {
@@ -36,7 +36,7 @@ func PopulateDockerNetworkMap() {
 
 func runDockerInspectForNodeIP(clusterName string) {
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("docker", &outB, &errB, true,"inspect", "--format={{.NetworkSettings.Networks.kind.IPAddress}}", fmt.Sprintf("%s-control-plane", clusterName))
+	err := util.RunCommandCustomIO("docker", &outB, &errB, true, "inspect", "--format={{.NetworkSettings.Networks.kind.IPAddress}}", fmt.Sprintf("%s-control-plane", clusterName))
 	if err != nil {
 		util.Printf("%s Failed to run command\nOutput: %s\nError: %s %v", util.Cross, outB.String(), errB.String(), err)
 		os.Exit(1)
