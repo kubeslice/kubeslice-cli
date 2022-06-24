@@ -44,10 +44,9 @@ Options:
 Commands:
 ```
   install
-      Creates 3 Kind Clusters, sets-up KubeSlice Controller, KubeSlice Worker,
-      and iperf example application.
-      Once the setup is done, prints the instructions on how to create a slice
-      and verify the connectivity.
+      Installs the required workloads to run KubeSlice Controller and KubeSlice Worker.
+      Additional example applications are also installed in demo profiles to showcase the
+      KubeSlice functionality
 
   uninstall
       Deletes the Kind Clusters used for the demo.
