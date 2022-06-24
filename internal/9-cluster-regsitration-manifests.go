@@ -30,7 +30,8 @@ func RegisterWorkerClusters() {
 	util.Printf("%s Generated cluster registration manifest %s", util.Tick, clusterRegistrationFileName)
 	time.Sleep(200 * time.Millisecond)
 
-	ApplyKubectlManifest(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-demo", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
+	ac := ApplicationConfiguration.Configuration
+	ApplyKubectlManifest(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-"+ac.KubeSliceConfiguration.ProjectName, ac.ClusterConfiguration.ControllerCluster)
 	util.Printf("%s Applied %s", util.Tick, clusterRegistrationFileName)
 	time.Sleep(200 * time.Millisecond)
 
