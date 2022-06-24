@@ -20,7 +20,7 @@ func main() {
 	osArgs := os.Args
 	args := flag.Args()
 
-	if args[0] == "help" {
+	if len(args) > 0 && args[0] == "help" {
 		printHelp()
 		return
 	}

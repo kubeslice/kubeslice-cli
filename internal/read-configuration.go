@@ -108,7 +108,7 @@ func validateConfiguration(specs *ConfigurationSpecs) []string {
 		if cc.ControllerCluster.KubeConfigPath == "" && cc.KubeConfigPath != "" {
 			cc.ControllerCluster.KubeConfigPath = cc.KubeConfigPath
 		}
-		if cc.ControllerCluster.ContextName != "" {
+		if cc.ControllerCluster.ContextName == "" {
 			errors = append(errors, fmt.Sprintf("%s configuration.cluster_configuration.controller.context_name must be specified when setting up topology", util.Cross))
 		}
 		for i, cluster := range cc.WorkerClusters {
@@ -118,7 +118,7 @@ func validateConfiguration(specs *ConfigurationSpecs) []string {
 			if cluster.KubeConfigPath == "" && cc.KubeConfigPath != "" {
 				cc.WorkerClusters[i].KubeConfigPath = cc.KubeConfigPath
 			}
-			if cluster.ContextName != "" {
+			if cluster.ContextName == "" {
 				errors = append(errors, fmt.Sprintf("%s configuration.cluster_configuration.workers[%d].context_name must be specified when setting up topology", util.Cross, i))
 			}
 		}
