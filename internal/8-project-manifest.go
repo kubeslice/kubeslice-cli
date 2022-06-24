@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/kubeslice/slicectl/util"
@@ -14,7 +15,7 @@ const kubesliceProjectTemplate = `
 apiVersion: controller.kubeslice.io/v1alpha1
 kind: Project
 metadata:
-  name: demo
+  name: %s
   namespace: kubeslice-controller
 spec:
   serviceAccount:
@@ -36,5 +37,5 @@ func CreateKubeSliceProject() {
 }
 
 func generateKubeSliceProjectManifest() {
-	util.DumpFile(kubesliceProjectTemplate, kubesliceDirectory+"/"+projectFileName)
+	util.DumpFile(fmt.Sprintf(kubesliceProjectTemplate, ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName), kubesliceDirectory+"/"+projectFileName)
 }
