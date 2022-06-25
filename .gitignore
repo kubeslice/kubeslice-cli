@@ -2,3 +2,4 @@
 *.iml
 cmd
 kubeslice
+kubeslice*

@@ -22,20 +22,20 @@ func InstallCalico() {
 		time.Sleep(200 * time.Millisecond)
 
 		util.Printf("%s Waiting for Calico Pods to be Healthy on Cluster %s...", util.Wait, cluster.Name)
-		PodVerification("Waiting for Calico Pods to be Healthy", cluster, "calico-system")
+		PodVerification("Waiting for Calico Pods to be Healthy", *cluster, "calico-system")
 	}
 
 	util.Printf("%s Successfully installed Calico Networking", util.Tick)
 }
 
-func installCalicoOperatorPrerequisites(cluster Cluster) {
+func installCalicoOperatorPrerequisites(cluster *Cluster) {
 	err := util.RunCommand("kubectl", "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath, "apply", "-f", "https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
 }
 
-func createCalicoOperator(cluster Cluster) {
+func createCalicoOperator(cluster *Cluster) {
 	err := util.RunCommand("kubectl", "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath, "apply", "-f", "https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)

@@ -18,7 +18,7 @@ kubeslice:
     loglevel: info
     rbacResourcePrefix: kubeslice-rbac
     projectnsPrefix: kubeslice
-    endpoint: https://%s:6443
+    endpoint: %s
 `
 
 func InstallKubeSliceController() {
@@ -42,7 +42,7 @@ func InstallKubeSliceController() {
 }
 
 func generateControllerValuesFile(cluster Cluster) {
-	util.DumpFile(fmt.Sprintf(controllerValuesTemplate, dockerNetworkMap[cluster.Name]), kubesliceDirectory+"/"+controllerValuesFileName)
+	util.DumpFile(fmt.Sprintf(controllerValuesTemplate, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+controllerValuesFileName)
 }
 
 func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {

@@ -108,8 +108,8 @@ func basicInstall() {
 		internal.SetKubeConfigPath()
 		internal.CreateKindClusters()
 		internal.InstallCalico()
-		internal.PopulateDockerNetworkMap()
 	}
+	internal.GatherNetworkInformation()
 	internal.AddHelmCharts()
 	internal.InstallCertManager()
 	internal.InstallKubeSliceController()

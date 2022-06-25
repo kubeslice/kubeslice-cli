@@ -47,7 +47,7 @@ func CreateKubeConfig() {
 	}
 }
 
-func getExistingClusters(clusters []Cluster) []bool {
+func getExistingClusters(clusters []*Cluster) []bool {
 	result := make([]bool, len(clusters), len(clusters))
 	var outB, errB bytes.Buffer
 	err := util.RunCommandCustomIO("kind", &outB, &errB, true, "get", "clusters")
@@ -94,10 +94,12 @@ func DeleteKindClusters() {
 	}
 }
 
-func getAllClusters() []Cluster {
-	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
-	clusters := make([]Cluster, 0, len(cc.WorkerClusters)+1)
-	clusters = append(clusters, cc.ControllerCluster)
-	clusters = append(clusters, cc.WorkerClusters...)
+func getAllClusters() []*Cluster {
+	cc := &ApplicationConfiguration.Configuration.ClusterConfiguration
+	clusters := make([]*Cluster, 0, len(cc.WorkerClusters)+1)
+	clusters = append(clusters, &cc.ControllerCluster)
+	for i := 0; i < len(cc.WorkerClusters); i++ {
+		clusters = append(clusters, &cc.WorkerClusters[i])
+	}
 	return clusters
 }

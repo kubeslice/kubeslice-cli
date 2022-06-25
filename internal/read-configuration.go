@@ -112,7 +112,7 @@ func validateConfiguration(specs *ConfigurationSpecs) []string {
 			errors = append(errors, fmt.Sprintf("%s configuration.cluster_configuration.controller.context_name must be specified when setting up topology", util.Cross))
 		}
 		for i, cluster := range cc.WorkerClusters {
-			if cc.KubeConfigPath == "" && cluster.KubeConfigPath != "" {
+			if cc.KubeConfigPath == "" && cluster.KubeConfigPath == "" {
 				errors = append(errors, fmt.Sprintf("%s configuration.cluster_configuration.kube_config_path or configuration.cluster_configuration.workers[%d].kube_config_path must be specified when setting up topology", util.Cross, i))
 			}
 			if cluster.KubeConfigPath == "" && cc.KubeConfigPath != "" {

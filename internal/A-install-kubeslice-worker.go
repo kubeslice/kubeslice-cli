@@ -21,6 +21,7 @@ controllerSecret:
 cluster:
   name: %s
   nodeIp: %s
+  endpoint: %s
 
 `
 
@@ -43,7 +44,7 @@ func InstallKubeSliceWorker() {
 
 func generateWorkerValuesFile(cluster Cluster, valuesFile string) {
 	secrets := fetchSecret(cluster.Name)
-	util.DumpFile(fmt.Sprintf(workerValuesTemplate, secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, dockerNetworkMap[cluster.Name]), kubesliceDirectory+"/"+valuesFile)
+	util.DumpFile(fmt.Sprintf(workerValuesTemplate, secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+valuesFile)
 }
 
 func installWorker(cluster Cluster, valuesName string) {
@@ -76,7 +77,7 @@ func fetchSecret(clusterName string) map[string]string {
 	secret := findSecret(clusterName)
 	//kubectl get secret/kubeslice-rbac-worker-kubeslice-worker-1-token-h99pc -n kubeslice-demo -o jsonpath={.data}
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ControllerCluster.ContextName, "get", secret, "-n", "kubeslice-"+ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName, "-o", "jsonpath={.data}")
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ControllerCluster.ContextName, "--kubeconfig="+cc.ControllerCluster.KubeConfigPath, "get", secret, "-n", "kubeslice-"+ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName, "-o", "jsonpath={.data}")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
