@@ -1,11 +1,22 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/kubeslice/slicectl/util"
 )
+
+const imagePullSecretsTemplate = `
+
+imagePullSecrets:
+  repository: %s
+  username: %s
+  password: %s
+  %s
+
+`
 
 func AddHelmCharts() {
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
@@ -41,4 +52,17 @@ func updateHelmChart() {
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
+}
+
+func generateImagePullSecretsValue() string {
+	imagePullSecretsValue := ""
+	ips := ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret
+	if ips.Registry != "" && ips.Username != "" && ips.Password != "" {
+		email := ""
+		if ips.Email != "" {
+			email = "email: " + ips.Email
+		}
+		imagePullSecretsValue = fmt.Sprintf(imagePullSecretsTemplate, ips.Registry, ips.Username, ips.Password, email)
+	}
+	return imagePullSecretsValue
 }

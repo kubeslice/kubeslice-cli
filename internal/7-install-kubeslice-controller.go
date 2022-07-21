@@ -42,7 +42,8 @@ func InstallKubeSliceController() {
 }
 
 func generateControllerValuesFile(cluster Cluster) {
-	util.DumpFile(fmt.Sprintf(controllerValuesTemplate, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+controllerValuesFileName)
+
+	util.DumpFile(fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(), cluster.ControlPlaneAddress), kubesliceDirectory+"/"+controllerValuesFileName)
 }
 
 func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {

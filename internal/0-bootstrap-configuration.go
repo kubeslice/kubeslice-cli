@@ -11,14 +11,14 @@ type Configuration struct {
 }
 
 type HelmChartConfiguration struct {
-	RepoAlias        string    `yaml:"repo_alias"`
-	RepoUrl          string    `yaml:"repo_url"`
-	CertManagerChart HelmChart `yaml:"cert_manager_chart"`
-	ControllerChart  HelmChart `yaml:"controller_chart"`
-	WorkerChart      HelmChart `yaml:"worker_chart"`
-	HelmUsername     string    `yaml:"helm_username"`
-	HelmPassword     string    `yaml:"helm_password"`
-	ImagePullSecret  string    `yaml:"image_pull_secret"`
+	RepoAlias        string           `yaml:"repo_alias"`
+	RepoUrl          string           `yaml:"repo_url"`
+	CertManagerChart HelmChart        `yaml:"cert_manager_chart"`
+	ControllerChart  HelmChart        `yaml:"controller_chart"`
+	WorkerChart      HelmChart        `yaml:"worker_chart"`
+	HelmUsername     string           `yaml:"helm_username"`
+	HelmPassword     string           `yaml:"helm_password"`
+	ImagePullSecret  ImagePullSecrets `yaml:"image_pull_secret"`
 }
 
 type HelmChart struct {
@@ -43,4 +43,11 @@ type Cluster struct {
 	KubeConfigPath      string `yaml:"kube_config_path"`
 	ControlPlaneAddress string `yaml:"control_plane_address"`
 	NodeIP              string `yaml:"node_ip"`
+}
+
+type ImagePullSecrets struct {
+	Registry string `yaml:"registry"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Email    string `yaml:"email"`
 }

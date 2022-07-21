@@ -44,7 +44,7 @@ func InstallKubeSliceWorker() {
 
 func generateWorkerValuesFile(cluster Cluster, valuesFile string) {
 	secrets := fetchSecret(cluster.Name)
-	util.DumpFile(fmt.Sprintf(workerValuesTemplate, secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+valuesFile)
+	util.DumpFile(fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+valuesFile)
 }
 
 func installWorker(cluster Cluster, valuesName string) {
