@@ -40,9 +40,6 @@ var installCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(installCmd)
-	installCmd.Flags().StringP("config", "c", "", `<path-to-topology-configuration-yaml-file>
-The yaml file with topology configuration. 
-Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml`)
 	installCmd.Flags().StringP("profile", "p", "", `<profile-value>
 The profile for installation/uninstallation.
 Supported values:
