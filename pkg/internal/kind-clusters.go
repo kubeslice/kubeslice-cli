@@ -12,11 +12,11 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-const kubeconfigPath = kubesliceDirectory + "/kubeconfig.yaml"
+const KubeconfigPath = kubesliceDirectory + "/kubeconfig.yaml"
 
-func CreateKindClusters() {
+func CreateKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 
-	clusters := getAllClusters()
+	clusters := getAllClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)
 	existingClusters := getExistingClusters(clusters)
 	created := false
 	util.Printf("\nCreating Kind Clusters...")
@@ -36,13 +36,13 @@ func CreateKindClusters() {
 }
 
 func SetKubeConfigPath() {
-	os.Setenv("KUBECONFIG", kubeconfigPath)
+	os.Setenv("KUBECONFIG", KubeconfigPath)
 }
 
 func CreateKubeConfig() {
-	if _, err := os.Stat(kubeconfigPath); errors.Is(err, os.ErrNotExist) {
-		util.DumpFile("", kubeconfigPath)
-		util.Printf("%s Created Empty KubeConfig file : %s", util.Tick, kubeconfigPath)
+	if _, err := os.Stat(KubeconfigPath); errors.Is(err, os.ErrNotExist) {
+		util.DumpFile("", KubeconfigPath)
+		util.Printf("%s Created Empty KubeConfig file : %s", util.Tick, KubeconfigPath)
 		time.Sleep(200 * time.Millisecond)
 	}
 }
@@ -72,8 +72,8 @@ func createKindCluster(configFile string) {
 	}
 }
 
-func DeleteKindClusters() {
-	clusters := getAllClusters()
+func DeleteKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
+	clusters := getAllClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)
 	existingClusters := getExistingClusters(clusters)
 	args := make([]string, 0, 0)
 	args = append(args, "delete", "clusters")
@@ -94,12 +94,17 @@ func DeleteKindClusters() {
 	}
 }
 
-func getAllClusters() []*Cluster {
-	cc := &ApplicationConfiguration.Configuration.ClusterConfiguration
+func getAllClusters(clusterConfig ClusterConfiguration) []*Cluster {
+	cc := &clusterConfig
 	clusters := make([]*Cluster, 0, len(cc.WorkerClusters)+1)
 	clusters = append(clusters, &cc.ControllerCluster)
 	for i := 0; i < len(cc.WorkerClusters); i++ {
 		clusters = append(clusters, &cc.WorkerClusters[i])
 	}
 	return clusters
+}
+
+func getControllerCluster(clusterConfig ClusterConfiguration) *Cluster {
+	cc := clusterConfig
+	return &cc.ControllerCluster
 }

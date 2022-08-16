@@ -23,10 +23,10 @@ spec:
 
 `
 
-func RegisterWorkerClusters() {
+func RegisterWorkerClusters(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nRegistering Worker Clusters with Project...")
 
-	generateClusterRegistrationManifest()
+	generateClusterRegistrationManifest(ApplicationConfiguration)
 	util.Printf("%s Generated cluster registration manifest %s", util.Tick, clusterRegistrationFileName)
 	time.Sleep(200 * time.Millisecond)
 
@@ -38,7 +38,7 @@ func RegisterWorkerClusters() {
 	util.Printf("Created KubeSlice Project.")
 }
 
-func generateClusterRegistrationManifest() {
+func generateClusterRegistrationManifest(ApplicationConfiguration *ConfigurationSpecs) {
 	var clusterRegistrationContent = ""
 	for _, cluster := range ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters {
 		clusterRegistrationContent = clusterRegistrationContent + fmt.Sprintf(clusterRegistrationTemplate, cluster.Name, ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)

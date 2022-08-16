@@ -23,10 +23,10 @@ spec:
       - john
 `
 
-func CreateKubeSliceProject() {
+func CreateKubeSliceProject(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nCreating KubeSlice Project...")
 
-	generateKubeSliceProjectManifest()
+	generateKubeSliceProjectManifest(ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
 	util.Printf("%s Generated project manifest %s", util.Tick, projectFileName)
 	time.Sleep(200 * time.Millisecond)
 
@@ -36,6 +36,11 @@ func CreateKubeSliceProject() {
 	util.Printf("Created KubeSlice Project.")
 }
 
-func generateKubeSliceProjectManifest() {
-	util.DumpFile(fmt.Sprintf(kubesliceProjectTemplate, ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName), kubesliceDirectory+"/"+projectFileName)
+func GetKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nFetching KubeSlice Project...")
+	GetKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}
+func generateKubeSliceProjectManifest(projectName string) {
+	util.DumpFile(fmt.Sprintf(kubesliceProjectTemplate, projectName), kubesliceDirectory+"/"+projectFileName)
 }

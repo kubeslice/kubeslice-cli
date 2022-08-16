@@ -10,21 +10,21 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-func GatherNetworkInformation() {
+func GatherNetworkInformation(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nFetching Network Address for Clusters...")
 
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
-		setControlPlaneAddress()
-		setNodeIP()
+		setControlPlaneAddress(ApplicationConfiguration.Configuration.ClusterConfiguration)
+		setNodeIP(ApplicationConfiguration.Configuration.ClusterConfiguration)
 	} else {
-		setNodeIPForKindClusters()
+		setNodeIPForKindClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)
 	}
 
 	util.Printf("Successfully fetched network addresses for clusters.")
 }
 
-func setNodeIPForKindClusters() {
-	clusters := getAllClusters()
+func setNodeIPForKindClusters(clusterConfig ClusterConfiguration) {
+	clusters := getAllClusters(clusterConfig)
 	for _, cluster := range clusters {
 		ip := runDockerInspectForNodeIP(cluster.Name)
 		cluster.NodeIP = ip
@@ -44,8 +44,8 @@ func runDockerInspectForNodeIP(clusterName string) string {
 	return strings.TrimSpace(outB.String())
 }
 
-func setControlPlaneAddress() {
-	for _, cluster := range getAllClusters() {
+func setControlPlaneAddress(clusterConfig ClusterConfiguration) {
+	for _, cluster := range getAllClusters(clusterConfig) {
 		if cluster.ControlPlaneAddress == "" {
 			ip := _getControlPlaneAddress(cluster)
 			cluster.ControlPlaneAddress = ip
@@ -64,8 +64,8 @@ func _getControlPlaneAddress(cluster *Cluster) string {
 	return outB.String()
 }
 
-func setNodeIP() {
-	for _, cluster := range getAllClusters() {
+func setNodeIP(clusterConfig ClusterConfiguration) {
+	for _, cluster := range getAllClusters(clusterConfig) {
 		if cluster.NodeIP == "" {
 			ip := _getNodeIP(cluster)
 			cluster.NodeIP = ip
