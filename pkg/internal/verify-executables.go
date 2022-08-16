@@ -11,7 +11,7 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-func VerifyExecutables() {
+func VerifyExecutables(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("Verifying Executables...")
 	time.Sleep(200 * time.Millisecond)
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {

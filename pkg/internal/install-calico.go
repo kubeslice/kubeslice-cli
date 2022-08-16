@@ -7,10 +7,10 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-func InstallCalico() {
+func InstallCalico(clusterConfig ClusterConfiguration) {
 	util.Printf("\nInstalling Calico Networking...")
 
-	clusters := getAllClusters()
+	clusters := getAllClusters(clusterConfig)
 	for _, cluster := range clusters {
 		util.Printf("Installing on Cluster %s", cluster.Name)
 		installCalicoOperatorPrerequisites(cluster)

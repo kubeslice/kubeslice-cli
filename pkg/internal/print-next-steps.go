@@ -9,13 +9,13 @@ import (
 
 const windowsEnvSet = `
 PowerShell(ps):
-	$env:KUBECONFIG=` + kubeconfigPath + `
+	$env:KUBECONFIG=` + KubeconfigPath + `
 
 Command Prompt(cmd):
-	set KUBECONFIG=` + kubeconfigPath + `
+	set KUBECONFIG=` + KubeconfigPath + `
 `
 
-const linuxEnvSet = `export KUBECONFIG=` + kubeconfigPath
+const linuxEnvSet = `export KUBECONFIG=` + KubeconfigPath
 
 const printVerificationStepsTemplate = `
 ========================================================================
@@ -82,15 +82,15 @@ Note: The DNS propagation may take a minute or two.
 %s %s
 `
 
-func PrintNextSteps(verificationOnly bool) {
+func PrintNextSteps(verificationOnly bool, ApplicationConfiguration *ConfigurationSpecs) {
 	if verificationOnly {
-		printVerificationSteps()
+		printVerificationSteps(ApplicationConfiguration)
 	} else {
-		printNamespaceIsolationSteps()
+		printNamespaceIsolationSteps(ApplicationConfiguration)
 	}
 }
 
-func printVerificationSteps() {
+func printVerificationSteps(ApplicationConfiguration *ConfigurationSpecs) {
 	clusters := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
 	iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+clusters[1].ContextName, "--kubeconfig="+clusters[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
 	template := fmt.Sprintf(printVerificationStepsTemplate,
@@ -99,7 +99,7 @@ func printVerificationSteps() {
 	util.Printf(template)
 }
 
-func printNamespaceIsolationSteps() {
+func printNamespaceIsolationSteps(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster
 	wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
 	iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+wc[1].ContextName, "--kubeconfig="+wc[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
