@@ -3,67 +3,67 @@ package pkg
 import (
 	"time"
 
-	"github.com/kubeslice/slicectl/internal"
+	"github.com/kubeslice/slicectl/pkg/internal"
 	"github.com/kubeslice/slicectl/util"
 )
 
 func Install() {
 	basicInstall()
-	switch internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
-	case internal.ProfileFullDemo:
+	switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
+	case ProfileFullDemo:
 		fullDemo()
-	case internal.ProfileMinimalDemo:
+	case ProfileMinimalDemo:
 		minimalDemo()
 	}
 }
 
 func fullDemo() {
-	internal.GenerateSliceConfiguration()
-	internal.ApplySliceConfiguration()
+	internal.GenerateSliceConfiguration(ApplicationConfiguration)
+	internal.ApplySliceConfiguration(ApplicationConfiguration)
 	util.Printf("%s Waiting for configuration propagation", util.Wait)
 	time.Sleep(20 * time.Second)
 	internal.GenerateIPerfManifests()
-	internal.GenerateIPerfServiceExportManifest()
-	internal.InstallIPerf()
-	internal.ApplyIPerfServiceExportManifest()
+	internal.GenerateIPerfServiceExportManifest(ApplicationConfiguration)
+	internal.InstallIPerf(ApplicationConfiguration)
+	internal.ApplyIPerfServiceExportManifest(ApplicationConfiguration)
 	util.Printf("%s Waiting for configuration propagation", util.Wait)
 	time.Sleep(20 * time.Second)
-	internal.RolloutRestartIPerf()
-	internal.PrintNextSteps(true)
+	internal.RolloutRestartIPerf(ApplicationConfiguration)
+	internal.PrintNextSteps(true, ApplicationConfiguration)
 }
 
 func minimalDemo() {
-	internal.GenerateSliceConfiguration()
+	internal.GenerateSliceConfiguration(ApplicationConfiguration)
 	internal.GenerateIPerfManifests()
-	internal.InstallIPerf()
-	internal.GenerateIPerfServiceExportManifest()
-	internal.PrintNextSteps(false)
+	internal.InstallIPerf(ApplicationConfiguration)
+	internal.GenerateIPerfServiceExportManifest(ApplicationConfiguration)
+	internal.PrintNextSteps(false, ApplicationConfiguration)
 }
 
 func basicInstall() {
-	internal.VerifyExecutables()
+	internal.VerifyExecutables(ApplicationConfiguration)
 	internal.GenerateKubeSliceDirectory()
-	if internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
-		internal.GenerateKindConfiguration()
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
+		internal.GenerateKindConfiguration(ApplicationConfiguration)
 		internal.CreateKubeConfig()
 		internal.SetKubeConfigPath()
-		internal.CreateKindClusters()
-		internal.InstallCalico()
+		internal.CreateKindClusters(ApplicationConfiguration)
+		internal.InstallCalico(ApplicationConfiguration.Configuration.ClusterConfiguration)
 	}
-	internal.GatherNetworkInformation()
-	internal.AddHelmCharts()
-	internal.InstallCertManager()
-	internal.InstallKubeSliceController()
-	internal.CreateKubeSliceProject()
-	internal.RegisterWorkerClusters()
-	internal.InstallKubeSliceWorker()
+	internal.GatherNetworkInformation(ApplicationConfiguration)
+	internal.AddHelmCharts(ApplicationConfiguration)
+	internal.InstallCertManager(ApplicationConfiguration)
+	internal.InstallKubeSliceController(ApplicationConfiguration)
+	internal.CreateKubeSliceProject(ApplicationConfiguration)
+	internal.RegisterWorkerClusters(ApplicationConfiguration)
+	internal.InstallKubeSliceWorker(ApplicationConfiguration)
 }
 
 func Uninstall() {
-	if internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
 		util.Fatalf("%s Uninstallation of topology is not yet supported")
 	}
-	internal.VerifyExecutables()
+	internal.VerifyExecutables(ApplicationConfiguration)
 	internal.SetKubeConfigPath()
-	internal.DeleteKindClusters()
+	internal.DeleteKindClusters(ApplicationConfiguration)
 }
