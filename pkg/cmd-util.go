@@ -18,8 +18,22 @@ var ApplicationConfiguration *internal.ConfigurationSpecs
 
 var CliOptions *internal.CliOptionsStruct
 
-func SetCliOptions(options *internal.CliOptionsStruct) {
+func SetCliOptions(config string, namespace string, objectType string, objectName string) {
+	var controllerCluster *internal.Cluster
+	configSpecs := ReadAndValidateConfiguration(config)
+	if config != "" {
+		controllerCluster = &configSpecs.Configuration.ClusterConfiguration.ControllerCluster
+	}
+	options := &internal.CliOptionsStruct{
+		Namespace:  namespace,
+		ObjectName: objectName,
+		ObjectType: objectType,
+		Cluster:    controllerCluster,
+	}
 	CliOptions = options
+	util.ExecutablePaths = map[string]string{
+		"kubectl": "kubectl",
+	}
 }
 
 var defaultConfiguration = &internal.ConfigurationSpecs{
