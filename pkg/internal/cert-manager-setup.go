@@ -8,7 +8,7 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-func InstallCertManager() {
+func InstallCertManager(ApplicationConfiguration *ConfigurationSpecs) {
 
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration

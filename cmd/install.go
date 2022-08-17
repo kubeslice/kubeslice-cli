@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/kubeslice/slicectl/internal"
 	"github.com/kubeslice/slicectl/pkg"
 	"github.com/kubeslice/slicectl/util"
 	"github.com/spf13/cobra"
@@ -24,15 +23,15 @@ var installCmd = &cobra.Command{
 		}
 		if profile != "" {
 			switch profile {
-			case internal.ProfileFullDemo:
-			case internal.ProfileMinimalDemo:
+			case pkg.ProfileFullDemo:
+			case pkg.ProfileMinimalDemo:
 			default:
-				util.Fatalf("Unknown profile: %s. Possible values %s", profile, []string{internal.ProfileFullDemo, internal.ProfileMinimalDemo})
+				util.Fatalf("Unknown profile: %s. Possible values %s", profile, []string{pkg.ProfileFullDemo, pkg.ProfileMinimalDemo})
 			}
-			internal.ReadAndValidateConfiguration("")
-			internal.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile = profile
+			pkg.ReadAndValidateConfiguration("")
+			pkg.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile = profile
 		} else {
-			internal.ReadAndValidateConfiguration(config)
+			pkg.ReadAndValidateConfiguration(config)
 		}
 		pkg.Install()
 	},

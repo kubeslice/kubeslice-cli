@@ -45,6 +45,22 @@ func ApplyKubectlManifest(fileName, namespace string, cluster Cluster) {
 	}
 }
 
+func GetKubectlResources(resourceType string, resourceName string, namespace string, cluster *Cluster) {
+	cmdArgs := []string{}
+	if cluster != nil {
+		cmdArgs = append(cmdArgs, "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath)
+	}
+	if resourceName == "" {
+		cmdArgs = append(cmdArgs, "get", resourceType, "-n", namespace)
+	} else {
+		cmdArgs = append(cmdArgs, "get", resourceType, resourceName, "-n", namespace)
+	}
+	err := util.RunCommandOnStdIO("kubectl", cmdArgs...)
+	if err != nil {
+		log.Fatalf("Process failed %v", err)
+	}
+}
+
 func verifyPods(cluster Cluster, namespace string) (PodVerificationStatus, string) {
 	var outB, errB bytes.Buffer
 	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath, "get", "pods", "-n", namespace)

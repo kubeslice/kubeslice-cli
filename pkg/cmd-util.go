@@ -1,10 +1,11 @@
-package internal
+package pkg
 
 import (
 	"fmt"
 	"io/ioutil"
 
 	"github.com/go-yaml/yaml"
+	"github.com/kubeslice/slicectl/pkg/internal"
 	"github.com/kubeslice/slicectl/util"
 )
 
@@ -13,16 +14,36 @@ const (
 	ProfileMinimalDemo = "minimal-demo"
 )
 
-var ApplicationConfiguration *ConfigurationSpecs
+var ApplicationConfiguration *internal.ConfigurationSpecs
 
-var defaultConfiguration = &ConfigurationSpecs{
-	Configuration: Configuration{
-		ClusterConfiguration: ClusterConfiguration{
+var CliOptions *internal.CliOptionsStruct
+
+func SetCliOptions(config string, namespace string, objectType string, objectName string) {
+	var controllerCluster *internal.Cluster
+	configSpecs := ReadAndValidateConfiguration(config)
+	if config != "" {
+		controllerCluster = &configSpecs.Configuration.ClusterConfiguration.ControllerCluster
+	}
+	options := &internal.CliOptionsStruct{
+		Namespace:  namespace,
+		ObjectName: objectName,
+		ObjectType: objectType,
+		Cluster:    controllerCluster,
+	}
+	CliOptions = options
+	util.ExecutablePaths = map[string]string{
+		"kubectl": "kubectl",
+	}
+}
+
+var defaultConfiguration = &internal.ConfigurationSpecs{
+	Configuration: internal.Configuration{
+		ClusterConfiguration: internal.ClusterConfiguration{
 			Profile: "full-demo",
-			ControllerCluster: Cluster{
+			ControllerCluster: internal.Cluster{
 				Name: "ks-ctrl",
 			},
-			WorkerClusters: []Cluster{
+			WorkerClusters: []internal.Cluster{
 				{
 					Name: "ks-w-1",
 				},
@@ -31,32 +52,32 @@ var defaultConfiguration = &ConfigurationSpecs{
 				},
 			},
 		},
-		KubeSliceConfiguration: KubeSliceConfiguration{
+		KubeSliceConfiguration: internal.KubeSliceConfiguration{
 			ProjectName: "demo",
 		},
-		HelmChartConfiguration: HelmChartConfiguration{
+		HelmChartConfiguration: internal.HelmChartConfiguration{
 			RepoAlias: "kubeslice-demo",
 			RepoUrl:   "https://kubeslice.github.io/charts/",
-			CertManagerChart: HelmChart{
+			CertManagerChart: internal.HelmChart{
 				ChartName: "cert-manager",
 			},
-			ControllerChart: HelmChart{
+			ControllerChart: internal.HelmChart{
 				ChartName: "kubeslice-controller",
 			},
-			WorkerChart: HelmChart{
+			WorkerChart: internal.HelmChart{
 				ChartName: "kubeslice-worker",
 			},
 		},
 	},
 }
 
-func readConfiguration(fileName string) *ConfigurationSpecs {
+func readConfiguration(fileName string) *internal.ConfigurationSpecs {
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		util.Fatalf("%s Failed to read configuration file %v", util.Cross, err)
 
 	}
-	specs := &ConfigurationSpecs{}
+	specs := &internal.ConfigurationSpecs{}
 	err = yaml.Unmarshal(file, specs)
 	if err != nil {
 		util.Fatalf("%s Failed to parse configuration file %v", util.Cross, err)
@@ -64,7 +85,7 @@ func readConfiguration(fileName string) *ConfigurationSpecs {
 	return specs
 }
 
-func validateConfiguration(specs *ConfigurationSpecs) []string {
+func validateConfiguration(specs *internal.ConfigurationSpecs) []string {
 	var errors = make([]string, 0)
 	if specs == nil {
 		errors = append(errors, fmt.Sprintf("%s Invalid Configuration", util.Cross))
@@ -83,7 +104,7 @@ func validateConfiguration(specs *ConfigurationSpecs) []string {
 		if cc.KubeConfigPath != "" || cc.ControllerCluster.KubeConfigPath != "" {
 			errors = append(errors, fmt.Sprintf("%s Cannot specify configuration.cluster_configuration.kube_config_path or configuration.cluster_configuration.controller.kube_config_path when running a kind cluster demo", util.Cross))
 		}
-		cc.ControllerCluster.KubeConfigPath = kubeconfigPath
+		cc.ControllerCluster.KubeConfigPath = internal.KubeconfigPath
 		if cc.ControllerCluster.ContextName != "" {
 			errors = append(errors, fmt.Sprintf("%s Cannot specify configuration.cluster_configuration.controller.context_name when running a kind cluster demo", util.Cross))
 		}
@@ -95,7 +116,7 @@ func validateConfiguration(specs *ConfigurationSpecs) []string {
 			if cluster.KubeConfigPath != "" {
 				errors = append(errors, fmt.Sprintf("%s Cannot specify configuration.cluster_configuration.kube_config_path or configuration.cluster_configuration.workers[%d].kube_config_path when running a kind cluster demo", util.Cross, i))
 			}
-			cc.WorkerClusters[i].KubeConfigPath = kubeconfigPath
+			cc.WorkerClusters[i].KubeConfigPath = internal.KubeconfigPath
 			if cluster.ContextName != "" {
 				errors = append(errors, fmt.Sprintf("%s Cannot specify configuration.cluster_configuration.workers[%d].context_name for worker when running a kind cluster demo", util.Cross, i))
 			}
@@ -152,8 +173,8 @@ func validateConfiguration(specs *ConfigurationSpecs) []string {
 	return errors
 }
 
-func ReadAndValidateConfiguration(fileName string) *ConfigurationSpecs {
-	var specs *ConfigurationSpecs
+func ReadAndValidateConfiguration(fileName string) *internal.ConfigurationSpecs {
+	var specs *internal.ConfigurationSpecs
 	if fileName != "" {
 		specs = readConfiguration(fileName)
 	} else {

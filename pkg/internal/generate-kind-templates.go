@@ -55,7 +55,7 @@ func GenerateKubeSliceDirectory() {
 	util.CreateDirectoryPath(kubesliceDirectory)
 }
 
-func GenerateKindConfiguration() {
+func GenerateKindConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	directory := kubesliceDirectory + "/" + kindSubDirectory
 	util.Printf("\nGenerating Kind configuration files to %s directory...", directory)
