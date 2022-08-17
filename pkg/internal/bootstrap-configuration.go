@@ -51,3 +51,10 @@ type ImagePullSecrets struct {
 	Password string `yaml:"password"`
 	Email    string `yaml:"email"`
 }
+
+type CliOptionsStruct struct {
+	ObjectType string   // "project", "cluster", "sliceConfig"
+	ObjectName string   // "projectName", "clusterName", "sliceConfigName"
+	Namespace  string   // namespace for the workloads
+	Cluster    *Cluster // cluster
+}

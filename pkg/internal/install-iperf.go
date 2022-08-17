@@ -118,7 +118,7 @@ spec:
           privileged: true
 `
 
-func InstallIPerf() {
+func InstallIPerf(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling iPerf Application...")
 
 	clientFileName := iPerfClientFileName
@@ -159,18 +159,18 @@ func GenerateIPerfManifests() {
 	time.Sleep(200 * time.Millisecond)
 }
 
-func GenerateIPerfServiceExportManifest() {
+func GenerateIPerfServiceExportManifest(ApplicationConfiguration *ConfigurationSpecs) {
 	util.DumpFile(iPerfServiceExportTemplate, kubesliceDirectory+"/"+iPerfServerServiceExportFileName)
 	util.Printf("%s Generated iPerf Server Service Export manifest %s for cluster %s", util.Tick, iPerfServerServiceExportFileName, ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters[0].Name)
 	time.Sleep(200 * time.Millisecond)
 }
 
-func ApplyIPerfServiceExportManifest() {
+func ApplyIPerfServiceExportManifest(ApplicationConfiguration *ConfigurationSpecs) {
 	ApplyKubectlManifest(kubesliceDirectory+"/"+iPerfServerServiceExportFileName, "iperf", ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters[0])
 }
 
-func RolloutRestartIPerf() {
-	clusters := getAllClusters()[1:]
+func RolloutRestartIPerf(ApplicationConfiguration *ConfigurationSpecs) {
+	clusters := getAllClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)[1:]
 	err := util.RunCommand("kubectl", "rollout", "restart", "deployment/iperf-server", "-n", "iperf", "--context="+clusters[0].ContextName, "--kubeconfig="+clusters[0].KubeConfigPath)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)

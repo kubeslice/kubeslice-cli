@@ -18,12 +18,12 @@ imagePullSecrets:
 
 `
 
-func AddHelmCharts() {
+func AddHelmCharts(ApplicationConfiguration *ConfigurationSpecs) {
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
 	// helm repo add avesha https://kubeslice.github.io/charts/
 	util.Printf("\nAdding KubeSlice Helm Charts...")
 
-	addHelmChart()
+	addHelmChart(ApplicationConfiguration)
 	util.Printf("%s Successfully added helm repo %s : %s", util.Tick, hc.RepoAlias, hc.RepoUrl)
 	time.Sleep(200 * time.Millisecond)
 
@@ -34,7 +34,7 @@ func AddHelmCharts() {
 	util.Printf("%s Successfully added helm charts.\n", util.Tick)
 }
 
-func addHelmChart() {
+func addHelmChart(ApplicationConfiguration *ConfigurationSpecs) {
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
 	repoAddCommands := make([]string, 0)
 	repoAddCommands = append(repoAddCommands, "repo", "add", hc.RepoAlias, hc.RepoUrl, "--force-update")
@@ -54,9 +54,9 @@ func updateHelmChart() {
 	}
 }
 
-func generateImagePullSecretsValue() string {
+func generateImagePullSecretsValue(ImagePullSecret ImagePullSecrets) string {
 	imagePullSecretsValue := ""
-	ips := ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret
+	ips := ImagePullSecret
 	if ips.Registry != "" && ips.Username != "" && ips.Password != "" {
 		email := ""
 		if ips.Email != "" {

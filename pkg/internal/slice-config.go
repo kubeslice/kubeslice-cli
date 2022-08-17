@@ -40,7 +40,7 @@ spec:
       - '*'
 `
 
-func GenerateSliceConfiguration() {
+func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nGenerating Slice Configuration to %s directory", kubesliceDirectory)
 
 	wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
@@ -56,7 +56,7 @@ func GenerateSliceConfiguration() {
 	util.Printf("Generated Slice Configuration")
 }
 
-func ApplySliceConfiguration() {
+func ApplySliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nApplying Slice Manifest %s to %s cluster", sliceTemplateFileName, ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster.Name)
 
 	ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-demo", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)

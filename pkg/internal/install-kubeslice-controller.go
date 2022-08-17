@@ -21,12 +21,12 @@ kubeslice:
     endpoint: %s
 `
 
-func InstallKubeSliceController() {
+func InstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling KubeSlice Controller...")
 
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
-	generateControllerValuesFile(cc.ControllerCluster)
+	generateControllerValuesFile(cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret)
 	util.Printf("%s Generated Helm Values file for Controller Installation %s", util.Tick, controllerValuesFileName)
 	time.Sleep(200 * time.Millisecond)
 
@@ -41,9 +41,9 @@ func InstallKubeSliceController() {
 
 }
 
-func generateControllerValuesFile(cluster Cluster) {
+func generateControllerValuesFile(cluster Cluster, imagePullSecret ImagePullSecrets) {
 
-	util.DumpFile(fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(), cluster.ControlPlaneAddress), kubesliceDirectory+"/"+controllerValuesFileName)
+	util.DumpFile(fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(imagePullSecret), cluster.ControlPlaneAddress), kubesliceDirectory+"/"+controllerValuesFileName)
 }
 
 func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {

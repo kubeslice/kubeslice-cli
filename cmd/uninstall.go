@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/kubeslice/slicectl/internal"
 	"github.com/kubeslice/slicectl/pkg"
 	"github.com/spf13/cobra"
 )
@@ -13,7 +12,7 @@ var uninstallCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		config, _ := cmd.Flags().GetString("config")
-		internal.ReadAndValidateConfiguration(config)
+		pkg.ReadAndValidateConfiguration(config)
 		pkg.Uninstall()
 	},
 }
