@@ -9,8 +9,8 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:     "delete",
 	Aliases: []string{"d"},
-	Short:   "delete kubeslice CRD objects.",
-	Args:    cobra.MinimumNArgs(1),
+	Short:   "Delete Kubeslice resources.",
+	Args:    cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		var objectName string
 		ns, _ := cmd.Flags().GetString("namespace")
@@ -19,11 +19,9 @@ var deleteCmd = &cobra.Command{
 		}
 		config, _ := cmd.Flags().GetString("config")
 
-		if len(args) > 1 {
-			objectName = args[1]
-		}
+		objectName = args[1]
 
-		pkg.SetCliOptions(config, ns, args[0], objectName)
+		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
 		switch args[0] {
 		case "project":
 			pkg.DeleteProject()

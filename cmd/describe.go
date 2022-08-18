@@ -6,11 +6,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var getCmd = &cobra.Command{
-	Use:     "get",
-	Aliases: []string{"g"},
-	Short:   "Get Kubeslice resources.",
-	Args:    cobra.MinimumNArgs(1),
+var describeCmd = &cobra.Command{
+	Use:   "describe",
+	Short: "Describe Kubeslice resources.",
+	Long:  "Show details of a specific Kubeslice resource or group of resources.",
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var objectName string
 		ns, _ := cmd.Flags().GetString("namespace")
@@ -27,16 +27,13 @@ var getCmd = &cobra.Command{
 		switch args[0] {
 		case "project":
 			pkg.GetProject()
-		case "sliceConfig":
-			pkg.GetSliceConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}
-
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(getCmd)
-	getCmd.Flags().StringP("namespace", "n", "", "namespace")
+	rootCmd.AddCommand(describeCmd)
+	describeCmd.Flags().StringP("namespace", "n", "", "namespace")
 }
