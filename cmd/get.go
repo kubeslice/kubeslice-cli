@@ -9,7 +9,7 @@ import (
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
-	Short:   "Get kubeslice CRD objects.",
+	Short:   "Get Kubeslice resources.",
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var objectName string
@@ -23,7 +23,7 @@ var getCmd = &cobra.Command{
 			objectName = args[1]
 		}
 
-		pkg.SetCliOptions(config, ns, args[0], objectName)
+		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
 		switch args[0] {
 		case "project":
 			pkg.GetProject()
