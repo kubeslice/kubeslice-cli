@@ -14,20 +14,29 @@ const (
 	ProfileMinimalDemo = "minimal-demo"
 )
 
+type CliParams struct {
+	ObjectType string // "project", "cluster", "sliceConfig"
+	ObjectName string // "projectName", "clusterName", "sliceConfigName"
+	Namespace  string // namespace for the workloads
+	FileName   string // path to the resource description file
+	Config     string // cluster
+}
+
 var ApplicationConfiguration *internal.ConfigurationSpecs
 
 var CliOptions *internal.CliOptionsStruct
 
-func SetCliOptions(config string, namespace string, objectType string, objectName string) {
+func SetCliOptions(cliParams CliParams) {
 	var controllerCluster *internal.Cluster
-	configSpecs := ReadAndValidateConfiguration(config)
-	if config != "" {
+	configSpecs := ReadAndValidateConfiguration(cliParams.Config)
+	if cliParams.Config != "" {
 		controllerCluster = &configSpecs.Configuration.ClusterConfiguration.ControllerCluster
 	}
 	options := &internal.CliOptionsStruct{
-		Namespace:  namespace,
-		ObjectName: objectName,
-		ObjectType: objectType,
+		Namespace:  cliParams.Namespace,
+		ObjectName: cliParams.ObjectName,
+		ObjectType: cliParams.ObjectType,
+		FileName:   cliParams.FileName,
 		Cluster:    controllerCluster,
 	}
 	CliOptions = options
