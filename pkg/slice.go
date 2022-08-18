@@ -16,3 +16,11 @@ func GetSliceConfig() {
 func DeleteSliceConfig() {
 	internal.DeleteSliceConfig(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster)
 }
+
+func EditSliceConfig() {
+	internal.EditSliceConfig(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster)
+}
+
+func DescribeSliceConfig() {
+	internal.DescribeSliceConfig(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster)
+}

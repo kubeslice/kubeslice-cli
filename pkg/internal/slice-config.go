@@ -75,3 +75,15 @@ func DeleteSliceConfig(sliceConfigName string, namespace string, controllerClust
 	DeleteKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster)
 	time.Sleep(200 * time.Millisecond)
 }
+
+func EditSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nEditing KubeSlice SliceConfig...")
+	EditKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}
+
+func DescribeSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nDescribing KubeSlice SliceConfig...")
+	DescribeKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}

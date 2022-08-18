@@ -50,3 +50,15 @@ func DeleteKubeSliceProject(projectName string, namespace string, controllerClus
 	DeleteKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
 	time.Sleep(200 * time.Millisecond)
 }
+
+func EditKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nDeleting KubeSlice Project...")
+	EditKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}
+
+func DescribeKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nDeleting KubeSlice Project...")
+	DescribeKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}

@@ -16,3 +16,11 @@ func GetProject() {
 func DeleteProject() {
 	internal.DeleteKubeSliceProject(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster)
 }
+
+func EditProject() {
+	internal.EditKubeSliceProject(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster)
+}
+
+func DescribeProject() {
+	internal.DescribeKubeSliceProject(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster)
+}
