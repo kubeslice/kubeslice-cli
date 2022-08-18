@@ -27,9 +27,12 @@ var getCmd = &cobra.Command{
 		switch args[0] {
 		case "project":
 			pkg.GetProject()
+		case "sliceConfig":
+			pkg.GetSliceConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}
+
 	},
 }
 

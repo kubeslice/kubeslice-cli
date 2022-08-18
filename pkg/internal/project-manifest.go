@@ -44,3 +44,9 @@ func GetKubeSliceProject(projectName string, namespace string, controllerCluster
 func generateKubeSliceProjectManifest(projectName string) {
 	util.DumpFile(fmt.Sprintf(kubesliceProjectTemplate, projectName), kubesliceDirectory+"/"+projectFileName)
 }
+
+func DeleteKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nDeleting KubeSlice Project...")
+	DeleteKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}

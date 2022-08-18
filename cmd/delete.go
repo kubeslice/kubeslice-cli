@@ -26,9 +26,9 @@ var deleteCmd = &cobra.Command{
 		pkg.SetCliOptions(config, ns, args[0], objectName)
 		switch args[0] {
 		case "project":
-		//	pkg.DeleteProject()
+			pkg.DeleteProject()
 		case "sliceConfig":
-		//	pkg.DeleteSliceConfig()
+			pkg.DeleteSliceConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}
