@@ -63,3 +63,15 @@ func ApplySliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }
+
+func GetSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nFetching KubeSlice sliceConfig...")
+	GetKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}
+
+func DeleteSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nDeleting KubeSlice SliceConfig...")
+	DeleteKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster)
+	time.Sleep(200 * time.Millisecond)
+}
