@@ -26,7 +26,9 @@ var describeCmd = &cobra.Command{
 		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
 		switch args[0] {
 		case "project":
-			pkg.GetProject()
+			pkg.DescribeProject()
+		case "sliceConfig":
+			pkg.DescribeSliceConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}

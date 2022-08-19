@@ -2,11 +2,10 @@ package pkg
 
 import (
 	"github.com/kubeslice/slicectl/pkg/internal"
-	"github.com/kubeslice/slicectl/util"
 )
 
-func CreateSliceConfig() {
-	util.Printf("testing create.")
+func CreateSliceConfig(filename string, worker []string) {
+	internal.CreateSliceConfig(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster, filename, worker)
 }
 
 func GetSliceConfig() {
