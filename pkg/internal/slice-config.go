@@ -16,8 +16,8 @@ const sliceTemplate = `
 apiVersion: controller.kubeslice.io/v1alpha1
 kind: SliceConfig
 metadata:
-  name: demo
-  namespace: kubeslice-%s
+  name: %s
+  namespace: %s
 spec:
   sliceSubnet: 10.1.0.0/16
   sliceType: Application
@@ -40,16 +40,26 @@ spec:
       - '*'
 `
 
-func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs, worker []string) {
+func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs, worker []string, sliceConfigName string, namespace string) {
 	util.Printf("\nGenerating Slice Configuration to %s directory", kubesliceDirectory)
-
-	wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
-	clusters := make([]string, 0, len(wc))
-	for _, cluster := range wc {
-		clusters = append(clusters, cluster.Name)
+	clusters := make([]string, 0)
+	if len(worker) != 0 {
+		clusters = append(clusters, worker...)
+	} else {
+		wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
+		for _, cluster := range wc {
+			clusters = append(clusters, cluster.Name)
+		}
 	}
 	clusterString := strings.Join(clusters, ",")
-	util.DumpFile(fmt.Sprintf(sliceTemplate, ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName, clusterString), kubesliceDirectory+"/"+sliceTemplateFileName)
+	if len(sliceConfigName) == 0 {
+		sliceConfigName = "demo"
+	}
+	projectNamespace := "kubeslice-" + ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName
+	if len(namespace) != 0 {
+		projectNamespace = namespace
+	}
+	util.DumpFile(fmt.Sprintf(sliceTemplate, sliceConfigName, projectNamespace, clusterString), kubesliceDirectory+"/"+"slice-"+sliceConfigName+".yaml")
 	util.Printf("%s Generated %s", util.Tick, sliceTemplateFileName)
 	time.Sleep(200 * time.Millisecond)
 
@@ -59,7 +69,7 @@ func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs, wo
 func ApplySliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nApplying Slice Manifest %s to %s cluster", sliceTemplateFileName, ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster.Name)
 
-	ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-demo", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
+	ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-preprod", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
 
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }
@@ -88,13 +98,7 @@ func DescribeSliceConfig(sliceConfigName string, namespace string, controllerClu
 	time.Sleep(200 * time.Millisecond)
 }
 
-func CreateSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster, filename string, worker []string) {
-	if len(filename) != 0 {
-		SetWorker(worker, filename)
-		ApplyFile(filename, namespace, controllerCluster)
-	} else {
-
-	}
-
+func CreateSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster, filename string) {
+	ApplyFile(filename, namespace, controllerCluster)
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }

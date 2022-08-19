@@ -147,10 +147,11 @@ func SetWorker(worker []string, filename string) {
 	//controllerv1alpha1
 	jsonByte := getConf(filename)
 	var value string
+	value = string(jsonByte)
 	log.Println("roshani", len(worker))
 	if len(worker) != 0 {
 		for i := 0; i < len(worker); i++ {
-			value, _ = sjson.Set(string(jsonByte), "spec.clusters."+strconv.Itoa(i), worker[i])
+			value, _ = sjson.Set(value, "spec.clusters."+strconv.Itoa(i), worker[i])
 		}
 	}
 	err := ioutil.WriteFile(filename, []byte(value), 0644)
@@ -159,6 +160,9 @@ func SetWorker(worker []string, filename string) {
 	}
 }
 
+// func SetKeys(filename string){
+
+// }
 func getConf(filename string) []byte {
 	yamlFile, err := ioutil.ReadFile(filename)
 	if err != nil {

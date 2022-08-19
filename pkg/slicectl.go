@@ -18,7 +18,7 @@ func Install() {
 }
 
 func fullDemo() {
-	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil)
+	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil, "", "")
 	internal.ApplySliceConfiguration(ApplicationConfiguration)
 	util.Printf("%s Waiting for configuration propagation", util.Wait)
 	time.Sleep(20 * time.Second)
@@ -33,7 +33,7 @@ func fullDemo() {
 }
 
 func minimalDemo() {
-	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil)
+	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil, "", "")
 	internal.GenerateIPerfManifests()
 	internal.InstallIPerf(ApplicationConfiguration)
 	internal.GenerateIPerfServiceExportManifest(ApplicationConfiguration)

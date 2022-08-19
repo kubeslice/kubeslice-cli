@@ -4,8 +4,13 @@ import (
 	"github.com/kubeslice/slicectl/pkg/internal"
 )
 
-func CreateSliceConfig(filename string, worker []string) {
-	internal.CreateSliceConfig(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster, filename, worker)
+func CreateSliceConfig(filename string, worker []string, keys []string) {
+	if len(filename) != 0 {
+		internal.CreateSliceConfig(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster, filename)
+	} else if len(worker) != 0 {
+		internal.GenerateSliceConfiguration(ApplicationConfiguration, worker, CliOptions.ObjectName, CliOptions.Namespace)
+		internal.ApplyFile("kubeslice/slice-"+CliOptions.ObjectName+".yaml", CliOptions.Namespace, CliOptions.Cluster)
+	}
 }
 
 func GetSliceConfig() {

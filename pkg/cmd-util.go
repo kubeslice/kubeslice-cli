@@ -21,6 +21,7 @@ type CliParams struct {
 	FileName   string   // path to the resource description file
 	Config     string   // cluster
 	Worker     []string //workerList
+	Key        []string
 }
 
 var ApplicationConfiguration *internal.ConfigurationSpecs
