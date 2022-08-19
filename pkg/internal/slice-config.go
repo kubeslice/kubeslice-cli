@@ -40,7 +40,7 @@ spec:
       - '*'
 `
 
-func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
+func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs, worker []string) {
 	util.Printf("\nGenerating Slice Configuration to %s directory", kubesliceDirectory)
 
 	wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
@@ -86,4 +86,15 @@ func DescribeSliceConfig(sliceConfigName string, namespace string, controllerClu
 	util.Printf("\nDescribing KubeSlice SliceConfig...")
 	DescribeKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster)
 	time.Sleep(200 * time.Millisecond)
+}
+
+func CreateSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster, filename string, worker []string) {
+	if len(filename) != 0 {
+		SetWorker(worker, filename)
+		ApplyFile(filename, namespace, controllerCluster)
+	} else {
+
+	}
+
+	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }
