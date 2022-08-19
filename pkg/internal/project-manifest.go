@@ -23,14 +23,20 @@ spec:
       - john
 `
 
-func CreateKubeSliceProject(ApplicationConfiguration *ConfigurationSpecs) {
+func CreateKubeSliceProject(ApplicationConfiguration *ConfigurationSpecs, cliOptions *CliOptionsStruct) {
 	util.Printf("\nCreating KubeSlice Project...")
 
 	generateKubeSliceProjectManifest(ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
 	util.Printf("%s Generated project manifest %s", util.Tick, projectFileName)
 	time.Sleep(200 * time.Millisecond)
-
-	ApplyKubectlManifest(kubesliceDirectory+"/"+projectFileName, "kubeslice-controller", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
+	if cliOptions != nil {
+		if cliOptions.FileName == "" {
+			cliOptions.FileName = kubesliceDirectory + "/" + projectFileName
+		}
+		ApplyKubectlManifest(cliOptions.FileName, cliOptions.Namespace, cliOptions.Cluster)
+	} else {
+		ApplyKubectlManifest(kubesliceDirectory+"/"+projectFileName, "kubeslice-controller", &ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
+	}
 	util.Printf("%s Applied %s", util.Tick, projectFileName)
 	time.Sleep(200 * time.Millisecond)
 	util.Printf("Created KubeSlice Project.")
@@ -52,13 +58,13 @@ func DeleteKubeSliceProject(projectName string, namespace string, controllerClus
 }
 
 func EditKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
-	util.Printf("\nDeleting KubeSlice Project...")
+	util.Printf("\nEditing KubeSlice Project...")
 	EditKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
 	time.Sleep(200 * time.Millisecond)
 }
 
 func DescribeKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
-	util.Printf("\nDeleting KubeSlice Project...")
+	util.Printf("\nDescribe KubeSlice Project...")
 	DescribeKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
 	time.Sleep(200 * time.Millisecond)
 }
