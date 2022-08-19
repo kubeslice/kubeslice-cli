@@ -18,18 +18,17 @@ var createCmd = &cobra.Command{
 		}
 		filename, _ := cmd.Flags().GetString("filename")
 		config, _ := cmd.Flags().GetString("config")
-		workerList, _ := cmd.Flags().GetStringSlice("set-worker")
-		keyList, _ := cmd.Flags().GetStringSlice("set")
+		workerList, _ := cmd.Flags().GetStringSlice("setWorker")
 		if len(args) > 1 {
 			objectName = args[1]
 		}
 
-		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename, Worker: workerList, Key: keyList})
+		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename, Worker: workerList})
 		switch args[0] {
 		case "project":
-		//	pkg.CreateProject()
+			pkg.CreateProject()
 		case "sliceConfig":
-			pkg.CreateSliceConfig(filename, workerList, keyList)
+			pkg.CreateSliceConfig(filename, workerList)
 		default:
 			util.Fatalf("Invalid object type")
 		}
@@ -40,7 +39,5 @@ func init() {
 	rootCmd.AddCommand(createCmd)
 	createCmd.Flags().StringP("namespace", "n", "", "namespace")
 	createCmd.Flags().StringP("filename", "f", "", "Filename, directory, or URL to file to use to create the resource")
-	createCmd.Flags().StringSliceP("set-worker", "w", nil, "WorkerList to install slice config on")
-	//createCmd.Flags()
-	createCmd.Flags().StringSliceP("set", "s", nil, "set key:values")
+	createCmd.Flags().StringSliceP("setWorker", "w", nil, "List of Worker Clusters to be registered in the SliceConfig")
 }

@@ -54,7 +54,7 @@ func basicInstall() {
 	internal.AddHelmCharts(ApplicationConfiguration)
 	internal.InstallCertManager(ApplicationConfiguration)
 	internal.InstallKubeSliceController(ApplicationConfiguration)
-	internal.CreateKubeSliceProject(ApplicationConfiguration)
+	internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
 	internal.RegisterWorkerClusters(ApplicationConfiguration)
 	internal.InstallKubeSliceWorker(ApplicationConfiguration)
 }
