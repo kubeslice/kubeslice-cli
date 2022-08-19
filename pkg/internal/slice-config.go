@@ -59,7 +59,7 @@ func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs, wo
 func ApplySliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nApplying Slice Manifest %s to %s cluster", sliceTemplateFileName, ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster.Name)
 
-	ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-demo", ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
+	ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-demo", &ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
 
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }
