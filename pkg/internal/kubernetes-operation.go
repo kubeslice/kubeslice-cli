@@ -41,8 +41,13 @@ func PodVerification(message string, cluster Cluster, namespace string) {
 	}
 }
 
-func ApplyKubectlManifest(fileName, namespace string, cluster Cluster) {
-	err := util.RunCommand("kubectl", "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath, "apply", "-f", fileName, "-n", namespace)
+func ApplyKubectlManifest(fileName, namespace string, cluster *Cluster) {
+	cmdArgs := []string{}
+	if cluster != nil {
+		cmdArgs = append(cmdArgs, "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath)
+	}
+	cmdArgs = append(cmdArgs, "apply", "-f", fileName, "-n", namespace)
+	err := util.RunCommand("kubectl", cmdArgs...)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}

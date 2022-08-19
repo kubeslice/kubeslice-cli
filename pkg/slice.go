@@ -4,7 +4,7 @@ import (
 	"github.com/kubeslice/slicectl/pkg/internal"
 )
 
-func CreateSliceConfig(filename string, worker []string, keys []string) {
+func CreateSliceConfig(filename string, worker []string) {
 	if len(filename) != 0 {
 		internal.CreateSliceConfig(CliOptions.ObjectName, CliOptions.Namespace, CliOptions.Cluster, filename)
 	} else if len(worker) != 0 {
