@@ -69,5 +69,6 @@ Supported values:
 	- calico: Skips the installation of Calico
 	- controller: Skips the installation of KubeSlice Controller
 	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
-	- worker: Skips the installation of KubeSlice Worker`)
+	- worker: Skips the installation of KubeSlice Worker
+	- demo: Skips the installation of additional example applications`)
 }

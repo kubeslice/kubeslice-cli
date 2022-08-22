@@ -9,11 +9,13 @@ import (
 
 func Install(skipSteps map[string]string) {
 	basicInstall(skipSteps)
-	switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
-	case ProfileFullDemo:
-		fullDemo()
-	case ProfileMinimalDemo:
-		minimalDemo()
+	if _, skipDemo := skipSteps[internal.Demo_skipStep]; !skipDemo {
+		switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
+		case ProfileFullDemo:
+			fullDemo()
+		case ProfileMinimalDemo:
+			minimalDemo()
+		}
 	}
 }
 
@@ -43,7 +45,7 @@ func minimalDemo() {
 func basicInstall(skipSteps map[string]string) {
 	internal.VerifyExecutables(ApplicationConfiguration)
 
-	_, skipKind := skipSteps["kind"]
+	_, skipKind := skipSteps[internal.Kind_skipStep]
 	_, skipCalico := skipSteps[internal.Calico_skipStep]
 	_, skipController := skipSteps[internal.Controller_skipStep]
 	_, skipWorker := skipSteps[internal.Worker_skipStep]
@@ -60,7 +62,7 @@ func basicInstall(skipSteps map[string]string) {
 			internal.CreateKindClusters(ApplicationConfiguration)
 		}
 		if !skipCalico {
-			internal.InstallCalico(ApplicationConfiguration.Configuration.ClusterConfiguration)
+			internal.InstallCalico(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 		}
 	}
 	internal.GatherNetworkInformation(ApplicationConfiguration)

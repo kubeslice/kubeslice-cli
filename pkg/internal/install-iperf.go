@@ -170,7 +170,7 @@ func ApplyIPerfServiceExportManifest(ApplicationConfiguration *ConfigurationSpec
 }
 
 func RolloutRestartIPerf(ApplicationConfiguration *ConfigurationSpecs) {
-	clusters := getAllClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)[1:]
+	clusters := getAllClusters(&ApplicationConfiguration.Configuration.ClusterConfiguration)[1:]
 	err := util.RunCommand("kubectl", "rollout", "restart", "deployment/iperf-server", "-n", "iperf", "--context="+clusters[0].ContextName, "--kubeconfig="+clusters[0].KubeConfigPath)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
