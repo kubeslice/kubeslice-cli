@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	profile string
+	profile   string
+	skipSteps = []string{}
 )
 
 var installCmd = &cobra.Command{
@@ -52,4 +53,11 @@ Supported values:
 		Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers. 
 		Generates the KubernetesManifests for user to manually apply, and verify 
 		the functionality`)
+	installCmd.Flags().StringSliceVarP(&skipSteps, "skip", "s", []string{}, `Skips the installation steps. 
+Supported values:
+	- kind: Skips the creation of kind clusters
+	- calico: Skips the installation of Calico
+	- controller: Skips the installation of KubeSlice Controller
+	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
+	- worker: Skips the installation of KubeSlice Worker`)
 }
