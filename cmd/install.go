@@ -11,6 +11,14 @@ var (
 	skipSteps = []string{}
 )
 
+func getStepsToSkip() map[string]string {
+	skipStepsMap := make(map[string]string)
+	for _, step := range skipSteps {
+		skipStepsMap[step] = ""
+	}
+	return skipStepsMap
+}
+
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
@@ -36,7 +44,9 @@ var installCmd = &cobra.Command{
 		} else {
 			pkg.ReadAndValidateConfiguration(Config)
 		}
-		pkg.Install()
+		stepsToSkipMap := getStepsToSkip()
+		// util.Printf("skipping: %v", stepsToSkipMap)
+		pkg.Install(stepsToSkipMap)
 	},
 }
 
@@ -53,7 +63,7 @@ Supported values:
 		Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers. 
 		Generates the KubernetesManifests for user to manually apply, and verify 
 		the functionality`)
-	installCmd.Flags().StringSliceVarP(&skipSteps, "skip", "s", []string{}, `Skips the installation steps. 
+	installCmd.Flags().StringSliceVarP(&skipSteps, "skip", "s", []string{}, `Skips the installation steps (comma-seperated). 
 Supported values:
 	- kind: Skips the creation of kind clusters
 	- calico: Skips the installation of Calico
