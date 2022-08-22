@@ -11,8 +11,7 @@ var uninstallCmd = &cobra.Command{
 	Short:   "Deletes the Kind Clusters used for the demo.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := cmd.Flags().GetString("config")
-		pkg.ReadAndValidateConfiguration(config)
+		pkg.ReadAndValidateConfiguration(Config)
 		pkg.Uninstall()
 	},
 }

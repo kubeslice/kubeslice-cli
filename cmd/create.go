@@ -17,13 +17,11 @@ var createCmd = &cobra.Command{
 			util.Fatalf("Namespace is required")
 		}
 		filename, _ := cmd.Flags().GetString("filename")
-		config, _ := cmd.Flags().GetString("config")
 		workerList, _ := cmd.Flags().GetStringSlice("setWorker")
 		if len(args) > 1 {
 			objectName = args[1]
 		}
-
-		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename, Worker: workerList})
+		pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename})
 		switch args[0] {
 		case "project":
 			pkg.CreateProject()

@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var Config string
+
 var version = "0.0.1"
 var rootCmd = &cobra.Command{
 	Use:     "slicectl",
@@ -23,7 +25,7 @@ KubeSlice functionality`,
 }
 
 func Execute() {
-	rootCmd.PersistentFlags().StringP("config", "c", "", `<path-to-topology-configuration-yaml-file>
+	rootCmd.PersistentFlags().StringVarP(&Config, "config", "c", "", `<path-to-topology-configuration-yaml-file>
 	The yaml file with topology configuration. 
 	Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml`)
 	if err := rootCmd.Execute(); err != nil {
