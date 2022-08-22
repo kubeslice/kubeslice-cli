@@ -11,4 +11,5 @@ const (
 	Controller_skipStep          = "controller"
 	Worker_registration_skipStep = "worker-registration"
 	Worker_skipStep              = "worker"
+	Demo_skipStep                = "demo"
 )

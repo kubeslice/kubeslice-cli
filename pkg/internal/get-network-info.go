@@ -14,16 +14,16 @@ func GatherNetworkInformation(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nFetching Network Address for Clusters...")
 
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
-		setControlPlaneAddress(ApplicationConfiguration.Configuration.ClusterConfiguration)
-		setNodeIP(ApplicationConfiguration.Configuration.ClusterConfiguration)
+		setControlPlaneAddress(&ApplicationConfiguration.Configuration.ClusterConfiguration)
+		setNodeIP(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 	} else {
-		setNodeIPForKindClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)
+		setNodeIPForKindClusters(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 	}
 
 	util.Printf("Successfully fetched network addresses for clusters.")
 }
 
-func setNodeIPForKindClusters(clusterConfig ClusterConfiguration) {
+func setNodeIPForKindClusters(clusterConfig *ClusterConfiguration) {
 	clusters := getAllClusters(clusterConfig)
 	for _, cluster := range clusters {
 		ip := runDockerInspectForNodeIP(cluster.Name)
@@ -31,6 +31,7 @@ func setNodeIPForKindClusters(clusterConfig ClusterConfiguration) {
 		cluster.ControlPlaneAddress = "https://" + ip + ":6443"
 		util.Printf("%s Fetched Network Address for %s : %s", util.Tick, cluster.Name, ip)
 		time.Sleep(200 * time.Millisecond)
+
 	}
 }
 
@@ -44,7 +45,7 @@ func runDockerInspectForNodeIP(clusterName string) string {
 	return strings.TrimSpace(outB.String())
 }
 
-func setControlPlaneAddress(clusterConfig ClusterConfiguration) {
+func setControlPlaneAddress(clusterConfig *ClusterConfiguration) {
 	for _, cluster := range getAllClusters(clusterConfig) {
 		if cluster.ControlPlaneAddress == "" {
 			ip := _getControlPlaneAddress(cluster)
@@ -64,7 +65,7 @@ func _getControlPlaneAddress(cluster *Cluster) string {
 	return outB.String()
 }
 
-func setNodeIP(clusterConfig ClusterConfiguration) {
+func setNodeIP(clusterConfig *ClusterConfiguration) {
 	for _, cluster := range getAllClusters(clusterConfig) {
 		if cluster.NodeIP == "" {
 			ip := _getNodeIP(cluster)
