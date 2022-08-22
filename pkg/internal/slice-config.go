@@ -60,7 +60,7 @@ func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs, wo
 		projectNamespace = namespace
 	}
 	util.DumpFile(fmt.Sprintf(sliceTemplate, sliceConfigName, projectNamespace, clusterString), kubesliceDirectory+"/"+"slice-"+sliceConfigName+".yaml")
-	util.Printf("%s Generated %s", util.Tick, sliceTemplateFileName)
+	util.Printf("%s Generated %s", util.Tick, "slice-"+sliceConfigName+".yaml")
 	time.Sleep(200 * time.Millisecond)
 
 	util.Printf("Generated Slice Configuration")
@@ -98,7 +98,7 @@ func DescribeSliceConfig(sliceConfigName string, namespace string, controllerClu
 	time.Sleep(200 * time.Millisecond)
 }
 
-func CreateSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster, filename string) {
+func CreateSliceConfig(namespace string, controllerCluster *Cluster, filename string) {
 	ApplyFile(filename, namespace, controllerCluster)
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }
