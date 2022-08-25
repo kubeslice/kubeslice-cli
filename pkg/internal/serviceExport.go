@@ -17,7 +17,7 @@ func CreateServiceExportConfig(namespace string, controllerCluster *Cluster, fil
 
 func GetServiceExportConfig(serviceExportConfigName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nFetching KubeSlice serviceExportConfig...")
-	GetKubectlResources(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster)
+	GetKubectlResources(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster, "")
 	time.Sleep(200 * time.Millisecond)
 }
 func generateServiceExportConfigManifest(serviceExportConfigName string) {
