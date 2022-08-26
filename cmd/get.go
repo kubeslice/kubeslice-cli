@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var outputFormat string
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
@@ -17,17 +18,21 @@ var getCmd = &cobra.Command{
 		if ns == "" {
 			util.Fatalf("Namespace is required")
 		}
-
+		worker, _ := cmd.Flags().GetString("worker")
 		if len(args) > 1 {
 			objectName = args[1]
 		}
 
-		pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
+		pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], OutputFormat: outputFormat})
 		switch args[0] {
 		case "project":
 			pkg.GetProject()
 		case "sliceConfig":
 			pkg.GetSliceConfig()
+		case "serviceExportConfig":
+			pkg.GetServiceExportConfig()
+		case "secrets":
+			pkg.GetSecrets(worker)
 		default:
 			util.Fatalf("Invalid object type")
 		}
@@ -38,4 +43,6 @@ var getCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(getCmd)
 	getCmd.Flags().StringP("namespace", "n", "", "namespace")
+	getCmd.Flags().StringP("worker", "w", "", "worker")
+	getCmd.Flags().StringVarP(&outputFormat, "output", "o", "", "supported values json, yaml")
 }

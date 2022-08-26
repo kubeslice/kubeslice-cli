@@ -32,6 +32,8 @@ var editCmd = &cobra.Command{
 			pkg.EditProject()
 		case "sliceConfig":
 			pkg.EditSliceConfig()
+		case "serviceExportConfig":
+			pkg.EditServiceExportConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}
