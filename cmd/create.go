@@ -26,7 +26,9 @@ var createCmd = &cobra.Command{
 		case "project":
 			pkg.CreateProject()
 		case "sliceConfig":
-			pkg.CreateSliceConfig(filename, workerList)
+			pkg.CreateSliceConfig(workerList)
+		case "serviceExportConfig":
+			pkg.CreateServiceExportConfig(filename)
 		default:
 			util.Fatalf("Invalid object type")
 		}
