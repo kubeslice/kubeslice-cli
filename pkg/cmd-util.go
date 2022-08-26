@@ -15,13 +15,13 @@ const (
 )
 
 type CliParams struct {
-	ObjectType string   // "project", "cluster", "sliceConfig"
-	ObjectName string   // "projectName", "clusterName", "sliceConfigName"
-	Namespace  string   // namespace for the workloads
-	FileName   string   // path to the resource description file
-	Config     string   // cluster
-	Worker     []string //workerList
-	Key        []string
+	ObjectType   string // "project", "cluster", "sliceConfig"
+	ObjectName   string // "projectName", "clusterName", "sliceConfigName"
+	Namespace    string // namespace for the workloads
+	FileName     string // path to the resource description file
+	Config       string // cluster
+	OutputFormat string //output format
+	Key          []string
 }
 
 var ApplicationConfiguration *internal.ConfigurationSpecs
@@ -35,11 +35,12 @@ func SetCliOptions(cliParams CliParams) {
 		controllerCluster = &configSpecs.Configuration.ClusterConfiguration.ControllerCluster
 	}
 	options := &internal.CliOptionsStruct{
-		Namespace:  cliParams.Namespace,
-		ObjectName: cliParams.ObjectName,
-		ObjectType: cliParams.ObjectType,
-		FileName:   cliParams.FileName,
-		Cluster:    controllerCluster,
+		Namespace:    cliParams.Namespace,
+		ObjectName:   cliParams.ObjectName,
+		ObjectType:   cliParams.ObjectType,
+		FileName:     cliParams.FileName,
+		Cluster:      controllerCluster,
+		OutputFormat: cliParams.OutputFormat,
 	}
 	CliOptions = options
 	util.ExecutablePaths = map[string]string{
