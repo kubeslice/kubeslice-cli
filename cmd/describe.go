@@ -28,6 +28,8 @@ var describeCmd = &cobra.Command{
 			pkg.DescribeProject()
 		case "sliceConfig":
 			pkg.DescribeSliceConfig()
+		case "serviceExportConfig":
+			pkg.DescribeServiceExportConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}

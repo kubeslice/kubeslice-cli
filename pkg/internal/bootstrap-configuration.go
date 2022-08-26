@@ -53,9 +53,10 @@ type ImagePullSecrets struct {
 }
 
 type CliOptionsStruct struct {
-	ObjectType string   // "project", "cluster", "sliceConfig"
-	ObjectName string   // "projectName", "clusterName", "sliceConfigName"
-	Namespace  string   // namespace for the workloads
-	FileName   string   // path to the resource description file
-	Cluster    *Cluster // cluster
+	ObjectType   string   // "project", "cluster", "sliceConfig"
+	ObjectName   string   // "projectName", "clusterName", "sliceConfigName"
+	Namespace    string   // namespace for the workloads
+	FileName     string   // path to the resource description file
+	Cluster      *Cluster // cluster
+	OutputFormat string
 }
