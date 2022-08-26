@@ -7,13 +7,15 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-func Install() {
-	basicInstall()
-	switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
-	case ProfileFullDemo:
-		fullDemo()
-	case ProfileMinimalDemo:
-		minimalDemo()
+func Install(skipSteps map[string]string) {
+	basicInstall(skipSteps)
+	if _, skipDemo := skipSteps[internal.Demo_skipStep]; !skipDemo {
+		switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
+		case ProfileFullDemo:
+			fullDemo()
+		case ProfileMinimalDemo:
+			minimalDemo()
+		}
 	}
 }
 
@@ -40,23 +42,42 @@ func minimalDemo() {
 	internal.PrintNextSteps(false, ApplicationConfiguration)
 }
 
-func basicInstall() {
+func basicInstall(skipSteps map[string]string) {
 	internal.VerifyExecutables(ApplicationConfiguration)
+
+	_, skipKind := skipSteps[internal.Kind_skipStep]
+	_, skipCalico := skipSteps[internal.Calico_skipStep]
+	_, skipController := skipSteps[internal.Controller_skipStep]
+	_, skipWorker := skipSteps[internal.Worker_skipStep]
+	_, skipWorker_registration := skipSteps[internal.Worker_registration_skipStep]
+
 	internal.GenerateKubeSliceDirectory()
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
-		internal.GenerateKindConfiguration(ApplicationConfiguration)
+		if !skipKind {
+			internal.GenerateKindConfiguration(ApplicationConfiguration)
+		}
 		internal.CreateKubeConfig()
 		internal.SetKubeConfigPath()
-		internal.CreateKindClusters(ApplicationConfiguration)
-		internal.InstallCalico(ApplicationConfiguration.Configuration.ClusterConfiguration)
+		if !skipKind {
+			internal.CreateKindClusters(ApplicationConfiguration)
+		}
+		if !skipCalico {
+			internal.InstallCalico(&ApplicationConfiguration.Configuration.ClusterConfiguration)
+		}
 	}
 	internal.GatherNetworkInformation(ApplicationConfiguration)
 	internal.AddHelmCharts(ApplicationConfiguration)
-	internal.InstallCertManager(ApplicationConfiguration)
-	internal.InstallKubeSliceController(ApplicationConfiguration)
-	internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
-	internal.RegisterWorkerClusters(ApplicationConfiguration)
-	internal.InstallKubeSliceWorker(ApplicationConfiguration)
+	if !skipController {
+		internal.InstallCertManager(ApplicationConfiguration)
+		internal.InstallKubeSliceController(ApplicationConfiguration)
+		internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
+	}
+	if !skipWorker_registration {
+		internal.RegisterWorkerClusters(ApplicationConfiguration)
+	}
+	if !skipWorker {
+		internal.InstallKubeSliceWorker(ApplicationConfiguration)
+	}
 }
 
 func Uninstall() {

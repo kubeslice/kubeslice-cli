@@ -16,7 +16,7 @@ const KubeconfigPath = kubesliceDirectory + "/kubeconfig.yaml"
 
 func CreateKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 
-	clusters := getAllClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)
+	clusters := getAllClusters(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 	existingClusters := getExistingClusters(clusters)
 	created := false
 	util.Printf("\nCreating Kind Clusters...")
@@ -73,7 +73,7 @@ func createKindCluster(configFile string) {
 }
 
 func DeleteKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
-	clusters := getAllClusters(ApplicationConfiguration.Configuration.ClusterConfiguration)
+	clusters := getAllClusters(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 	existingClusters := getExistingClusters(clusters)
 	args := make([]string, 0, 0)
 	args = append(args, "delete", "clusters")
@@ -94,8 +94,8 @@ func DeleteKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 	}
 }
 
-func getAllClusters(clusterConfig ClusterConfiguration) []*Cluster {
-	cc := &clusterConfig
+func getAllClusters(clusterConfig *ClusterConfiguration) []*Cluster {
+	cc := clusterConfig
 	clusters := make([]*Cluster, 0, len(cc.WorkerClusters)+1)
 	clusters = append(clusters, &cc.ControllerCluster)
 	for i := 0; i < len(cc.WorkerClusters); i++ {
