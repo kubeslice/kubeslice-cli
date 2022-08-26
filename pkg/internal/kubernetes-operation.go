@@ -53,7 +53,7 @@ func ApplyKubectlManifest(fileName, namespace string, cluster *Cluster) {
 	}
 }
 
-func GetKubectlResources(resourceType string, resourceName string, namespace string, cluster *Cluster) {
+func GetKubectlResources(resourceType string, resourceName string, namespace string, cluster *Cluster, outputFormat string) {
 	cmdArgs := []string{}
 	if cluster != nil {
 		cmdArgs = append(cmdArgs, "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath)
@@ -62,6 +62,10 @@ func GetKubectlResources(resourceType string, resourceName string, namespace str
 		cmdArgs = append(cmdArgs, "get", resourceType, "-n", namespace)
 	} else {
 		cmdArgs = append(cmdArgs, "get", resourceType, resourceName, "-n", namespace)
+	}
+	if outputFormat != "" {
+
+		cmdArgs = append(cmdArgs, "-o", outputFormat)
 	}
 	err := util.RunCommandOnStdIO("kubectl", cmdArgs...)
 	if err != nil {
