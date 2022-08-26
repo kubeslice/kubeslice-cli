@@ -44,7 +44,7 @@ func CreateKubeSliceProject(ApplicationConfiguration *ConfigurationSpecs, cliOpt
 
 func GetKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nFetching KubeSlice Project...")
-	GetKubectlResources(ProjectObject, projectName, namespace, controllerCluster)
+	GetKubectlResources(ProjectObject, projectName, namespace, controllerCluster, "")
 	time.Sleep(200 * time.Millisecond)
 }
 func generateKubeSliceProjectManifest(projectName string) {

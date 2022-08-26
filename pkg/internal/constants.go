@@ -5,4 +5,7 @@ const (
 	ClusterObject             = "clusters.controller.kubeslice.io"
 	SliceConfigObject         = "sliceconfigs.controller.kubeslice.io"
 	ServiceExportConfigObject = "serviceexportconfigs.controller.kubeslice.io"
+	SecretObject              = "secrets"
+	OutputFormatYaml          = "yaml"
+	OutputFormatJson          = "json"
 )

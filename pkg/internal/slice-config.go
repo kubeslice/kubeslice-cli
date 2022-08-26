@@ -76,7 +76,7 @@ func ApplySliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 
 func GetSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nFetching KubeSlice sliceConfig...")
-	GetKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster)
+	GetKubectlResources(SliceConfigObject, sliceConfigName, namespace, controllerCluster, "")
 	time.Sleep(200 * time.Millisecond)
 }
 
