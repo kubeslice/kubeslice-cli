@@ -5,18 +5,19 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	// "github.com/spf13/cobra/doc"
 )
 
 var Config string
 
 var version = "0.0.1"
 var rootCmd = &cobra.Command{
-	Use:     "slicectl",
+	Use:     "kubeslice-cli",
 	Version: version,
-	Short:   "slicectl - a simple CLI for KubeSlice Operations",
-	Long: `slicectl - a simple CLI for KubeSlice Operations
+	Short:   "kubeslice-cli - a simple CLI for KubeSlice Operations",
+	Long: `kubeslice-cli - a simple CLI for KubeSlice Operations
     
-Use slicectl to install/uninstall required workloads to run KubeSlice Controller and KubeSlice Worker.
+Use kubeslice-cli to install/uninstall required workloads to run KubeSlice Controller and KubeSlice Worker.
 Additional example applications can also be installed in demo profiles to showcase the
 KubeSlice functionality`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -32,5 +33,7 @@ func Execute() {
 		fmt.Fprintf(os.Stderr, "Whoops. There was an error while executing slicectl '%s'", err)
 		os.Exit(1)
 	}
+	//  Uncomment to generate docs for new commands/flags
+	// doc.GenMarkdownTree(rootCmd, "doc")
 
 }
