@@ -6,6 +6,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	profile string
+)
+
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
@@ -15,10 +19,8 @@ var installCmd = &cobra.Command{
 	KubeSlice functionality`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		config, _ := cmd.Flags().GetString("config")
-		profile, _ := cmd.Flags().GetString("profile")
 		// check if config and profile are both set, if so, error out
-		if config != "" && profile != "" {
+		if Config != "" && profile != "" {
 			util.Fatalf("Cannot use both -config and -profile options")
 		}
 		if profile != "" {
@@ -31,7 +33,7 @@ var installCmd = &cobra.Command{
 			pkg.ReadAndValidateConfiguration("")
 			pkg.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile = profile
 		} else {
-			pkg.ReadAndValidateConfiguration(config)
+			pkg.ReadAndValidateConfiguration(Config)
 		}
 		pkg.Install()
 	},
@@ -39,7 +41,7 @@ var installCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(installCmd)
-	installCmd.Flags().StringP("profile", "p", "", `<profile-value>
+	installCmd.Flags().StringVarP(&profile, "profile", "p", "", `<profile-value>
 The profile for installation/uninstallation.
 Supported values:
 	- full-demo:

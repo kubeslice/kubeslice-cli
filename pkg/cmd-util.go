@@ -15,11 +15,13 @@ const (
 )
 
 type CliParams struct {
-	ObjectType string // "project", "cluster", "sliceConfig"
-	ObjectName string // "projectName", "clusterName", "sliceConfigName"
-	Namespace  string // namespace for the workloads
-	FileName   string // path to the resource description file
-	Config     string // cluster
+	ObjectType string   // "project", "cluster", "sliceConfig"
+	ObjectName string   // "projectName", "clusterName", "sliceConfigName"
+	Namespace  string   // namespace for the workloads
+	FileName   string   // path to the resource description file
+	Config     string   // cluster
+	Worker     []string //workerList
+	Key        []string
 }
 
 var ApplicationConfiguration *internal.ConfigurationSpecs

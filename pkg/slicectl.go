@@ -18,7 +18,7 @@ func Install() {
 }
 
 func fullDemo() {
-	internal.GenerateSliceConfiguration(ApplicationConfiguration)
+	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil, "", "")
 	internal.ApplySliceConfiguration(ApplicationConfiguration)
 	util.Printf("%s Waiting for configuration propagation", util.Wait)
 	time.Sleep(20 * time.Second)
@@ -33,7 +33,7 @@ func fullDemo() {
 }
 
 func minimalDemo() {
-	internal.GenerateSliceConfiguration(ApplicationConfiguration)
+	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil, "", "")
 	internal.GenerateIPerfManifests()
 	internal.InstallIPerf(ApplicationConfiguration)
 	internal.GenerateIPerfServiceExportManifest(ApplicationConfiguration)
@@ -54,7 +54,7 @@ func basicInstall() {
 	internal.AddHelmCharts(ApplicationConfiguration)
 	internal.InstallCertManager(ApplicationConfiguration)
 	internal.InstallKubeSliceController(ApplicationConfiguration)
-	internal.CreateKubeSliceProject(ApplicationConfiguration)
+	internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
 	internal.RegisterWorkerClusters(ApplicationConfiguration)
 	internal.InstallKubeSliceWorker(ApplicationConfiguration)
 }

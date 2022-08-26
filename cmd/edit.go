@@ -22,16 +22,16 @@ var editCmd = &cobra.Command{
 		}
 		filename, _ := cmd.Flags().GetString("filename")
 
-		config, _ := cmd.Flags().GetString("config")
-
 		if len(args) > 1 {
 			objectName = args[1]
 		}
 
-		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename})
+		pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename})
 		switch args[0] {
 		case "project":
-			// pkg.GetProject()
+			pkg.EditProject()
+		case "sliceConfig":
+			pkg.EditSliceConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}
