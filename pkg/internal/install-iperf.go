@@ -126,7 +126,7 @@ func InstallIPerf(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	wc := cc.WorkerClusters
 
-	ApplyKubectlManifest(kubesliceDirectory+"/"+serverFileName, "iperf", wc[0])
+	ApplyKubectlManifest(kubesliceDirectory+"/"+serverFileName, "iperf", &wc[0])
 	util.Printf("%s Applied %s to %s", util.Tick, serverFileName, wc[0].Name)
 	time.Sleep(200 * time.Millisecond)
 
@@ -135,7 +135,7 @@ func InstallIPerf(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("%s Successfully installed iPerf Server on %s...", util.Tick, wc[0].Name)
 
 	for i := 1; i < len(wc); i++ {
-		ApplyKubectlManifest(kubesliceDirectory+"/"+clientFileName, "iperf", wc[i])
+		ApplyKubectlManifest(kubesliceDirectory+"/"+clientFileName, "iperf", &wc[i])
 		util.Printf("%s Applied %s to %s", util.Tick, clientFileName, wc[i].Name)
 		time.Sleep(200 * time.Millisecond)
 
@@ -166,7 +166,7 @@ func GenerateIPerfServiceExportManifest(ApplicationConfiguration *ConfigurationS
 }
 
 func ApplyIPerfServiceExportManifest(ApplicationConfiguration *ConfigurationSpecs) {
-	ApplyKubectlManifest(kubesliceDirectory+"/"+iPerfServerServiceExportFileName, "iperf", ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters[0])
+	ApplyKubectlManifest(kubesliceDirectory+"/"+iPerfServerServiceExportFileName, "iperf", &ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters[0])
 }
 
 func RolloutRestartIPerf(ApplicationConfiguration *ConfigurationSpecs) {

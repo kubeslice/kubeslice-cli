@@ -17,16 +17,15 @@ var deleteCmd = &cobra.Command{
 		if ns == "" {
 			util.Fatalf("Namespace is required")
 		}
-		config, _ := cmd.Flags().GetString("config")
 
 		objectName = args[1]
 
-		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
+		pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
 		switch args[0] {
 		case "project":
-		//	pkg.DeleteProject()
+			pkg.DeleteProject()
 		case "sliceConfig":
-		//	pkg.DeleteSliceConfig()
+			pkg.DeleteSliceConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}

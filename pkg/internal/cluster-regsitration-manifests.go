@@ -31,7 +31,7 @@ func RegisterWorkerClusters(ApplicationConfiguration *ConfigurationSpecs) {
 	time.Sleep(200 * time.Millisecond)
 
 	ac := ApplicationConfiguration.Configuration
-	ApplyKubectlManifest(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-"+ac.KubeSliceConfiguration.ProjectName, ac.ClusterConfiguration.ControllerCluster)
+	ApplyKubectlManifest(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-"+ac.KubeSliceConfiguration.ProjectName, &ac.ClusterConfiguration.ControllerCluster)
 	util.Printf("%s Applied %s", util.Tick, clusterRegistrationFileName)
 	time.Sleep(200 * time.Millisecond)
 

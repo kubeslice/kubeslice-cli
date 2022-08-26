@@ -17,16 +17,17 @@ var describeCmd = &cobra.Command{
 		if ns == "" {
 			util.Fatalf("Namespace is required")
 		}
-		config, _ := cmd.Flags().GetString("config")
 
 		if len(args) > 1 {
 			objectName = args[1]
 		}
 
-		pkg.SetCliOptions(pkg.CliParams{Config: config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
+		pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
 		switch args[0] {
 		case "project":
-			pkg.GetProject()
+			pkg.DescribeProject()
+		case "sliceConfig":
+			pkg.DescribeSliceConfig()
 		default:
 			util.Fatalf("Invalid object type")
 		}
