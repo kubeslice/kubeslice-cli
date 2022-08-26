@@ -23,11 +23,12 @@ KubeSlice functionality`,
 }
 
 func Execute() {
+	rootCmd.PersistentFlags().StringP("config", "c", "", `<path-to-topology-configuration-yaml-file>
+	The yaml file with topology configuration. 
+	Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml`)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Whoops. There was an error while executing slicectl '%s'", err)
 		os.Exit(1)
 	}
-	rootCmd.PersistentFlags().StringP("config", "c", "", `<path-to-topology-configuration-yaml-file>
-	The yaml file with topology configuration. 
-	Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml`)
+
 }
