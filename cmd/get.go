@@ -33,6 +33,8 @@ var getCmd = &cobra.Command{
 			pkg.GetServiceExportConfig()
 		case "secrets":
 			pkg.GetSecrets(worker)
+		case "worker":
+			pkg.GetWorker()
 		default:
 			util.Fatalf("Invalid object type")
 		}
