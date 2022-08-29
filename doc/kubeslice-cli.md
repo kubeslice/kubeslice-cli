@@ -26,13 +26,13 @@ kubeslice-cli [flags]
 
 ### SEE ALSO
 
-* [kubeslice-cli completion](kubeslice-cli_completion.md)	 - Generate the autocompletion script for the specified shell
 * [kubeslice-cli create](kubeslice-cli_create.md)	 - Create Kubeslice resources.
 * [kubeslice-cli delete](kubeslice-cli_delete.md)	 - Delete Kubeslice resources.
 * [kubeslice-cli describe](kubeslice-cli_describe.md)	 - Describe Kubeslice resources.
 * [kubeslice-cli edit](kubeslice-cli_edit.md)	 - Edit Kubeslice resources.
 * [kubeslice-cli get](kubeslice-cli_get.md)	 - Get Kubeslice resources.
 * [kubeslice-cli install](kubeslice-cli_install.md)	 - Installs workloads to run KubeSlice
+* [kubeslice-cli register](kubeslice-cli_register.md)	 - Register a Kubeslice worker cluster.
 * [kubeslice-cli uninstall](kubeslice-cli_uninstall.md)	 - Deletes the Kind Clusters used for the demo.
 
 
