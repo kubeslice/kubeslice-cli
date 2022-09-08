@@ -55,7 +55,8 @@ KubeSlice functionality
 * [kubeslice-cli describe](doc/kubeslice-cli_describe.md)	 - Describe Kubeslice resources.
 * [kubeslice-cli edit](doc/kubeslice-cli_edit.md)	 - Edit Kubeslice resources.
 * [kubeslice-cli get](doc/kubeslice-cli_get.md)	 - Get Kubeslice resources.
-* [kubeslice-cli install](doc/kubeslice-cli_install.md)	 - Installs workloads to run KubeSlice
+* [kubeslice-cli install](doc/kubeslice-cli_install.md)	 - Installs workloads to run KubeSlice.
+* [kubeslice-cli register](doc/kubeslice-cli_register.md)	 - Register a Kubeslice worker cluster.
 * [kubeslice-cli uninstall](doc/kubeslice-cli_uninstall.md)	 - Deletes the Kind Clusters used for the demo.
 
 

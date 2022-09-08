@@ -8,7 +8,7 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:     "delete",
-	Aliases: []string{"d"},
+	Aliases: []string{"d, remove"},
 	Short:   "Delete Kubeslice resources.",
 	Args:    cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -28,6 +28,8 @@ var deleteCmd = &cobra.Command{
 			pkg.DeleteSliceConfig()
 		case "serviceExportConfig":
 			pkg.DeleteServiceExportConfig()
+		case "worker":
+			pkg.RemoveWorker()
 		default:
 			util.Fatalf("Invalid object type")
 		}
