@@ -7,8 +7,8 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-func Install() {
-	basicInstall()
+func Install(ent bool) {
+	basicInstall(ent)
 	switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
 	case ProfileFullDemo:
 		fullDemo()
@@ -40,7 +40,7 @@ func minimalDemo() {
 	internal.PrintNextSteps(false, ApplicationConfiguration)
 }
 
-func basicInstall() {
+func basicInstall(enterprise bool) {
 	internal.VerifyExecutables(ApplicationConfiguration)
 	internal.GenerateKubeSliceDirectory()
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
@@ -57,6 +57,9 @@ func basicInstall() {
 	internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
 	internal.RegisterWorkerClusters(ApplicationConfiguration)
 	internal.InstallKubeSliceWorker(ApplicationConfiguration)
+	if enterprise {
+		internal.InstallKubeSliceUI(ApplicationConfiguration)
+	}
 }
 
 func Uninstall() {

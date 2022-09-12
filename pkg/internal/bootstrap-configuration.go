@@ -16,6 +16,7 @@ type HelmChartConfiguration struct {
 	CertManagerChart HelmChart        `yaml:"cert_manager_chart"`
 	ControllerChart  HelmChart        `yaml:"controller_chart"`
 	WorkerChart      HelmChart        `yaml:"worker_chart"`
+	UIChart          HelmChart        `yaml:ui_chart`
 	HelmUsername     string           `yaml:"helm_username"`
 	HelmPassword     string           `yaml:"helm_password"`
 	ImagePullSecret  ImagePullSecrets `yaml:"image_pull_secret"`
