@@ -7,9 +7,8 @@ import (
 )
 
 var (
-	profile    string
-	skipSteps  = []string{}
-	enterprise bool
+	profile   string
+	skipSteps = []string{}
 )
 
 func getStepsToSkip() map[string]string {
@@ -29,7 +28,6 @@ var installCmd = &cobra.Command{
 	KubeSlice functionality`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		var ent bool
 		// check if config and profile are both set, if so, error out
 		if Config != "" && profile != "" {
 			util.Fatalf("Cannot use both -config and -profile options")
@@ -44,12 +42,11 @@ var installCmd = &cobra.Command{
 			pkg.ReadAndValidateConfiguration("")
 			pkg.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile = profile
 		} else {
-			ent, _ = cmd.Flags().GetBool("enterprise")
 			pkg.ReadAndValidateConfiguration(Config)
 		}
 		stepsToSkipMap := getStepsToSkip()
 		// util.Printf("skipping: %v", stepsToSkipMap)
-		pkg.Install(stepsToSkipMap, ent)
+		pkg.Install(stepsToSkipMap)
 	},
 }
 
@@ -74,7 +71,5 @@ Supported values:
 	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
 	- worker: Skips the installation of KubeSlice Worker
 	- demo: Skips the installation of additional example applications`)
-	installCmd.Flags().BoolVarP(&enterprise, "enterprise", "e", false, `gives option of installing the enterprise solution,
-	to avail this provide necessary username and password in config file,					      
-	includes UI and many more.`)
+
 }

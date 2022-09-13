@@ -7,8 +7,8 @@ import (
 	"github.com/kubeslice/slicectl/util"
 )
 
-func Install(skipSteps map[string]string, ent bool) {
-	basicInstall(skipSteps, ent)
+func Install(skipSteps map[string]string) {
+	basicInstall(skipSteps)
 	if _, skipDemo := skipSteps[internal.Demo_skipStep]; !skipDemo {
 		switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
 		case ProfileFullDemo:
@@ -42,7 +42,7 @@ func minimalDemo() {
 	internal.PrintNextSteps(false, ApplicationConfiguration)
 }
 
-func basicInstall(skipSteps map[string]string, ent bool) {
+func basicInstall(skipSteps map[string]string) {
 	internal.VerifyExecutables(ApplicationConfiguration)
 
 	_, skipKind := skipSteps[internal.Kind_skipStep]
@@ -78,7 +78,7 @@ func basicInstall(skipSteps map[string]string, ent bool) {
 	if !skipWorker {
 		internal.InstallKubeSliceWorker(ApplicationConfiguration)
 	}
-	if ent {
+	if ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName != "" {
 		internal.InstallKubeSliceUI(ApplicationConfiguration)
 	}
 }
