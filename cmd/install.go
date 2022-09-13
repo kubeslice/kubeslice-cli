@@ -70,6 +70,6 @@ Supported values:
 	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
 	- worker: Skips the installation of KubeSlice Worker
 	- demo: Skips the installation of additional example applications
-	- ent: Skips the installtion of UI/enterprise`)
+	- enterprise: Skips the installtion of UI/enterprise`)
 
 }
