@@ -50,6 +50,7 @@ func basicInstall(skipSteps map[string]string) {
 	_, skipController := skipSteps[internal.Controller_skipStep]
 	_, skipWorker := skipSteps[internal.Worker_skipStep]
 	_, skipWorker_registration := skipSteps[internal.Worker_registration_skipStep]
+	_, skipUI := skipSteps[internal.UI_install_skipStep]
 
 	internal.GenerateKubeSliceDirectory()
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
@@ -77,6 +78,10 @@ func basicInstall(skipSteps map[string]string) {
 	}
 	if !skipWorker {
 		internal.InstallKubeSliceWorker(ApplicationConfiguration)
+	}
+	if !skipUI ||
+		ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName != "" {
+		internal.InstallKubeSliceUI(ApplicationConfiguration)
 	}
 }
 

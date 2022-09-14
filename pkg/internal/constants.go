@@ -11,6 +11,7 @@ const (
 	Calico_skipStep              = "calico"
 	Controller_skipStep          = "controller"
 	Worker_registration_skipStep = "worker-registration"
+	UI_install_skipStep          = "enterprise"
 	Worker_skipStep              = "worker"
 	Demo_skipStep                = "demo"
 	SecretObject                 = "secrets"

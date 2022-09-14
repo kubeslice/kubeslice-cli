@@ -42,6 +42,9 @@ configuration:
     worker_chart:
       chart_name: #{The name of the Worker Chart}
       version: #{The version of the chart to use. Leave blank for latest version}
+    ui_chart:
+      chart_name: #{The name of the UI/Enterprise Chart}
+      version: #{The version of the chart to use. Leave blank for latest version}
     helm_username: #{Helm Username if the repo is private}
     helm_password: #{Helm Password if the repo is private}
     image_pull_secret: #{The image pull secrets. Optional for OpenSource, required for enterprise}

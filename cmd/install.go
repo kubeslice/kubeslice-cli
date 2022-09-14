@@ -45,7 +45,6 @@ var installCmd = &cobra.Command{
 			pkg.ReadAndValidateConfiguration(Config)
 		}
 		stepsToSkipMap := getStepsToSkip()
-		// util.Printf("skipping: %v", stepsToSkipMap)
 		pkg.Install(stepsToSkipMap)
 	},
 }
@@ -70,5 +69,7 @@ Supported values:
 	- controller: Skips the installation of KubeSlice Controller
 	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
 	- worker: Skips the installation of KubeSlice Worker
-	- demo: Skips the installation of additional example applications`)
+	- demo: Skips the installation of additional example applications
+	- enterprise: Skips the installtion of UI/enterprise`)
+
 }
