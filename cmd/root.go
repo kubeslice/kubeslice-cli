@@ -10,7 +10,7 @@ import (
 
 var Config string
 
-var version = "0.0.1"
+var version = "0.3.0"
 var rootCmd = &cobra.Command{
 	Use:     "kubeslice-cli",
 	Version: version,
