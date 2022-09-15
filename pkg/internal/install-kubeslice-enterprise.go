@@ -21,6 +21,10 @@ kubeslice:
 
 func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling KubeSlice dashboard...")
+	if ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName == "" {
+		util.Printf("%s UI Helm Chart not found. Update UI chart configuration in topology file.", util.Cross)
+		return
+	}
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
 	time.Sleep(200 * time.Millisecond)

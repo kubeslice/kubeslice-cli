@@ -79,8 +79,7 @@ func basicInstall(skipSteps map[string]string) {
 	if !skipWorker {
 		internal.InstallKubeSliceWorker(ApplicationConfiguration)
 	}
-	if !skipUI ||
-		ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName != "" {
+	if !skipUI {
 		internal.InstallKubeSliceUI(ApplicationConfiguration)
 	}
 }
