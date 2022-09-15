@@ -8,12 +8,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubeslice/kubeslice-installer/util"
+	"github.com/kubeslice/slicectl/util"
 )
 
-func VerifyExecutables() {
+func VerifyExecutables(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("Verifying Executables...")
 	time.Sleep(200 * time.Millisecond)
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
+		util.ExecutablePaths = map[string]string{
+			"kind":    "kind",
+			"kubectl": "kubectl",
+			"docker":  "docker",
+			"helm":    "helm",
+		}
+	} else {
+		util.ExecutablePaths = map[string]string{
+			"kubectl": "kubectl",
+			"helm":    "helm",
+		}
+	}
 	for key := range util.ExecutablePaths {
 		time.Sleep(200 * time.Millisecond)
 		verificationResult(verifyBinary(key), key)

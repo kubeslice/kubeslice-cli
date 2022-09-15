@@ -7,12 +7,8 @@ import (
 	"os/exec"
 )
 
-var ExecutablePaths = map[string]string{
-	"kind":    "kind",
-	"kubectl": "kubectl",
-	"docker":  "docker",
-	"helm":    "helm",
-}
+var ExecutablePaths map[string]string
+
 var ExecutableVerifyCommands = map[string][]string{
 	"kind":    {"version"},
 	"kubectl": {"version", "--client=true"},
