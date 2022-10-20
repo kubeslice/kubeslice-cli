@@ -30,7 +30,11 @@ var installCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// check if config and profile are both set, if so, error out
 		if Config != "" && profile != "" {
-			util.Fatalf("Cannot use both -config and -profile options")
+			util.Fatalf("Cannot use both --config and --profile options")
+		}
+		// check if config and profile are both not set, if so, error out
+		if Config == "" && profile == "" {
+			util.Fatalf("Please pass either --config or --profile option")
 		}
 		if profile != "" {
 			switch profile {
