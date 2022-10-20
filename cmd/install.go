@@ -30,14 +30,20 @@ var installCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// check if config and profile are both set, if so, error out
 		if Config != "" && profile != "" {
-			util.Fatalf("Cannot use both -config and -profile options")
+			cmd.Help()
+			util.Fatalf("\n %v Cannot use both --config and --profile options", util.Cross)
+		}
+		// check if config and profile are both not set, if so, error out
+		if Config == "" && profile == "" {
+			cmd.Help()
+			util.Fatalf("\n %v Please pass either --config or --profile option", util.Cross)
 		}
 		if profile != "" {
 			switch profile {
 			case pkg.ProfileFullDemo:
 			case pkg.ProfileMinimalDemo:
 			default:
-				util.Fatalf("Unknown profile: %s. Possible values %s", profile, []string{pkg.ProfileFullDemo, pkg.ProfileMinimalDemo})
+				util.Fatalf("%v Unknown profile: %s. Possible values %s", util.Cross, profile, []string{pkg.ProfileFullDemo, pkg.ProfileMinimalDemo})
 			}
 			pkg.ReadAndValidateConfiguration("")
 			pkg.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile = profile
@@ -61,7 +67,8 @@ Supported values:
 	- minimal-demo:
 		Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers. 
 		Generates the KubernetesManifests for user to manually apply, and verify 
-		the functionality`)
+		the functionality
+Cannot be used with --config flag.`)
 	installCmd.Flags().StringSliceVarP(&skipSteps, "skip", "s", []string{}, `Skips the installation steps (comma-seperated). 
 Supported values:
 	- kind: Skips the creation of kind clusters
