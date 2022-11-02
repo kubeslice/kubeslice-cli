@@ -21,7 +21,7 @@ Use kubeslice-cli to install/uninstall required workloads to run KubeSlice Contr
 Additional example applications can also be installed in demo profiles to showcase the
 KubeSlice functionality`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		cmd.Help()
 	},
 }
 
