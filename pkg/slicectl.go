@@ -3,8 +3,8 @@ package pkg
 import (
 	"time"
 
-	"github.com/kubeslice/slicectl/pkg/internal"
-	"github.com/kubeslice/slicectl/util"
+	"github.com/kubeslice/kubeslice-cli/pkg/internal"
+	"github.com/kubeslice/kubeslice-cli/util"
 )
 
 func Install(skipSteps map[string]string) {

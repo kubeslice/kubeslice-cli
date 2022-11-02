@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/kubeslice/slicectl/pkg"
-	"github.com/kubeslice/slicectl/util"
+	"github.com/kubeslice/kubeslice-cli/pkg"
+	"github.com/kubeslice/kubeslice-cli/util"
 	"github.com/spf13/cobra"
 )
 
