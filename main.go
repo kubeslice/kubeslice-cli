@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/kubeslice/slicectl/cmd"
+	"github.com/kubeslice/kubeslice-cli/cmd"
 )
 
 func main() {

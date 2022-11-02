@@ -3,7 +3,7 @@ package internal
 import (
 	"time"
 
-	"github.com/kubeslice/slicectl/util"
+	"github.com/kubeslice/kubeslice-cli/util"
 )
 
 const (

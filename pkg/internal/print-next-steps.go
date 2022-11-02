@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/kubeslice/slicectl/util"
+	"github.com/kubeslice/kubeslice-cli/util"
 )
 
 const windowsEnvSet = `

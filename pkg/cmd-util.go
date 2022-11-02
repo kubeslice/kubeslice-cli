@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 
 	"github.com/go-yaml/yaml"
-	"github.com/kubeslice/slicectl/pkg/internal"
-	"github.com/kubeslice/slicectl/util"
+	"github.com/kubeslice/kubeslice-cli/pkg/internal"
+	"github.com/kubeslice/kubeslice-cli/util"
 )
 
 const (
@@ -69,7 +69,7 @@ var defaultConfiguration = &internal.ConfigurationSpecs{
 		},
 		HelmChartConfiguration: internal.HelmChartConfiguration{
 			RepoAlias: "kubeslice-demo",
-			RepoUrl:   "https://kubeslice.github.io/charts/",
+			RepoUrl:   "https://kubeslice.github.io/kubeslice/",
 			CertManagerChart: internal.HelmChart{
 				ChartName: "cert-manager",
 			},

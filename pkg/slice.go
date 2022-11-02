@@ -1,7 +1,7 @@
 package pkg
 
 import (
-	"github.com/kubeslice/slicectl/pkg/internal"
+	"github.com/kubeslice/kubeslice-cli/pkg/internal"
 )
 
 func CreateSliceConfig(worker []string) {

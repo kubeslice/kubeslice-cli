@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubeslice/slicectl/util"
+	"github.com/kubeslice/kubeslice-cli/util"
 )
 
 func GatherNetworkInformation(ApplicationConfiguration *ConfigurationSpecs) {
