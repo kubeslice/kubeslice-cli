@@ -20,7 +20,7 @@ imagePullSecrets:
 
 func AddHelmCharts(ApplicationConfiguration *ConfigurationSpecs) {
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
-	// helm repo add avesha https://kubeslice.github.io/charts/
+	// helm repo add avesha https://kubeslice.github.io/kubeslice/
 	util.Printf("\nAdding KubeSlice Helm Charts...")
 
 	addHelmChart(ApplicationConfiguration)

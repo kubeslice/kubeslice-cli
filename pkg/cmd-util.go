@@ -69,7 +69,7 @@ var defaultConfiguration = &internal.ConfigurationSpecs{
 		},
 		HelmChartConfiguration: internal.HelmChartConfiguration{
 			RepoAlias: "kubeslice-demo",
-			RepoUrl:   "https://kubeslice.github.io/charts/",
+			RepoUrl:   "https://kubeslice.github.io/kubeslice/",
 			CertManagerChart: internal.HelmChart{
 				ChartName: "cert-manager",
 			},
