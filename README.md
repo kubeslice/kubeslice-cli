@@ -1,6 +1,6 @@
 # `kubeslice-cli` for simplified KubeSlice Operations
 
-[comment]: <> (![Latest GitHub release]&#40;https://img.shields.io/github/release/kubeslice/slicectl.svg&#41;)
+[comment]: <> (![Latest GitHub release]&#40;https://img.shields.io/github/release/kubeslice/kubeslice-cli.svg&#41;)
 
 This repository provides `kubeslice-cli` tool.
 [Install &rarr;](#installation)
@@ -9,7 +9,7 @@ This repository provides `kubeslice-cli` tool.
 
 `kubeslice-cli` is a Go Lang executable utility which helps perform the KubeSlice operations like installation, demo, etc. 
 on Kubernetes Clusters. You can download a suitable version of the installer from the [**Releases page
-&rarr;**](https://github.com/kubeslice/slicectl/releases)
+&rarr;**](https://github.com/kubeslice/kubeslice-cli/releases)
 
 
 ## Synopsis
@@ -43,7 +43,7 @@ KubeSlice functionality
 ```
   -c, --config string   <path-to-topology-configuration-yaml-file>
                         	The yaml file with topology configuration. 
-                        	Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml
+                        	Refer: https://github.com/kubeslice/kubeslice-cli/blob/master/samples/template.yaml
   -h, --help            help for kubeslice-cli
   -v, --version         version for kubeslice-cli
 ```

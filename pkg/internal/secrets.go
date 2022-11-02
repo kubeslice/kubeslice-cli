@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kubeslice/slicectl/util"
+	"github.com/kubeslice/kubeslice-cli/util"
 )
 
 func GetSecrets(workerName string, namespace string, controllerCluster *Cluster, outputFormat string) {
