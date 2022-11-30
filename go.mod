@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.1
 	sigs.k8s.io/yaml v1.2.0
 )
 

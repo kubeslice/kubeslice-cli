@@ -6,19 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	profile   string
-	skipSteps = []string{}
-)
-
-func getStepsToSkip() map[string]string {
-	skipStepsMap := make(map[string]string)
-	for _, step := range skipSteps {
-		skipStepsMap[step] = ""
-	}
-	return skipStepsMap
-}
-
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},

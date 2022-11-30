@@ -6,12 +6,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var outputFormat string
 var getCmd = &cobra.Command{
 	Use:     "get",
 	Aliases: []string{"g"},
 	Short:   "Get Kubeslice resources.",
-	Args:    cobra.MinimumNArgs(1),
+	Args:    cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		var objectName string
 		ns, _ := cmd.Flags().GetString("namespace")

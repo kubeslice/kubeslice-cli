@@ -8,8 +8,6 @@ import (
 	// "github.com/spf13/cobra/doc"
 )
 
-var Config string
-
 var version = "0.3.2"
 var rootCmd = &cobra.Command{
 	Use:     "kubeslice-cli",
