@@ -35,7 +35,7 @@ func InstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) {
 	time.Sleep(200 * time.Millisecond)
 
 	util.Printf("%s Waiting for KubeSlice Controller Pods to be Healthy...", util.Wait)
-	PodVerification("Waiting for KubeSlice Controller Pods to be Healthy", cc.ControllerCluster, "kubeslice-controller")
+	PodVerification("Waiting for KubeSlice Controller Pods to be Healthy", cc.ControllerCluster, KUBESLICE_CONTROLLER_NAMESPACE)
 
 	util.Printf("%s Successfully installed KubeSlice Controller.\n", util.Tick)
 
@@ -48,7 +48,7 @@ func generateControllerValuesFile(cluster Cluster, imagePullSecret ImagePullSecr
 
 func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {
 	args := make([]string, 0)
-	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", "kubeslice-controller", fmt.Sprintf("%s/%s", hc.RepoAlias, hc.ControllerChart.ChartName), "--namespace", "kubeslice-controller", "--create-namespace", "-f", kubesliceDirectory+"/"+controllerValuesFileName)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", KUBESLICE_CONTROLLER_NAMESPACE, fmt.Sprintf("%s/%s", hc.RepoAlias, hc.ControllerChart.ChartName), "--namespace", KUBESLICE_CONTROLLER_NAMESPACE, "--create-namespace", "-f", kubesliceDirectory+"/"+controllerValuesFileName)
 	if hc.ControllerChart.Version != "" {
 		args = append(args, "--version", hc.ControllerChart.Version)
 	}

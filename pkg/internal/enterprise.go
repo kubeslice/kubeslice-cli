@@ -20,7 +20,7 @@ kubeslice:
 `
 
 func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
-	util.Printf("\nInstalling KubeSlice dashboard...")
+	util.Printf("\nInstalling KubeSlice Manager...")
 	if ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName == "" {
 		util.Printf("%s UI Helm Chart not found. Update UI chart configuration in topology file.", util.Cross)
 		return
@@ -33,8 +33,20 @@ func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	installKubeSliceUI(cc.ControllerCluster, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.UIChart.ChartName)
 	time.Sleep(200 * time.Millisecond)
-	util.Printf("%s Waiting for KubeSlice UI Pods to be Healthy...", util.Wait)
-	PodVerification("Waiting for KubeSlice Ui Pods to be Healthy", cc.ControllerCluster, "kubernetes-dashboard")
+	util.Printf("%s Waiting for KubeSlice Manager Pods to be Healthy...", util.Wait)
+	PodVerification("Waiting for KubeSlice Manager Pods to be Healthy", cc.ControllerCluster, "kubernetes-dashboard")
+	util.Printf("%s Successfully installed KubeSlice Manager.\n", util.Tick)
+}
+
+func UninstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
+	util.Printf("\nUnstalling KubeSlice Manager...")
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	time.Sleep(200 * time.Millisecond)
+	uninstallKubeSliceUI(cc.ControllerCluster)
+	util.Printf("%s Successfully uninstalled KubeSlice Manager", util.Tick)
+	time.Sleep(200 * time.Millisecond)
+	// wait for pods to be cleaned up.
+	// util.Printf("%s Waiting for KubeSlice Manager Pods to be removed...", util.Wait)
 	util.Printf("%s Successfully installed KubeSlice dashboard.\n", util.Tick)
 }
 
@@ -50,10 +62,19 @@ func generateUIValuesFile(clusterType string, cluster Cluster, imagePullSecrets 
 
 func installKubeSliceUI(cluster Cluster, hc HelmChartConfiguration) {
 	args := make([]string, 0)
-	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", "kubeslice-ui", fmt.Sprintf("%s/%s", hc.RepoAlias, hc.UIChart.ChartName), "--namespace", "kubeslice-controller", "-f", kubesliceDirectory+"/"+uiValuesFileName)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", "kubeslice-ui", fmt.Sprintf("%s/%s", hc.RepoAlias, hc.UIChart.ChartName), "--namespace", KUBESLICE_CONTROLLER_NAMESPACE, "-f", kubesliceDirectory+"/"+uiValuesFileName)
 	if hc.ControllerChart.Version != "" {
 		args = append(args, "--version", hc.ControllerChart.Version)
 	}
+	err := util.RunCommand("helm", args...)
+	if err != nil {
+		log.Fatalf("Process failed %v", err)
+	}
+}
+
+func uninstallKubeSliceUI(cluster Cluster) {
+	args := make([]string, 0)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "kubeslice-ui", "--namespace", KUBESLICE_CONTROLLER_NAMESPACE)
 	err := util.RunCommand("helm", args...)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)

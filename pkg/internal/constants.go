@@ -1,20 +1,20 @@
 package internal
 
 const (
-	ProjectObject             = "projects.controller.kubeslice.io"
-	ClusterObject             = "clusters.controller.kubeslice.io"
-	SliceConfigObject         = "sliceconfigs.controller.kubeslice.io"
-	ServiceExportConfigObject = "serviceexportconfigs.controller.kubeslice.io"
+	KUBESLICE_CONTROLLER_NAMESPACE = "kubeslice-controller"
+	ProjectObject                  = "projects.controller.kubeslice.io"
+	ClusterObject                  = "clusters.controller.kubeslice.io"
+	SliceConfigObject              = "sliceconfigs.controller.kubeslice.io"
+	ServiceExportConfigObject      = "serviceexportconfigs.controller.kubeslice.io"
 
-	// skipStep suffix is for the set of installation steps to skip.
-	Kind_skipStep                = "kind"
-	Calico_skipStep              = "calico"
-	Controller_skipStep          = "controller"
-	Worker_registration_skipStep = "worker-registration"
-	UI_install_skipStep          = "enterprise"
-	Worker_skipStep              = "worker"
-	Demo_skipStep                = "demo"
-	SecretObject                 = "secrets"
-	OutputFormatYaml             = "yaml"
-	OutputFormatJson             = "json"
+	Kind_Component                = "kind"
+	Calico_Component              = "calico"
+	Controller_Component          = "controller"
+	Worker_registration_Component = "worker-registration"
+	UI_install_Component          = "enterprise"
+	Worker_Component              = "worker"
+	Demo_Component                = "demo"
+	SecretObject                  = "secrets"
+	OutputFormatYaml              = "yaml"
+	OutputFormatJson              = "json"
 )

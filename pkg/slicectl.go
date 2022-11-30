@@ -9,7 +9,7 @@ import (
 
 func Install(skipSteps map[string]string) {
 	basicInstall(skipSteps)
-	if _, skipDemo := skipSteps[internal.Demo_skipStep]; !skipDemo {
+	if _, skipDemo := skipSteps[internal.Demo_Component]; !skipDemo {
 		switch ApplicationConfiguration.Configuration.ClusterConfiguration.Profile {
 		case ProfileFullDemo:
 			fullDemo()
@@ -45,12 +45,12 @@ func minimalDemo() {
 func basicInstall(skipSteps map[string]string) {
 	internal.VerifyExecutables(ApplicationConfiguration)
 
-	_, skipKind := skipSteps[internal.Kind_skipStep]
-	_, skipCalico := skipSteps[internal.Calico_skipStep]
-	_, skipController := skipSteps[internal.Controller_skipStep]
-	_, skipWorker := skipSteps[internal.Worker_skipStep]
-	_, skipWorker_registration := skipSteps[internal.Worker_registration_skipStep]
-	_, skipUI := skipSteps[internal.UI_install_skipStep]
+	_, skipKind := skipSteps[internal.Kind_Component]
+	_, skipCalico := skipSteps[internal.Calico_Component]
+	_, skipController := skipSteps[internal.Controller_Component]
+	_, skipWorker := skipSteps[internal.Worker_Component]
+	_, skipWorker_registration := skipSteps[internal.Worker_registration_Component]
+	_, skipUI := skipSteps[internal.UI_install_Component]
 
 	internal.GenerateKubeSliceDirectory()
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
@@ -84,11 +84,23 @@ func basicInstall(skipSteps map[string]string) {
 	}
 }
 
-func Uninstall() {
-	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
-		util.Fatalf("%s Uninstallation of topology is not yet supported")
-	}
+func Uninstall(componentsToUninstall, workersToUninstall map[string]string) {
+
 	internal.VerifyExecutables(ApplicationConfiguration)
+
+	// Custom topology passed
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
+		// _, uninstallController := componentsToUninstall[internal.Controller_Component]
+		// _, uninstallWorker := componentsToUninstall[internal.Worker_Component]
+		_, uninstallUI := componentsToUninstall[internal.UI_install_Component]
+
+		if uninstallUI {
+			internal.UninstallKubeSliceUI(ApplicationConfiguration)
+		}
+
+		return
+	}
+	// Cleanup setup of Minimal/Full Demo.
 	internal.SetKubeConfigPath()
 	internal.DeleteKindClusters(ApplicationConfiguration)
 }

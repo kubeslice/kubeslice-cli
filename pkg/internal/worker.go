@@ -47,6 +47,28 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 	time.Sleep(200 * time.Millisecond)
 }
 
+func UninstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
+	util.Printf("\nUninstalling KubeSlice Worker...")
+
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	for _, cluster := range cc.WorkerClusters {
+		filename := "helm-values-" + cluster.Name + ".yaml"
+		generateWorkerValuesFile(cluster,
+			filename,
+			ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret,
+			ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster,
+			ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
+
+		util.Printf("%s Generated Helm Values file for Worker Installation %s", util.Tick, filename)
+		time.Sleep(200 * time.Millisecond)
+
+		installWorker(cluster, filename, ApplicationConfiguration.Configuration.HelmChartConfiguration)
+	}
+
+	util.Printf("%s Successfully Installed Kubeslice Worker", util.Tick)
+	time.Sleep(200 * time.Millisecond)
+}
+
 func generateWorkerValuesFile(cluster Cluster, valuesFile string, imagePullSecrets ImagePullSecrets, cc Cluster, projectName string) {
 	secrets := fetchSecret(cluster.Name, cc, projectName)
 	util.DumpFile(fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(imagePullSecrets), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+valuesFile)
