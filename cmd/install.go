@@ -37,7 +37,7 @@ var installCmd = &cobra.Command{
 		} else {
 			pkg.ReadAndValidateConfiguration(Config)
 		}
-		stepsToSkipMap := getStepsToSkip()
+		stepsToSkipMap := mapFromSlice(skipSteps)
 		pkg.Install(stepsToSkipMap)
 	},
 }

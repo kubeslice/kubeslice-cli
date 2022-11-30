@@ -7,10 +7,10 @@ var (
 	Config       string
 )
 
-func getStepsToSkip() map[string]string {
-	skipStepsMap := make(map[string]string)
-	for _, step := range skipSteps {
-		skipStepsMap[step] = ""
+func mapFromSlice(slice []string) map[string]string {
+	resultantMap := make(map[string]string)
+	for _, step := range slice {
+		resultantMap[step] = ""
 	}
-	return skipStepsMap
+	return resultantMap
 }
