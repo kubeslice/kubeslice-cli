@@ -11,7 +11,7 @@ const (
 	Calico_Component              = "calico"
 	Controller_Component          = "controller"
 	Worker_registration_Component = "worker-registration"
-	UI_install_Component          = "enterprise"
+	UI_install_Component          = "ui"
 	Worker_Component              = "worker"
 	Demo_Component                = "demo"
 	SecretObject                  = "secrets"

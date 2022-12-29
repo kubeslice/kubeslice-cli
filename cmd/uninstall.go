@@ -9,7 +9,7 @@ import (
 var (
 	uninstallAll          bool
 	uninstallController   bool
-	uninstallEnterprise   bool
+	uninstallUI           bool
 	uninstallWorker       = []string{}
 	workersToUninstall    map[string]string
 	componentsToUninstall map[string]string
@@ -22,15 +22,13 @@ var uninstallCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		pkg.ReadAndValidateConfiguration(Config)
 		// if --all flag is passed, other flags should not be allowed
-		util.Printf("current values: \nuninstallAll: %v \nuninstallController: %v \nuninstallEnterprise: %v \nuninstallWorker: %v",
-			uninstallAll, uninstallController, uninstallEnterprise, len(uninstallWorker) > 1)
-		if uninstallAll && (uninstallController || uninstallEnterprise || len(uninstallWorker) > 0) {
+		if uninstallAll && uninstallUI {
 			cmd.Help()
 			util.Fatalf("\n %v Cannot use other options if --all is passed", util.Cross)
 		}
 
 		// if no flags are passed, set uninstallAll true
-		if !uninstallAll || !uninstallController || !uninstallEnterprise || (len(uninstallWorker) < 1) {
+		if !uninstallAll && !uninstallUI {
 			uninstallAll = true
 		}
 
@@ -39,14 +37,14 @@ var uninstallCmd = &cobra.Command{
 
 		if uninstallAll {
 			uninstallController = true
-			uninstallEnterprise = true
+			uninstallUI = true
 			uninstallWorker = []string{"*"}
 		}
 		if uninstallController {
 			componentsToUninstall["controller"] = ""
 		}
-		if uninstallEnterprise {
-			componentsToUninstall["enterprise"] = ""
+		if uninstallUI {
+			componentsToUninstall["ui"] = ""
 		}
 		if len(uninstallWorker) > 0 {
 			componentsToUninstall["worker"] = ""
@@ -59,9 +57,9 @@ var uninstallCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(uninstallCmd)
-	uninstallCmd.Flags().BoolVarP(&uninstallAll, "all", "A", false, `Uninstalls all components (Worker, Controller, UI)`)
-	uninstallCmd.Flags().BoolVarP(&uninstallController, "controller", "", false, `Uninstalls the Controller`)
-	uninstallCmd.Flags().BoolVarP(&uninstallEnterprise, "enterprise", "", false, `Uninstalls enterprise components (Kubeslice-Manager)`)
-	uninstallCmd.Flags().StringSliceVarP(&uninstallWorker, "worker", "", []string{}, `Uninstalls UI (Kubeslice-Manager)`)
-	uninstallCmd.Flags().Lookup("worker").NoOptDefVal = "*"
+	uninstallCmd.Flags().BoolVarP(&uninstallAll, "all", "a", false, `Uninstalls all components (Worker, Controller, UI)`)
+	uninstallCmd.Flags().BoolVarP(&uninstallUI, "ui", "u", false, `Uninstalls enterprise UI components (Kubeslice-Manager)`)
+	// TODO: A discussion is needed for graceful cleanup of worker clusters
+	// uninstallCmd.Flags().StringSliceVarP(&uninstallWorker, "worker", "", []string{}, `Uninstalls worker clusters`)
+	// uninstallCmd.Flags().Lookup("worker").NoOptDefVal = "*"
 }

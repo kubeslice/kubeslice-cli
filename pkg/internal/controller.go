@@ -41,6 +41,17 @@ func InstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) {
 
 }
 
+func UninstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) {
+	util.Printf("\nUninstalling KubeSlice Controller...")
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	time.Sleep(200 * time.Millisecond)
+	uninstallKubeSliceController(cc.ControllerCluster)
+	time.Sleep(200 * time.Millisecond)
+	util.Printf("%s Successfully uninstalled KubeSlice Controller", util.Tick)
+	// wait for pods to be cleaned up.
+	// util.Printf("%s Waiting for KubeSlice Manager Pods to be removed...", util.Wait)
+}
+
 func generateControllerValuesFile(cluster Cluster, imagePullSecret ImagePullSecrets) {
 
 	util.DumpFile(fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(imagePullSecret), cluster.ControlPlaneAddress), kubesliceDirectory+"/"+controllerValuesFileName)
@@ -52,6 +63,15 @@ func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {
 	if hc.ControllerChart.Version != "" {
 		args = append(args, "--version", hc.ControllerChart.Version)
 	}
+	err := util.RunCommand("helm", args...)
+	if err != nil {
+		log.Fatalf("Process failed %v", err)
+	}
+}
+
+func uninstallKubeSliceController(cluster Cluster) {
+	args := make([]string, 0)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", KUBESLICE_CONTROLLER_NAMESPACE, "--namespace", KUBESLICE_CONTROLLER_NAMESPACE)
 	err := util.RunCommand("helm", args...)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)

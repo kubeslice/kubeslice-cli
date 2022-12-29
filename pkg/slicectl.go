@@ -90,14 +90,19 @@ func Uninstall(componentsToUninstall, workersToUninstall map[string]string) {
 
 	// Custom topology passed
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
-		// _, uninstallController := componentsToUninstall[internal.Controller_Component]
-		// _, uninstallWorker := componentsToUninstall[internal.Worker_Component]
+		_, uninstallController := componentsToUninstall[internal.Controller_Component]
+		_, uninstallWorker := componentsToUninstall[internal.Worker_Component]
 		_, uninstallUI := componentsToUninstall[internal.UI_install_Component]
 
 		if uninstallUI {
 			internal.UninstallKubeSliceUI(ApplicationConfiguration)
 		}
-
+		if uninstallWorker {
+			internal.UninstallKubeSliceWorker(ApplicationConfiguration, workersToUninstall)
+		}
+		if uninstallController {
+			internal.UninstallKubeSliceController(ApplicationConfiguration)
+		}
 		return
 	}
 	// Cleanup setup of Minimal/Full Demo.

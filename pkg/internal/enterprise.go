@@ -39,15 +39,17 @@ func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 }
 
 func UninstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
-	util.Printf("\nUnstalling KubeSlice Manager...")
+	util.Printf("\nUninstalling KubeSlice Manager...")
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	time.Sleep(200 * time.Millisecond)
-	uninstallKubeSliceUI(cc.ControllerCluster)
-	util.Printf("%s Successfully uninstalled KubeSlice Manager", util.Tick)
-	time.Sleep(200 * time.Millisecond)
-	// wait for pods to be cleaned up.
-	// util.Printf("%s Waiting for KubeSlice Manager Pods to be removed...", util.Wait)
-	util.Printf("%s Successfully installed KubeSlice dashboard.\n", util.Tick)
+	ok, err := uninstallKubeSliceUI(cc.ControllerCluster)
+	if err != nil {
+		log.Fatalf("Process failed %v", err)
+	}
+	if ok {
+		time.Sleep(200 * time.Millisecond)
+		util.Printf("%s Successfully uninstalled KubeSlice Manager", util.Tick)
+	}
 }
 
 func generateUIValuesFile(clusterType string, cluster Cluster, imagePullSecrets ImagePullSecrets) {
@@ -72,11 +74,21 @@ func installKubeSliceUI(cluster Cluster, hc HelmChartConfiguration) {
 	}
 }
 
-func uninstallKubeSliceUI(cluster Cluster) {
+func uninstallKubeSliceUI(cluster Cluster) (bool, error) {
 	args := make([]string, 0)
-	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "kubeslice-ui", "--namespace", KUBESLICE_CONTROLLER_NAMESPACE)
-	err := util.RunCommand("helm", args...)
+	// fetching UI release
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "status", "kubeslice-ui", "--namespace", KUBESLICE_CONTROLLER_NAMESPACE)
+	err := util.RunCommandWithoutPrint("helm", args...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Printf("%s KubeSlice Manager not installed, skipping uninstall.", util.Cross)
+		return false, nil
+	} else {
+		args = make([]string, 0)
+		args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "kubeslice-ui", "--namespace", KUBESLICE_CONTROLLER_NAMESPACE)
+		err = util.RunCommand("helm", args...)
+		if err != nil {
+			return false, err
+		}
 	}
+	return true, nil
 }

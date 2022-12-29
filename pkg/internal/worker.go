@@ -47,25 +47,21 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 	time.Sleep(200 * time.Millisecond)
 }
 
-func UninstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
+func UninstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs, workersToUninstall map[string]string) {
 	util.Printf("\nUninstalling KubeSlice Worker...")
+
+	_, uninstallAllWorker := workersToUninstall["*"]
 
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	for _, cluster := range cc.WorkerClusters {
-		filename := "helm-values-" + cluster.Name + ".yaml"
-		generateWorkerValuesFile(cluster,
-			filename,
-			ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret,
-			ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster,
-			ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
-
-		util.Printf("%s Generated Helm Values file for Worker Installation %s", util.Tick, filename)
-		time.Sleep(200 * time.Millisecond)
-
-		installWorker(cluster, filename, ApplicationConfiguration.Configuration.HelmChartConfiguration)
+		_, found := workersToUninstall[cluster.Name]
+		if found || uninstallAllWorker {
+			uninstallKubeSliceWorkerHelm(cluster)
+			time.Sleep(200 * time.Millisecond)
+		}
 	}
 
-	util.Printf("%s Successfully Installed Kubeslice Worker", util.Tick)
+	// util.Printf("%s Successfully Installed Kubeslice Worker", util.Tick)
 	time.Sleep(200 * time.Millisecond)
 }
 
@@ -133,4 +129,15 @@ func findSecret(workerName string, projectName string, cc Cluster) string {
 		log.Fatalf("failed to find secret for %s", workerName)
 	}
 	return secret
+}
+
+func uninstallKubeSliceWorkerHelm(cluster Cluster) {
+	args := make([]string, 0)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "kubeslice-worker", "--namespace", "kubeslice-system")
+
+	err := util.RunCommand("helm", args...)
+	if err != nil {
+		util.Printf("%s Uninstall failed. %v", util.Cross, err)
+	}
+	util.Printf("%s Successfully uninstalled KubeSlice Worker %s.", util.Tick, cluster.Name)
 }
