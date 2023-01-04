@@ -17,7 +17,7 @@ var (
 var uninstallCmd = &cobra.Command{
 	Use:     "uninstall",
 	Aliases: []string{"cleanup"},
-	Short:   "Deletes the Kind Clusters used for the demo.",
+	Short:   "Performs cleanup of Kubeslice components.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		pkg.ReadAndValidateConfiguration(Config)
