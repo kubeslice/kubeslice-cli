@@ -25,6 +25,15 @@ func RunCommand(cli string, arg ...string) error {
 	return err
 }
 
+func RunCommandWithoutPrint(cli string, arg ...string) error {
+	var outB, errB bytes.Buffer
+	err := RunCommandCustomIO(cli, &outB, &errB, true, arg...)
+	// if err != nil {
+	// 	Printf("%s Failed to run command\nOutput: %s\nError: %s %v", Cross, outB.String(), errB.String(), err)
+	// }
+	return err
+}
+
 func RunCommandOnStdIO(cli string, arg ...string) error {
 	return RunCommandCustomIO(cli, os.Stdout, os.Stderr, false, arg...)
 }

@@ -47,6 +47,24 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 	time.Sleep(200 * time.Millisecond)
 }
 
+func UninstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs, workersToUninstall map[string]string) {
+	util.Printf("\nUninstalling KubeSlice Worker...")
+
+	_, uninstallAllWorker := workersToUninstall["*"]
+
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	for _, cluster := range cc.WorkerClusters {
+		_, found := workersToUninstall[cluster.Name]
+		if found || uninstallAllWorker {
+			uninstallKubeSliceWorkerHelm(cluster)
+			time.Sleep(200 * time.Millisecond)
+		}
+	}
+
+	// util.Printf("%s Successfully Installed Kubeslice Worker", util.Tick)
+	time.Sleep(200 * time.Millisecond)
+}
+
 func generateWorkerValuesFile(cluster Cluster, valuesFile string, imagePullSecrets ImagePullSecrets, cc Cluster, projectName string) {
 	secrets := fetchSecret(cluster.Name, cc, projectName)
 	util.DumpFile(fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(imagePullSecrets), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+valuesFile)
@@ -86,7 +104,7 @@ func fetchSecret(clusterName string, cc Cluster, projectName string) map[string]
 		log.Fatalf("Process failed %v", err)
 	}
 	x := map[string]string{}
-	err = json.Unmarshal([]byte(outB.String()), &x)
+	err = json.Unmarshal(outB.Bytes(), &x)
 	if err != nil {
 		log.Fatalf("failed to read secret %s", secret)
 	}
@@ -95,15 +113,15 @@ func fetchSecret(clusterName string, cc Cluster, projectName string) map[string]
 
 func findSecret(workerName string, projectName string, cc Cluster) string {
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "secrets", "-n", "kubeslice-"+projectName, "-o", "name")
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
 
 	var secret string
 	for _, line := range strings.Split(outB.String(), "\n") {
-		if strings.Contains(line, "worker-"+workerName) {
-			secret = line
+		if strings.Contains(line, "rbac-worker-"+workerName) {
+			secret = fmt.Sprintf("secrets/%s", strings.TrimPrefix(line, "serviceaccount/"))
 			break
 		}
 	}
@@ -111,4 +129,15 @@ func findSecret(workerName string, projectName string, cc Cluster) string {
 		log.Fatalf("failed to find secret for %s", workerName)
 	}
 	return secret
+}
+
+func uninstallKubeSliceWorkerHelm(cluster Cluster) {
+	args := make([]string, 0)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "kubeslice-worker", "--namespace", "kubeslice-system")
+
+	err := util.RunCommand("helm", args...)
+	if err != nil {
+		util.Printf("%s Uninstall failed. %v", util.Cross, err)
+	}
+	util.Printf("%s Successfully uninstalled KubeSlice Worker %s.", util.Tick, cluster.Name)
 }
