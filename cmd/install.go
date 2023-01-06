@@ -6,19 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	profile   string
-	skipSteps = []string{}
-)
-
-func getStepsToSkip() map[string]string {
-	skipStepsMap := make(map[string]string)
-	for _, step := range skipSteps {
-		skipStepsMap[step] = ""
-	}
-	return skipStepsMap
-}
-
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
@@ -50,7 +37,7 @@ var installCmd = &cobra.Command{
 		} else {
 			pkg.ReadAndValidateConfiguration(Config)
 		}
-		stepsToSkipMap := getStepsToSkip()
+		stepsToSkipMap := mapFromSlice(skipSteps)
 		pkg.Install(stepsToSkipMap)
 	},
 }
@@ -77,6 +64,6 @@ Supported values:
 	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
 	- worker: Skips the installation of KubeSlice Worker
 	- demo: Skips the installation of additional example applications
-	- enterprise: Skips the installtion of UI/enterprise`)
+	- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)`)
 
 }

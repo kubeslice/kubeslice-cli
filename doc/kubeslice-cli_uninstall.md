@@ -1,6 +1,6 @@
 ## kubeslice-cli uninstall
 
-Deletes the Kind Clusters used for the demo.
+Performs cleanup of Kubeslice components.
 
 ```
 kubeslice-cli uninstall [flags]
@@ -9,7 +9,9 @@ kubeslice-cli uninstall [flags]
 ### Options
 
 ```
+  -a, --all    Uninstalls all components (Worker, Controller, UI)
   -h, --help   help for uninstall
+  -u, --ui     Uninstalls enterprise UI components (Kubeslice-Manager)
 ```
 
 ### Options inherited from parent commands
@@ -17,7 +19,7 @@ kubeslice-cli uninstall [flags]
 ```
   -c, --config string   <path-to-topology-configuration-yaml-file>
                         	The yaml file with topology configuration. 
-                        	Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml
+                        	Refer: https://github.com/kubeslice/kubeslice-cli/blob/master/samples/template.yaml
 ```
 
 ### SEE ALSO
