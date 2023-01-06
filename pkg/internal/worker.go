@@ -104,7 +104,7 @@ func fetchSecret(clusterName string, cc Cluster, projectName string) map[string]
 		log.Fatalf("Process failed %v", err)
 	}
 	x := map[string]string{}
-	err = json.Unmarshal([]byte(outB.String()), &x)
+	err = json.Unmarshal(outB.Bytes(), &x)
 	if err != nil {
 		log.Fatalf("failed to read secret %s", secret)
 	}
@@ -113,15 +113,15 @@ func fetchSecret(clusterName string, cc Cluster, projectName string) map[string]
 
 func findSecret(workerName string, projectName string, cc Cluster) string {
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "secrets", "-n", "kubeslice-"+projectName, "-o", "name")
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
 
 	var secret string
 	for _, line := range strings.Split(outB.String(), "\n") {
-		if strings.Contains(line, "worker-"+workerName) {
-			secret = line
+		if strings.Contains(line, "rbac-worker-"+workerName) {
+			secret = fmt.Sprintf("secrets/%s", strings.TrimPrefix(line, "serviceaccount/"))
 			break
 		}
 	}
