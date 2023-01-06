@@ -1,6 +1,6 @@
 # `kubeslice-cli` for simplified KubeSlice Operations
 
-[comment]: <> (![Latest GitHub release]&#40;https://img.shields.io/github/release/kubeslice/kubeslice-cli.svg&#41;)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/kubeslice/kubeslice-cli?style=for-the-badge)
 
 This repository provides `kubeslice-cli` tool.
 [Install &rarr;](#installation)
@@ -33,7 +33,7 @@ KubeSlice functionality
   edit        Edit Kubeslice resources.
   get         Get Kubeslice resources.
   install     Installs workloads to run KubeSlice
-  uninstall   Deletes the Kind Clusters used for the demo.
+  uninstall   Performs cleanup of Kubeslice components.
   help        Help about any command
 
 ```
@@ -57,6 +57,6 @@ KubeSlice functionality
 * [kubeslice-cli get](doc/kubeslice-cli_get.md)	 - Get Kubeslice resources.
 * [kubeslice-cli install](doc/kubeslice-cli_install.md)	 - Installs workloads to run KubeSlice.
 * [kubeslice-cli register](doc/kubeslice-cli_register.md)	 - Register a Kubeslice worker cluster.
-* [kubeslice-cli uninstall](doc/kubeslice-cli_uninstall.md)	 - Deletes the Kind Clusters used for the demo.
+* [kubeslice-cli uninstall](doc/kubeslice-cli_uninstall.md)	 - Performs cleanup of Kubeslice components.
 
 

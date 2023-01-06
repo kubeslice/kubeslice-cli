@@ -19,7 +19,7 @@ kubeslice-cli [flags]
 ```
   -c, --config string   <path-to-topology-configuration-yaml-file>
                         	The yaml file with topology configuration. 
-                        	Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml
+                        	Refer: https://github.com/kubeslice/kubeslice-cli/blob/master/samples/template.yaml
   -h, --help            help for kubeslice-cli
   -v, --version         version for kubeslice-cli
 ```
@@ -33,6 +33,6 @@ kubeslice-cli [flags]
 * [kubeslice-cli get](kubeslice-cli_get.md)	 - Get Kubeslice resources.
 * [kubeslice-cli install](kubeslice-cli_install.md)	 - Installs workloads to run KubeSlice
 * [kubeslice-cli register](kubeslice-cli_register.md)	 - Register a Kubeslice worker cluster.
-* [kubeslice-cli uninstall](kubeslice-cli_uninstall.md)	 - Deletes the Kind Clusters used for the demo.
+* [kubeslice-cli uninstall](kubeslice-cli_uninstall.md)	 - Performs cleanup of Kubeslice components.
 
 
