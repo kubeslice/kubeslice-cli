@@ -44,7 +44,7 @@ kubeslice-cli install [flags]
 ```
   -c, --config string   <path-to-topology-configuration-yaml-file>
                         	The yaml file with topology configuration. 
-                        	Refer: https://github.com/kubeslice/slicectl/blob/master/samples/template.yaml
+                        	Refer: https://github.com/kubeslice/kubeslice-cli/blob/master/samples/template.yaml
 ```
 
 ### SEE ALSO
