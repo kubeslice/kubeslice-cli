@@ -102,6 +102,7 @@ func Uninstall(componentsToUninstall, workersToUninstall map[string]string) {
 		}
 		if uninstallController {
 			internal.UninstallKubeSliceController(ApplicationConfiguration)
+			internal.UninstallCertManager(ApplicationConfiguration)
 		}
 		return
 	}

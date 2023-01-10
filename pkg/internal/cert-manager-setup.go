@@ -24,6 +24,20 @@ func InstallCertManager(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("%s Successfully installed cert manager.\n", util.Tick)
 
 }
+func UninstallCertManager(ApplicationConfiguration *ConfigurationSpecs) {
+
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
+	util.Printf("\nUninstalling Cert Manager...")
+
+	err := uninstallCertManager(cc.ControllerCluster, hc)
+	if err == nil {
+		util.Printf("%s Successfully uninstalled cert manager.\n", util.Tick)
+	} else {
+		util.Printf("%s Failed to uninstall cert manager.\n", util.Cross)
+	}
+
+}
 
 func installCertManager(cluster Cluster, hc HelmChartConfiguration) {
 	args := make([]string, 0)
@@ -35,4 +49,12 @@ func installCertManager(cluster Cluster, hc HelmChartConfiguration) {
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
+}
+func uninstallCertManager(cluster Cluster, hc HelmChartConfiguration) error {
+	args := make([]string, 0)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "cert-manager", "--namespace", "cert-manager")
+
+	err := util.RunCommand("helm", args...)
+	return err
+
 }
