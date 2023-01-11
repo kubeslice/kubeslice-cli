@@ -24,7 +24,7 @@ const (
 func PodVerification(message string, cluster Cluster, namespace string) {
 	var i = 0
 	var backoffCount = 0
-	var backoffLimit = 6
+	var backoffLimit = 20
 	for {
 		i = i + 1
 		time.Sleep(5 * time.Second)
@@ -33,11 +33,13 @@ func PodVerification(message string, cluster Cluster, namespace string) {
 			break
 		} else if status == PodVerificationStatusFailed {
 			backoffCount = backoffCount + 1
+			util.Printf("%s %s... Pod(s) in error state, waiting to recover... %d seconds elapsed", util.Wait, message, i*5)
 			if backoffCount > backoffLimit {
-				log.Fatalf("Pod(s) in error state\n%s", output)
+				log.Fatalf("Pod(s) in error state,\n%s", output)
 			}
+		} else {
+			util.Printf("%s %s... %d seconds elapsed", util.Wait, message, i*5)
 		}
-		util.Printf("%s %s... %d seconds elapsed", util.Wait, message, i*5)
 	}
 }
 

@@ -65,8 +65,35 @@ func UninstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs, work
 	time.Sleep(200 * time.Millisecond)
 }
 
+// Retry tries to execute the funtion, If failed reattempts till backoffLimit
+func Retry(backoffLimit int, sleep time.Duration, f func() error) (err error) {
+	start := time.Now()
+	for i := 0; i < backoffLimit; i++ {
+		if i > 0 {
+			time.Sleep(sleep)
+			sleep *= 2
+		}
+		err = f()
+		if err == nil {
+			return nil
+		}
+	}
+	elapsed := time.Since(start)
+	return fmt.Errorf("retry failed after %d attempts (took %d seconds), last error: %s", backoffLimit, int(elapsed.Seconds()), err)
+}
+
 func generateWorkerValuesFile(cluster Cluster, valuesFile string, imagePullSecrets ImagePullSecrets, cc Cluster, projectName string) {
-	secrets := fetchSecret(cluster.Name, cc, projectName)
+	var secrets map[string]string
+	err := Retry(3, 1*time.Second, func() (err error) {
+		secrets = fetchSecret(cluster.Name, cc, projectName)
+		if secrets["namespace"] == "" || secrets["controllerEndpoint"] == "" || secrets["ca.crt"] == "" || secrets["token"] == "" {
+			return fmt.Errorf("secret is empty")
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("Unable to fetch secrets\n%s", err)
+	}
 	util.DumpFile(fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(imagePullSecrets), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+valuesFile)
 }
 
