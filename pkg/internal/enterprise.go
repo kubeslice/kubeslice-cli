@@ -29,7 +29,7 @@ func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
 	time.Sleep(200 * time.Millisecond)
 	clusterType := ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType
-	generateUIValuesFile(clusterType, cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret)
+	generateUIValuesFile(clusterType, cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration)
 	installKubeSliceUI(cc.ControllerCluster, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.UIChart.ChartName)
 	time.Sleep(200 * time.Millisecond)
@@ -52,14 +52,17 @@ func UninstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	}
 }
 
-func generateUIValuesFile(clusterType string, cluster Cluster, imagePullSecrets ImagePullSecrets) {
+func generateUIValuesFile(clusterType string, cluster Cluster, hcConfig HelmChartConfiguration) {
 	serviceType := ""
 	if clusterType == "kind" {
 		serviceType = "NodePort"
 	} else {
 		serviceType = "LoadBalancer"
 	}
-	util.DumpFile(fmt.Sprintf(UIValuesTemplate+generateImagePullSecretsValue(imagePullSecrets), serviceType), kubesliceDirectory+"/"+uiValuesFileName)
+	err := generateValuesFile(kubesliceDirectory+"/"+uiValuesFileName, &hcConfig.UIChart, fmt.Sprintf(UIValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), serviceType))
+	if err != nil {
+		log.Fatalf("%s %s", util.Cross, err)
+	}
 }
 
 func installKubeSliceUI(cluster Cluster, hc HelmChartConfiguration) {
