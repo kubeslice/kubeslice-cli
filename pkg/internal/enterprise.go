@@ -22,7 +22,7 @@ kubeslice:
 func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling KubeSlice Manager...")
 	if ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName == "" {
-		util.Printf("%s UI Helm Chart not found. Update UI chart configuration in topology file.", util.Cross)
+		util.Printf("%s Skipping Kubeslice Manager installaition. UI Helm Chart not found in topology file.", util.Warn)
 		return
 	}
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
