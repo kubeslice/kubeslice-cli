@@ -9,7 +9,8 @@ const (
 	Cross = string(rune(0x274c))
 	Tick  = string(rune(0x2714))
 	Wait  = string(rune(0x267B))
-	Run  = string(rune(0x1F3C3))
+	Run   = string(rune(0x1F3C3))
+	Warn  = string(rune(0x26A0))
 )
 
 func Printf(format string, a ...interface{}) {
