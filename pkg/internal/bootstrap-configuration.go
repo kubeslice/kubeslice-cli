@@ -25,6 +25,8 @@ type HelmChartConfiguration struct {
 type HelmChart struct {
 	ChartName string `yaml:"chart_name"`
 	Version   string `yaml:"version"`
+	// Values to be passed as --set arguments to helm install
+	Values map[string]string `yaml:"values"`
 }
 
 type KubeSliceConfiguration struct {
@@ -36,7 +38,7 @@ type ClusterConfiguration struct {
 	KubeConfigPath    string    `yaml:"kube_config_path"`
 	ControllerCluster Cluster   `yaml:"controller"`
 	WorkerClusters    []Cluster `yaml:"workers"`
-	ClusterType       string    `yaml:"cluster"`
+	ClusterType       string    `yaml:"cluster_type"`
 }
 
 type Cluster struct {
