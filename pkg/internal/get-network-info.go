@@ -13,7 +13,7 @@ import (
 func GatherNetworkInformation(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nFetching Network Address for Clusters...")
 
-	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" && ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType != "kind" {
 		setControlPlaneAddress(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 		setNodeIP(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 	} else {

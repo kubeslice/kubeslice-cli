@@ -62,9 +62,9 @@ func basicInstall(skipSteps map[string]string) {
 		if !skipKind {
 			internal.CreateKindClusters(ApplicationConfiguration)
 		}
-		if !skipCalico {
-			internal.InstallCalico(&ApplicationConfiguration.Configuration.ClusterConfiguration)
-		}
+	}
+	if (ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" || ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType == "kind") && !skipCalico {
+		internal.InstallCalico(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 	}
 	internal.GatherNetworkInformation(ApplicationConfiguration)
 	internal.AddHelmCharts(ApplicationConfiguration)

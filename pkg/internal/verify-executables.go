@@ -14,7 +14,7 @@ import (
 func VerifyExecutables(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("Verifying Executables...")
 	time.Sleep(200 * time.Millisecond)
-	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" || ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType == "kind" {
 		util.ExecutablePaths = map[string]string{
 			"kind":    "kind",
 			"kubectl": "kubectl",

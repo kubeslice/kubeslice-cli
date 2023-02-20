@@ -38,7 +38,7 @@ type ClusterConfiguration struct {
 	KubeConfigPath    string    `yaml:"kube_config_path"`
 	ControllerCluster Cluster   `yaml:"controller"`
 	WorkerClusters    []Cluster `yaml:"workers"`
-	ClusterType       string    `yaml:"cluster"`
+	ClusterType       string    `yaml:"cluster_type"`
 }
 
 type Cluster struct {

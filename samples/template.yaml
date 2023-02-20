@@ -2,6 +2,7 @@ configuration:
   cluster_configuration:
     profile: #{the KubeSlice Profile for the demo. Possible values [full-demo, minimal-demo]}
     kube_config_path: #{specify the kube config file to use for topology setup; for topology only}
+    cluster_type: #{optional: specify the type of cluster. Valid values are kind, cloud, data-center}
     controller:
       name: #{the user defined name of the controller cluster}
       context_name: #{the name of the context to use from kubeconfig file; for topology only}
