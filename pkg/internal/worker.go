@@ -33,9 +33,7 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 		filename := "helm-values-" + cluster.Name + ".yaml"
 		generateWorkerValuesFile(cluster,
 			filename,
-			ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret,
-			ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster,
-			ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
+			ApplicationConfiguration.Configuration)
 
 		util.Printf("%s Generated Helm Values file for Worker Installation %s", util.Tick, filename)
 		time.Sleep(200 * time.Millisecond)
@@ -82,10 +80,10 @@ func Retry(backoffLimit int, sleep time.Duration, f func() error) (err error) {
 	return fmt.Errorf("retry failed after %d attempts (took %d seconds), last error: %s", backoffLimit, int(elapsed.Seconds()), err)
 }
 
-func generateWorkerValuesFile(cluster Cluster, valuesFile string, imagePullSecrets ImagePullSecrets, cc Cluster, projectName string) {
+func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configuration) {
 	var secrets map[string]string
 	err := Retry(3, 1*time.Second, func() (err error) {
-		secrets = fetchSecret(cluster.Name, cc, projectName)
+		secrets = fetchSecret(cluster.Name, config.ClusterConfiguration.ControllerCluster, config.KubeSliceConfiguration.ProjectName)
 		if secrets["namespace"] == "" || secrets["controllerEndpoint"] == "" || secrets["ca.crt"] == "" || secrets["token"] == "" {
 			return fmt.Errorf("secret is empty")
 		}
@@ -94,7 +92,10 @@ func generateWorkerValuesFile(cluster Cluster, valuesFile string, imagePullSecre
 	if err != nil {
 		log.Fatalf("Unable to fetch secrets\n%s", err)
 	}
-	util.DumpFile(fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(imagePullSecrets), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress), kubesliceDirectory+"/"+valuesFile)
+	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress))
+	if err != nil {
+		log.Fatalf("%s %s", util.Cross, err)
+	}
 }
 
 func installWorker(cluster Cluster, valuesName string, helmChartConfig HelmChartConfiguration) {

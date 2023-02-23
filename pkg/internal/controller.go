@@ -26,7 +26,7 @@ func InstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) {
 
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
-	generateControllerValuesFile(cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration.ImagePullSecret)
+	generateControllerValuesFile(cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration)
 	util.Printf("%s Generated Helm Values file for Controller Installation %s", util.Tick, controllerValuesFileName)
 	time.Sleep(200 * time.Millisecond)
 
@@ -52,9 +52,11 @@ func UninstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) 
 	// util.Printf("%s Waiting for KubeSlice Manager Pods to be removed...", util.Wait)
 }
 
-func generateControllerValuesFile(cluster Cluster, imagePullSecret ImagePullSecrets) {
-
-	util.DumpFile(fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(imagePullSecret), cluster.ControlPlaneAddress), kubesliceDirectory+"/"+controllerValuesFileName)
+func generateControllerValuesFile(cluster Cluster, hcConfig HelmChartConfiguration) {
+	err := generateValuesFile(kubesliceDirectory+"/"+controllerValuesFileName, &hcConfig.ControllerChart, fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), cluster.ControlPlaneAddress))
+	if err != nil {
+		log.Fatalf("%s %s", util.Cross, err)
+	}
 }
 
 func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {

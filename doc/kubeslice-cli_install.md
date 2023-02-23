@@ -36,7 +36,7 @@ kubeslice-cli install [flags]
                          	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
                          	- worker: Skips the installation of KubeSlice Worker
                          	- demo: Skips the installation of additional example applications
-							- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)
+				- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)
 ```
 
 ### Options inherited from parent commands
