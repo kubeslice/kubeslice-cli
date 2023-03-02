@@ -68,8 +68,8 @@ func generateUIValuesFile(clusterType string, cluster Cluster, hcConfig HelmChar
 func installKubeSliceUI(cluster Cluster, hc HelmChartConfiguration) {
 	args := make([]string, 0)
 	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", "kubeslice-ui", fmt.Sprintf("%s/%s", hc.RepoAlias, hc.UIChart.ChartName), "--namespace", KUBESLICE_CONTROLLER_NAMESPACE, "-f", kubesliceDirectory+"/"+uiValuesFileName)
-	if hc.ControllerChart.Version != "" {
-		args = append(args, "--version", hc.ControllerChart.Version)
+	if hc.UIChart.Version != "" {
+		args = append(args, "--version", hc.UIChart.Version)
 	}
 	err := util.RunCommand("helm", args...)
 	if err != nil {
