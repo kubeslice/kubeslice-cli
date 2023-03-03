@@ -8,7 +8,7 @@ import (
 	// "github.com/spf13/cobra/doc"
 )
 
-var version = "0.4.3"
+var version = "0.4.4"
 var rootCmd = &cobra.Command{
 	Use:     "kubeslice-cli",
 	Version: version,
