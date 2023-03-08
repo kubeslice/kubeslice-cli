@@ -14,7 +14,7 @@ var getCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var objectName string
 		ns, _ := cmd.Flags().GetString("namespace")
-		if ns == "" {
+		if ns == "" && args[0] != "ui-endpoint" {
 			util.Fatalf("Namespace is required")
 		}
 		worker, _ := cmd.Flags().GetString("worker")
@@ -34,6 +34,8 @@ var getCmd = &cobra.Command{
 			pkg.GetSecrets(worker)
 		case "worker":
 			pkg.GetWorker()
+		case "ui-endpoint":
+			pkg.GetUIEndpoint()
 		default:
 			util.Fatalf("Invalid object type")
 		}
