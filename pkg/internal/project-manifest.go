@@ -19,14 +19,13 @@ metadata:
   namespace: kubeslice-controller
 spec:
   serviceAccount:
-    readWrite:
-      - john
+    readWrite: %s
 `
 
 func CreateKubeSliceProject(ApplicationConfiguration *ConfigurationSpecs, cliOptions *CliOptionsStruct) {
 	util.Printf("\nCreating KubeSlice Project...")
 
-	generateKubeSliceProjectManifest(ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
+	generateKubeSliceProjectManifest(ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName, ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectUsers)
 	util.Printf("%s Generated project manifest %s", util.Tick, projectFileName)
 	time.Sleep(200 * time.Millisecond)
 	if cliOptions != nil {
@@ -47,8 +46,15 @@ func GetKubeSliceProject(projectName string, namespace string, controllerCluster
 	GetKubectlResources(ProjectObject, projectName, namespace, controllerCluster, "")
 	time.Sleep(200 * time.Millisecond)
 }
-func generateKubeSliceProjectManifest(projectName string) {
-	util.DumpFile(fmt.Sprintf(kubesliceProjectTemplate, projectName), kubesliceDirectory+"/"+projectFileName)
+func generateKubeSliceProjectManifest(projectName string, users []string) {
+	if len(users) == 0 {
+		users = []string{"admin"}
+	}
+	userString := "\n"
+	for _, user := range users {
+		userString = fmt.Sprintf(`%s      - %s%s`, userString, user, "\n")
+	}
+	util.DumpFile(fmt.Sprintf(kubesliceProjectTemplate, projectName, userString), kubesliceDirectory+"/"+projectFileName)
 }
 
 func DeleteKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
