@@ -1,8 +1,12 @@
 package internal
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/kubeslice/kubeslice-cli/util"
@@ -94,4 +98,70 @@ func uninstallKubeSliceUI(cluster Cluster) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func GetUIEndpoint(cc *Cluster) {
+	util.Printf("\nFetching KubeSlice Manager Endpoint...")
+	ep := ""
+
+	var outB, errB bytes.Buffer
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "services", "kubeslice-ui-proxy", "-n", KUBESLICE_CONTROLLER_NAMESPACE, "-o", "jsonpath='{.spec}'")
+	if err == nil {
+		jsonMap := make(map[string]interface{})
+		err = json.Unmarshal(outB.Bytes()[1:len(outB.Bytes())-1], &jsonMap)
+		if err != nil {
+			util.Printf("%s Unable to parse. Err: %v", util.Cross, err)
+		}
+		switch jsonMap["type"] {
+		case "NodePort":
+			ports := jsonMap["ports"].([]interface{})
+			for _, port := range ports {
+				portMap := port.(map[string]interface{})
+				if portMap["name"] == "http" { // Assuming that http is the name of the port that you want to use
+					nodePort := int(portMap["nodePort"].(float64))
+					nodeIP, err := getNodeIP(cc)
+					if err == nil {
+						ep = fmt.Sprintf("https://%s:%d", strings.Trim(nodeIP, "'"), nodePort)
+					} else {
+						util.Printf("%s Unable to get node IP. Err: %v", util.Cross, err)
+					}
+					break
+				}
+			}
+		case "LoadBalancer":
+			if jsonMap["externalIPs"] != nil {
+				lbIP := jsonMap["externalIPs"].([]interface{})[0].(string)
+				ports := jsonMap["ports"].([]interface{})
+				for _, port := range ports {
+					portMap := port.(map[string]interface{})
+					if portMap["name"] == "http" { // Assuming that http is the name of the port that you want to use
+						nodePort := int(portMap["port"].(float64))
+						ep = fmt.Sprintf("https://%s:%d", lbIP, nodePort)
+						break
+					}
+				}
+			}
+
+		default:
+			util.Printf("%s Unsupported service type: %s", util.Cross, jsonMap["type"])
+		}
+	}
+	if err != nil || ep == "" {
+		util.Printf("%s Unable to find the endpoint.", util.Cross)
+	} else {
+		util.Printf("%s Visit %v from your browser to access the Kubeslice Manager.", util.Tick, ep)
+	}
+}
+
+func getNodeIP(cc *Cluster) (string, error) {
+	var outB, errB bytes.Buffer
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "nodes", "-o", "jsonpath='{.items[*].status.addresses[?(@.type==\"InternalIP\")].address}'")
+	if err == nil {
+		nodeIPs := strings.FieldsFunc(outB.String(), func(c rune) bool { return c == ' ' || c == '\n' })
+		if len(nodeIPs) > 0 {
+			return nodeIPs[0], nil
+		}
+		return "", errors.New("No nodes found")
+	}
+	return "", err
 }
