@@ -9,9 +9,10 @@ kubeslice-cli uninstall [flags]
 ### Options
 
 ```
-  -a, --all    Uninstalls all components (Worker, Controller, UI)
-  -h, --help   help for uninstall
-  -u, --ui     Uninstalls enterprise UI components (Kubeslice-Manager)
+  -a, --all            Uninstalls all components (Worker, Controller, UI)
+      --cert-manager   Uninstalls Cert Manager (required for controller version < 0.7.0)
+  -h, --help           help for uninstall
+  -u, --ui             Uninstalls enterprise UI components (Kubeslice-Manager)
 ```
 
 ### Options inherited from parent commands
