@@ -31,6 +31,7 @@ configuration:
                #{Override this flag to an address which is discoverable by other clusters in the topology}
   kubeslice_configuration:
     project_name: #{the name of the KubeSlice Project}
+    project_users: #{optional: specify KubeSlice Project users with Readw-Write access. Default is admin}
   helm_chart_configuration:
     repo_alias: #{The alias of the helm repo for KubeSlice Charts}
     repo_url: #{The URL of the Helm Charts for KubeSlice}
