@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var withCertManager bool
+
 var installCmd = &cobra.Command{
 	Use:     "install",
 	Aliases: []string{"i"},
@@ -37,6 +39,10 @@ var installCmd = &cobra.Command{
 		} else {
 			pkg.ReadAndValidateConfiguration(Config)
 		}
+		// Default behaviour is not ot install cert-manager
+		if !withCertManager {
+			skipSteps = append(skipSteps, "cert-manager")
+		}
 		stepsToSkipMap := mapFromSlice(skipSteps)
 		pkg.Install(stepsToSkipMap)
 	},
@@ -65,5 +71,7 @@ Supported values:
 	- worker: Skips the installation of KubeSlice Worker
 	- demo: Skips the installation of additional example applications
 	- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)`)
+	// TODO: update the controller version after release
+	installCmd.Flags().BoolVarP(&withCertManager, "with-cert-manager", "", false, `Installs Cert-Manager for kubeslice controller (for versions < 0.7.0)`)
 
 }

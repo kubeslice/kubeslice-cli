@@ -14,6 +14,7 @@ const (
 	UI_install_Component          = "ui"
 	Worker_Component              = "worker"
 	Demo_Component                = "demo"
+	CertManager_Component         = "cert-manager"
 	SecretObject                  = "secrets"
 	OutputFormatYaml              = "yaml"
 	OutputFormatJson              = "json"
