@@ -53,7 +53,7 @@ configuration:
     helm_username: #{Helm Username if the repo is private}
     helm_password: #{Helm Password if the repo is private}
     image_pull_secret: #{The image pull secrets. Optional for OpenSource, required for enterprise}
-      registry: #{The endpoint of the OCI registry to use}
+      registry: #{The endpoint of the OCI registry to use. Default is `https://index.docker.io/v1/`} 
       username: #{The username to authenticate against the OCI registry}
       password: #{The password to authenticate against the OCI registry}
       email: #{The email to authenticate against the OCI registry}
