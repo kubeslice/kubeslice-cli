@@ -57,10 +57,14 @@ func updateHelmChart() {
 func generateImagePullSecretsValue(ImagePullSecret ImagePullSecrets) string {
 	imagePullSecretsValue := ""
 	ips := ImagePullSecret
-	if ips.Registry != "" && ips.Username != "" && ips.Password != "" {
+	if ips.Username != "" && ips.Password != "" {
 		email := ""
 		if ips.Email != "" {
 			email = "email: " + ips.Email
+		}
+		// setting default registry
+		if ips.Registry == "" {
+			ips.Registry = "https://index.docker.io/v1/"
 		}
 		imagePullSecretsValue = fmt.Sprintf(imagePullSecretsTemplate, ips.Registry, ips.Username, ips.Password, email)
 	}

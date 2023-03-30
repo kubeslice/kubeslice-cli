@@ -10,6 +10,7 @@ var (
 	uninstallAll          bool
 	uninstallController   bool
 	uninstallUI           bool
+	uninstallCertManager  bool
 	uninstallWorker       = []string{}
 	workersToUninstall    map[string]string
 	componentsToUninstall map[string]string
@@ -46,11 +47,13 @@ var uninstallCmd = &cobra.Command{
 		if uninstallUI {
 			componentsToUninstall["ui"] = ""
 		}
+		if uninstallCertManager {
+			componentsToUninstall["cert-manager"] = ""
+		}
 		if len(uninstallWorker) > 0 {
 			componentsToUninstall["worker"] = ""
 			workersToUninstall = mapFromSlice(uninstallWorker)
 		}
-
 		pkg.Uninstall(componentsToUninstall, workersToUninstall)
 	},
 }
@@ -59,6 +62,8 @@ func init() {
 	rootCmd.AddCommand(uninstallCmd)
 	uninstallCmd.Flags().BoolVarP(&uninstallAll, "all", "a", false, `Uninstalls all components (Worker, Controller, UI)`)
 	uninstallCmd.Flags().BoolVarP(&uninstallUI, "ui", "u", false, `Uninstalls enterprise UI components (Kubeslice-Manager)`)
+	// TODO: update the controller version after release
+	uninstallCmd.Flags().BoolVarP(&uninstallCertManager, "cert-manager", "", false, `Uninstalls Cert Manager (required for controller version < 0.7.0)`)
 	// TODO: A discussion is needed for graceful cleanup of worker clusters
 	// uninstallCmd.Flags().StringSliceVarP(&uninstallWorker, "worker", "", []string{}, `Uninstalls worker clusters`)
 	// uninstallCmd.Flags().Lookup("worker").NoOptDefVal = "*"

@@ -51,6 +51,7 @@ func basicInstall(skipSteps map[string]string) {
 	_, skipWorker := skipSteps[internal.Worker_Component]
 	_, skipWorker_registration := skipSteps[internal.Worker_registration_Component]
 	_, skipUI := skipSteps[internal.UI_install_Component]
+	_, skipCertManager := skipSteps[internal.CertManager_Component]
 
 	internal.GenerateKubeSliceDirectory()
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
@@ -69,7 +70,9 @@ func basicInstall(skipSteps map[string]string) {
 	internal.GatherNetworkInformation(ApplicationConfiguration)
 	internal.AddHelmCharts(ApplicationConfiguration)
 	if !skipController {
-		internal.InstallCertManager(ApplicationConfiguration)
+		if !skipCertManager {
+			internal.InstallCertManager(ApplicationConfiguration)
+		}
 		internal.InstallKubeSliceController(ApplicationConfiguration)
 		internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
 	}
@@ -91,6 +94,7 @@ func Uninstall(componentsToUninstall, workersToUninstall map[string]string) {
 	// Custom topology passed
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == "" {
 		_, uninstallController := componentsToUninstall[internal.Controller_Component]
+		_, uninstallCertManager := componentsToUninstall[internal.CertManager_Component]
 		_, uninstallWorker := componentsToUninstall[internal.Worker_Component]
 		_, uninstallUI := componentsToUninstall[internal.UI_install_Component]
 
@@ -102,7 +106,9 @@ func Uninstall(componentsToUninstall, workersToUninstall map[string]string) {
 		}
 		if uninstallController {
 			internal.UninstallKubeSliceController(ApplicationConfiguration)
-			internal.UninstallCertManager(ApplicationConfiguration)
+			if uninstallCertManager {
+				internal.UninstallCertManager(ApplicationConfiguration)
+			}
 		}
 		return
 	}

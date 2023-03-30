@@ -30,7 +30,8 @@ type HelmChart struct {
 }
 
 type KubeSliceConfiguration struct {
-	ProjectName string `yaml:"project_name"`
+	ProjectName  string   `yaml:"project_name"`
+	ProjectUsers []string `yaml:"project_users"`
 }
 
 type ClusterConfiguration struct {
