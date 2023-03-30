@@ -2,6 +2,10 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   releases-matrix:
     name: Release Kubeslice-cli Binary
