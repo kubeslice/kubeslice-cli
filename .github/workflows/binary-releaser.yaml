@@ -1,10 +1,10 @@
+name: kubeslice-cli-binary-release
 on:
   release:
     types: [created]
 
-permissions:
-  contents: write
-  pages: write
+permissions: write-all
+  
 
 jobs:
   releases-matrix:
