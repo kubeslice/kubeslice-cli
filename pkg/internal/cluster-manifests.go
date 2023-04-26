@@ -18,7 +18,6 @@ metadata:
   name: %s 
   namespace: %s
 spec:
-  networkInterface: eth0
 ---
 
 `
