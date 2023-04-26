@@ -15,6 +15,8 @@ func Install(skipSteps map[string]string) {
 			fullDemo()
 		case ProfileMinimalDemo:
 			minimalDemo()
+		case ProfileEntDemo:
+			entDemo()
 		}
 	}
 }
@@ -40,6 +42,15 @@ func minimalDemo() {
 	internal.InstallIPerf(ApplicationConfiguration)
 	internal.GenerateIPerfServiceExportManifest(ApplicationConfiguration)
 	internal.PrintNextSteps(false, ApplicationConfiguration)
+}
+
+func entDemo() {
+	//  TODO: Add enterprise demo applications like bookinfo etc.
+	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil, "", "")
+	internal.ApplySliceConfiguration(ApplicationConfiguration)
+	util.Printf("%s Waiting for configuration propagation", util.Wait)
+	time.Sleep(20 * time.Second)
+	internal.PrintNextSteps(true, ApplicationConfiguration)
 }
 
 func basicInstall(skipSteps map[string]string) {

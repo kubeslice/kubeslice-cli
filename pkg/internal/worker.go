@@ -18,7 +18,7 @@ controllerSecret:
   ca.crt: %s
   token: %s
 metrics:
-  insecure: %s
+  insecure: %t
 
 cluster:
   name: %s
@@ -32,7 +32,7 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	for _, cluster := range cc.WorkerClusters {
 		filename := "helm-values-" + cluster.Name + ".yaml"
-		insecureMetrics := ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster.Name == Kind_Component
+		insecureMetrics := ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType == Kind_Component
 		generateWorkerValuesFile(cluster,
 			filename,
 			ApplicationConfiguration.Configuration,
