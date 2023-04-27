@@ -17,6 +17,8 @@ controllerSecret:
   endpoint: %s
   ca.crt: %s
   token: %s
+metrics:
+  insecure: %s
 
 cluster:
   name: %s
@@ -31,9 +33,12 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	for _, cluster := range cc.WorkerClusters {
 		filename := "helm-values-" + cluster.Name + ".yaml"
+		insecureMetrics := ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster.Name == Kind_Component
 		generateWorkerValuesFile(cluster,
 			filename,
-			ApplicationConfiguration.Configuration)
+			ApplicationConfiguration.Configuration,
+			insecureMetrics,
+		)
 
 		util.Printf("%s Generated Helm Values file for Worker Installation %s", util.Tick, filename)
 		time.Sleep(200 * time.Millisecond)
@@ -80,7 +85,7 @@ func Retry(backoffLimit int, sleep time.Duration, f func() error) (err error) {
 	return fmt.Errorf("retry failed after %d attempts (took %d seconds), last error: %s", backoffLimit, int(elapsed.Seconds()), err)
 }
 
-func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configuration) {
+func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configuration, insecureMetrics bool) {
 	var secrets map[string]string
 	err := Retry(3, 1*time.Second, func() (err error) {
 		secrets = fetchSecret(cluster.Name, config.ClusterConfiguration.ControllerCluster, config.KubeSliceConfiguration.ProjectName)
@@ -92,7 +97,7 @@ func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configu
 	if err != nil {
 		log.Fatalf("Unable to fetch secrets\n%s", err)
 	}
-	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress))
+	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress))
 	if err != nil {
 		log.Fatalf("%s %s", util.Cross, err)
 	}
