@@ -100,6 +100,9 @@ var defaultEntConfiguration = &internal.HelmChartConfiguration{
 	},
 	UIChart: internal.HelmChart{
 		ChartName: "kubeslice-ui",
+		Values: map[string]interface{}{
+			"kubeslice.uiproxy.service.nodePort": 31000,
+		},
 	},
 }
 

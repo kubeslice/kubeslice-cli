@@ -26,7 +26,7 @@ type HelmChart struct {
 	ChartName string `yaml:"chart_name"`
 	Version   string `yaml:"version"`
 	// Values to be passed as --set arguments to helm install
-	Values map[string]string `yaml:"values"`
+	Values map[string]interface{} `yaml:"values"`
 }
 
 type KubeSliceConfiguration struct {
