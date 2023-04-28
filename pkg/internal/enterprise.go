@@ -33,11 +33,17 @@ func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
 	time.Sleep(200 * time.Millisecond)
+
 	clusterType := ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType
+	filename := "helm-values-ui.yaml"
 	generateUIValuesFile(clusterType, cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration)
+	util.Printf("%s Generated Helm Values file for Kubeslice Manager Installation %s", util.Tick, filename)
+	time.Sleep(200 * time.Millisecond)
+
 	installKubeSliceUI(cc.ControllerCluster, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.UIChart.ChartName)
 	time.Sleep(200 * time.Millisecond)
+
 	util.Printf("%s Waiting for KubeSlice Manager Pods to be Healthy...", util.Wait)
 	PodVerification("Waiting for KubeSlice Manager Pods to be Healthy", cc.ControllerCluster, "kubernetes-dashboard")
 	util.Printf("%s Successfully installed KubeSlice Manager.\n", util.Tick)

@@ -87,14 +87,14 @@ func basicInstall(skipSteps map[string]string) {
 		internal.InstallKubeSliceController(ApplicationConfiguration)
 		internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
 	}
+	if !skipUI {
+		internal.InstallKubeSliceUI(ApplicationConfiguration)
+	}
 	if !skipWorker_registration {
 		internal.RegisterWorkerClusters(ApplicationConfiguration, nil)
 	}
 	if !skipWorker {
 		internal.InstallKubeSliceWorker(ApplicationConfiguration)
-	}
-	if !skipUI {
-		internal.InstallKubeSliceUI(ApplicationConfiguration)
 	}
 }
 
