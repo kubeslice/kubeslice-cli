@@ -63,6 +63,11 @@ func basicInstall(skipSteps map[string]string) {
 	_, skipWorker_registration := skipSteps[internal.Worker_registration_Component]
 	_, skipUI := skipSteps[internal.UI_install_Component]
 	_, skipCertManager := skipSteps[internal.CertManager_Component]
+	_, skipPrometheus := skipSteps[internal.Prometheus_Component]
+
+	if ApplicationConfiguration.Configuration.HelmChartConfiguration.PrometheusChart.ChartName == "" {
+		skipPrometheus = true
+	}
 
 	internal.GenerateKubeSliceDirectory()
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
@@ -95,6 +100,9 @@ func basicInstall(skipSteps map[string]string) {
 	}
 	if !skipWorker {
 		internal.InstallKubeSliceWorker(ApplicationConfiguration)
+	}
+	if !skipPrometheus {
+		internal.InstallPrometheus(ApplicationConfiguration)
 	}
 }
 

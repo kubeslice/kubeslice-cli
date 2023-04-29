@@ -30,7 +30,9 @@ var installCmd = &cobra.Command{
 		if profile != "" {
 			switch profile {
 			case pkg.ProfileFullDemo:
+				skipSteps = append(skipSteps, "prometheus")
 			case pkg.ProfileMinimalDemo:
+				skipSteps = append(skipSteps, "prometheus")
 			case pkg.ProfileEntDemo:
 			default:
 				util.Fatalf("%v Unknown profile: %s. Possible values %s", util.Cross, profile, []string{pkg.ProfileFullDemo, pkg.ProfileMinimalDemo, pkg.ProfileEntDemo})
@@ -43,6 +45,7 @@ var installCmd = &cobra.Command{
 		if !withCertManager {
 			skipSteps = append(skipSteps, "cert-manager")
 		}
+
 		stepsToSkipMap := mapFromSlice(skipSteps)
 		pkg.Install(stepsToSkipMap)
 	},
@@ -80,7 +83,8 @@ Supported values:
 	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
 	- worker: Skips the installation of KubeSlice Worker
 	- demo: Skips the installation of additional example applications
-	- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)`)
+	- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)
+	- prometheus: Skips the installation of prometheus`)
 	installCmd.Flags().BoolVarP(&withCertManager, "with-cert-manager", "", false, `Installs Cert-Manager for kubeslice controller (for versions < 0.7.0)`)
 
 }

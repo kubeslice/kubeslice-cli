@@ -104,6 +104,9 @@ var defaultEntConfiguration = &internal.HelmChartConfiguration{
 			"kubeslice.uiproxy.service.nodePort": 31000,
 		},
 	},
+	PrometheusChart: internal.HelmChart{
+		ChartName: "prometheus",
+	},
 }
 
 func readConfiguration(fileName string) *internal.ConfigurationSpecs {
