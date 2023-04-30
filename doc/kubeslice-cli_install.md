@@ -1,4 +1,4 @@
-## ## kubeslice-cli install
+## kubeslice-cli install
 
 Installs workloads to run KubeSlice
 
@@ -27,6 +27,16 @@ kubeslice-cli install [flags]
                             		Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers. 
                             		Generates the KubernetesManifests for user to manually apply, and verify 
                             		the functionality
+                            	- enterprise-demo:
+                            		Showcases the KubeSlice Enterprise functionality by spawning
+                            		3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers, 
+                            		installing the enterprise charts for Controller and Worker with KubeSlice Manager (UI),
+                            		and installing iPerf application to generate network traffic. 
+                            		Ensure that the imagePullSecrets (username and password) are set as environment variables.
+                            
+                            		KUBESLICE_IMAGE_PULL_USERNAME : optional : Default 'aveshaenterprise'
+                            		KUBESLICE_IMAGE_PULL_PASSWORD : required
+                            
                             Cannot be used with --config flag.
   -s, --skip strings        Skips the installation steps (comma-seperated). 
                             Supported values:
@@ -37,6 +47,7 @@ kubeslice-cli install [flags]
                             	- worker: Skips the installation of KubeSlice Worker
                             	- demo: Skips the installation of additional example applications
                             	- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)
+                            	- prometheus: Skips the installation of prometheus
       --with-cert-manager   Installs Cert-Manager for kubeslice controller (for versions < 0.7.0)
 ```
 
@@ -51,5 +62,3 @@ kubeslice-cli install [flags]
 ### SEE ALSO
 
 * [kubeslice-cli](kubeslice-cli.md)	 - kubeslice-cli - a simple CLI for KubeSlice Operations
-
-

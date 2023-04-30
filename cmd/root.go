@@ -22,6 +22,7 @@ KubeSlice functionality`,
 		cmd.Help()
 	},
 }
+var RootCmd = rootCmd
 
 func Execute() {
 	rootCmd.PersistentFlags().StringVarP(&Config, "config", "c", "", `<path-to-topology-configuration-yaml-file>

@@ -15,6 +15,8 @@ func Install(skipSteps map[string]string) {
 			fullDemo()
 		case ProfileMinimalDemo:
 			minimalDemo()
+		case ProfileEntDemo:
+			entDemo()
 		}
 	}
 }
@@ -42,6 +44,15 @@ func minimalDemo() {
 	internal.PrintNextSteps(false, ApplicationConfiguration)
 }
 
+func entDemo() {
+	//  TODO: Add enterprise demo applications like bookinfo etc.
+	internal.GenerateSliceConfiguration(ApplicationConfiguration, nil, "", "")
+	internal.ApplySliceConfiguration(ApplicationConfiguration)
+	util.Printf("%s Waiting for configuration propagation", util.Wait)
+	time.Sleep(20 * time.Second)
+	internal.PrintNextSteps(true, ApplicationConfiguration)
+}
+
 func basicInstall(skipSteps map[string]string) {
 	internal.VerifyExecutables(ApplicationConfiguration)
 
@@ -52,6 +63,11 @@ func basicInstall(skipSteps map[string]string) {
 	_, skipWorker_registration := skipSteps[internal.Worker_registration_Component]
 	_, skipUI := skipSteps[internal.UI_install_Component]
 	_, skipCertManager := skipSteps[internal.CertManager_Component]
+	_, skipPrometheus := skipSteps[internal.Prometheus_Component]
+
+	if ApplicationConfiguration.Configuration.HelmChartConfiguration.PrometheusChart.ChartName == "" {
+		skipPrometheus = true
+	}
 
 	internal.GenerateKubeSliceDirectory()
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" {
@@ -76,14 +92,17 @@ func basicInstall(skipSteps map[string]string) {
 		internal.InstallKubeSliceController(ApplicationConfiguration)
 		internal.CreateKubeSliceProject(ApplicationConfiguration, nil)
 	}
+	if !skipUI {
+		internal.InstallKubeSliceUI(ApplicationConfiguration)
+	}
 	if !skipWorker_registration {
 		internal.RegisterWorkerClusters(ApplicationConfiguration, nil)
 	}
 	if !skipWorker {
 		internal.InstallKubeSliceWorker(ApplicationConfiguration)
 	}
-	if !skipUI {
-		internal.InstallKubeSliceUI(ApplicationConfiguration)
+	if !skipPrometheus {
+		internal.InstallPrometheus(ApplicationConfiguration)
 	}
 }
 

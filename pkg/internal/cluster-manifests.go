@@ -18,10 +18,29 @@ metadata:
   name: %s 
   namespace: %s
 spec:
-  networkInterface: eth0
+  clusterProperty: %s
 ---
 
 `
+const regionTemplate1 = `
+    geoLocation:
+      cloudProvider: GCP
+      cloudRegion: custom
+      latitude: "36.7783"
+      longitude: "-119.4179"
+`
+const regionTemplate2 = `
+    geoLocation:
+      cloudProvider: DATACENTER
+      cloudRegion: custom
+      latitude: "40.6976633"
+      longitude: "-74.1201054"
+`
+
+var regionTemplates = map[string]string{
+	"ks-w-1": regionTemplate1,
+	"ks-w-2": regionTemplate2,
+}
 
 func RegisterWorkerClusters(ApplicationConfiguration *ConfigurationSpecs, cliOptions *CliOptionsStruct) {
 	util.Printf("\nRegistering Worker Clusters with Project...")
@@ -51,11 +70,15 @@ func RegisterWorkerClusters(ApplicationConfiguration *ConfigurationSpecs, cliOpt
 
 func generateClusterRegistrationManifest(ApplicationConfiguration *ConfigurationSpecs, filename string, namespace string) {
 	var clusterRegistrationContent = ""
+	var regionTemplate = "{}"
 	if namespace == "" {
 		namespace = "kubeslice-" + ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName
 	}
 	for _, cluster := range ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters {
-		clusterRegistrationContent = clusterRegistrationContent + fmt.Sprintf(clusterRegistrationTemplate, cluster.Name, namespace)
+		if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == ProfileEntDemo {
+			regionTemplate = regionTemplates[cluster.Name]
+		}
+		clusterRegistrationContent = clusterRegistrationContent + fmt.Sprintf(clusterRegistrationTemplate, cluster.Name, namespace, regionTemplate)
 	}
 	util.DumpFile(clusterRegistrationContent, filename)
 }

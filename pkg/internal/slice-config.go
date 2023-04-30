@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"time"
@@ -67,11 +68,36 @@ func GenerateSliceConfiguration(ApplicationConfiguration *ConfigurationSpecs, wo
 }
 
 func ApplySliceConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
+	verifyNodeIPsInClusters(ApplicationConfiguration)
 	util.Printf("\nApplying Slice Manifest %s to %s cluster", sliceTemplateFileName, ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster.Name)
 
 	ApplyKubectlManifest(kubesliceDirectory+"/"+sliceTemplateFileName, "kubeslice-demo", &ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
 
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
+}
+
+func verifyNodeIPsInClusters(ApplicationConfiguration *ConfigurationSpecs) {
+	var outB, errB bytes.Buffer
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster
+	wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
+	projectNamespace := "kubeslice-" + ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName
+	for _, cluster := range wc {
+		util.Printf("%s Waiting for NodeIPs to be populated in %s...", util.Wait, cluster.Name)
+		var nodeIPs string
+		i := 1 // retry for 50 seconds
+		for nodeIPs == "" && i < 11 {
+			util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", ClusterObject, cluster.Name, "-n", projectNamespace, "-o", "jsonpath='{.status.nodeIPs}'")
+			nodeIPs = outB.String()
+			if nodeIPs == "" {
+				time.Sleep(5 * time.Second)
+				util.Printf("%s Waiting for NodeIPs to be populated in %s... %d seconds elapsed", util.Wait, cluster.Name, i*5)
+				i++
+			} else {
+				util.Printf("%s NodeIPs populated in %s", util.Tick, cluster.Name)
+			}
+		}
+	}
+
 }
 
 func GetSliceConfig(sliceConfigName string, namespace string, controllerCluster *Cluster) {

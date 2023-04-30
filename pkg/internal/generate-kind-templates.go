@@ -12,6 +12,7 @@ import (
 const (
 	kubesliceDirectory = "kubeslice"
 	kindSubDirectory   = "kind"
+	ProfileEntDemo     = "enterprise-demo"
 )
 
 const kubesliceControllerTemplate = `
@@ -24,6 +25,21 @@ networking:
 nodes:
   - role: control-plane
     image: kindest/node:v1.22.9
+`
+const kubesliceEntControllerTemplate = `
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: %s
+networking:
+  disableDefaultCNI: true # disable kindnet
+  podSubnet: 192.168.0.0/16 # set to Calico's default subnet
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.22.9
+    extraPortMappings:
+      - containerPort: 31000
+        hostPort: 8443
+        protocol: TCP
 `
 
 const kubesliceWorkerTemplate = `
@@ -62,7 +78,12 @@ func GenerateKindConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 
 	util.CreateDirectoryPath(directory)
 
-	util.DumpFile(fmt.Sprintf(kubesliceControllerTemplate, cc.ControllerCluster.Name), directory+"/"+cc.ControllerCluster.Name+".yaml")
+	controllerTemplate := kubesliceControllerTemplate
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == ProfileEntDemo {
+		controllerTemplate = kubesliceEntControllerTemplate
+	}
+
+	util.DumpFile(fmt.Sprintf(controllerTemplate, cc.ControllerCluster.Name), directory+"/"+cc.ControllerCluster.Name+".yaml")
 	util.Printf("%s Generated %s", util.Tick, directory+"/"+cc.ControllerCluster.Name+".yaml")
 	time.Sleep(200 * time.Millisecond)
 

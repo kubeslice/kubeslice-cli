@@ -30,19 +30,22 @@ var installCmd = &cobra.Command{
 		if profile != "" {
 			switch profile {
 			case pkg.ProfileFullDemo:
+				skipSteps = append(skipSteps, "prometheus")
 			case pkg.ProfileMinimalDemo:
+				skipSteps = append(skipSteps, "prometheus")
+			case pkg.ProfileEntDemo:
 			default:
-				util.Fatalf("%v Unknown profile: %s. Possible values %s", util.Cross, profile, []string{pkg.ProfileFullDemo, pkg.ProfileMinimalDemo})
+				util.Fatalf("%v Unknown profile: %s. Possible values %s", util.Cross, profile, []string{pkg.ProfileFullDemo, pkg.ProfileMinimalDemo, pkg.ProfileEntDemo})
 			}
-			pkg.ReadAndValidateConfiguration("")
-			pkg.ApplicationConfiguration.Configuration.ClusterConfiguration.Profile = profile
+			pkg.ReadAndValidateConfiguration("", profile)
 		} else {
-			pkg.ReadAndValidateConfiguration(Config)
+			pkg.ReadAndValidateConfiguration(Config, "")
 		}
 		// Default behaviour is not ot install cert-manager
 		if !withCertManager {
 			skipSteps = append(skipSteps, "cert-manager")
 		}
+
 		stepsToSkipMap := mapFromSlice(skipSteps)
 		pkg.Install(stepsToSkipMap)
 	},
@@ -61,6 +64,16 @@ Supported values:
 		Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers. 
 		Generates the KubernetesManifests for user to manually apply, and verify 
 		the functionality
+	- enterprise-demo:
+		Showcases the KubeSlice Enterprise functionality by spawning
+		3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers, 
+		installing the enterprise charts for Controller and Worker with KubeSlice Manager (UI),
+		and installing iPerf application to generate network traffic. 
+		Ensure that the imagePullSecrets (username and password) are set as environment variables.
+
+		KUBESLICE_IMAGE_PULL_USERNAME : optional : Default 'aveshaenterprise'
+		KUBESLICE_IMAGE_PULL_PASSWORD : required
+
 Cannot be used with --config flag.`)
 	installCmd.Flags().StringSliceVarP(&skipSteps, "skip", "s", []string{}, `Skips the installation steps (comma-seperated). 
 Supported values:
@@ -70,8 +83,8 @@ Supported values:
 	- worker-registration: Skips the registration of KubeSlice Workers on the Controller
 	- worker: Skips the installation of KubeSlice Worker
 	- demo: Skips the installation of additional example applications
-	- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)`)
-	// TODO: update the controller version after release
+	- ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)
+	- prometheus: Skips the installation of prometheus`)
 	installCmd.Flags().BoolVarP(&withCertManager, "with-cert-manager", "", false, `Installs Cert-Manager for kubeslice controller (for versions < 0.7.0)`)
 
 }
