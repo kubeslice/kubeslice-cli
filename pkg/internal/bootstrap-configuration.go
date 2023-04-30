@@ -17,6 +17,7 @@ type HelmChartConfiguration struct {
 	ControllerChart  HelmChart        `yaml:"controller_chart"`
 	WorkerChart      HelmChart        `yaml:"worker_chart"`
 	UIChart          HelmChart        `yaml:"ui_chart"`
+	PrometheusChart  HelmChart        `yaml:"prometheus_chart"`
 	HelmUsername     string           `yaml:"helm_username"`
 	HelmPassword     string           `yaml:"helm_password"`
 	ImagePullSecret  ImagePullSecrets `yaml:"image_pull_secret"`
@@ -26,7 +27,7 @@ type HelmChart struct {
 	ChartName string `yaml:"chart_name"`
 	Version   string `yaml:"version"`
 	// Values to be passed as --set arguments to helm install
-	Values map[string]string `yaml:"values"`
+	Values map[string]interface{} `yaml:"values"`
 }
 
 type KubeSliceConfiguration struct {

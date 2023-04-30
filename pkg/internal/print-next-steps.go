@@ -31,6 +31,17 @@ Note: The DNS propagation may take a minute or two.
 
 %s %s
 `
+const printEntVerificationStepsTemplate = `
+========================================================================
+KubeSlice Enterprise Setup (1 Controller + 2 Worker) is complete.
+You can now access Kubeslice Manager UI using the following URL:
+
+%s %s
+
+To access Kubeslice Manager use the following token in the login screen:
+
+%s %s
+`
 
 const printNextStepsTemplateForSliceInstallation = `
 
@@ -91,11 +102,27 @@ func PrintNextSteps(verificationOnly bool, ApplicationConfiguration *Configurati
 }
 
 func printVerificationSteps(ApplicationConfiguration *ConfigurationSpecs) {
-	clusters := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
-	iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+clusters[1].ContextName, "--kubeconfig="+clusters[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
-	template := fmt.Sprintf(printVerificationStepsTemplate,
-		util.Run, iperfCommand.String(),
-	)
+	var template string
+	username := "admin"
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == ProfileEntDemo {
+		token := GetUIAdminToken(
+			&ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster,
+			username,
+			ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
+		endpoint := GetUIEndpoint(&ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster, ProfileEntDemo)
+		template = fmt.Sprintf(printEntVerificationStepsTemplate,
+			util.Globe, endpoint,
+			util.Lock, token,
+		)
+
+	} else {
+
+		clusters := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
+		iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+clusters[1].ContextName, "--kubeconfig="+clusters[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
+		template = fmt.Sprintf(printVerificationStepsTemplate,
+			util.Run, iperfCommand.String(),
+		)
+	}
 	util.Printf(template)
 }
 

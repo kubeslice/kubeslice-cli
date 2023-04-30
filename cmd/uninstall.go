@@ -21,7 +21,7 @@ var uninstallCmd = &cobra.Command{
 	Short:   "Performs cleanup of Kubeslice components.",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		pkg.ReadAndValidateConfiguration(Config)
+		pkg.ReadAndValidateConfiguration(Config, "")
 		// if --all flag is passed, other flags should not be allowed
 		if uninstallAll && uninstallUI {
 			cmd.Help()

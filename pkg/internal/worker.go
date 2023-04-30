@@ -17,10 +17,11 @@ controllerSecret:
   endpoint: %s
   ca.crt: %s
   token: %s
+metrics:
+  insecure: %t
 
 cluster:
   name: %s
-  nodeIp: %s
   endpoint: %s
 
 `
@@ -31,9 +32,12 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	for _, cluster := range cc.WorkerClusters {
 		filename := "helm-values-" + cluster.Name + ".yaml"
+		insecureMetrics := ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType == Kind_Component
 		generateWorkerValuesFile(cluster,
 			filename,
-			ApplicationConfiguration.Configuration)
+			ApplicationConfiguration.Configuration,
+			insecureMetrics,
+		)
 
 		util.Printf("%s Generated Helm Values file for Worker Installation %s", util.Tick, filename)
 		time.Sleep(200 * time.Millisecond)
@@ -80,7 +84,7 @@ func Retry(backoffLimit int, sleep time.Duration, f func() error) (err error) {
 	return fmt.Errorf("retry failed after %d attempts (took %d seconds), last error: %s", backoffLimit, int(elapsed.Seconds()), err)
 }
 
-func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configuration) {
+func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configuration, insecureMetrics bool) {
 	var secrets map[string]string
 	err := Retry(3, 1*time.Second, func() (err error) {
 		secrets = fetchSecret(cluster.Name, config.ClusterConfiguration.ControllerCluster, config.KubeSliceConfiguration.ProjectName)
@@ -92,7 +96,7 @@ func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configu
 	if err != nil {
 		log.Fatalf("Unable to fetch secrets\n%s", err)
 	}
-	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], cluster.Name, cluster.NodeIP, cluster.ControlPlaneAddress))
+	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.ControlPlaneAddress))
 	if err != nil {
 		log.Fatalf("%s %s", util.Cross, err)
 	}
@@ -127,7 +131,7 @@ func fetchSecret(clusterName string, cc Cluster, projectName string) map[string]
 	secret := findSecret(clusterName, projectName, cc)
 	//kubectl get secret/kubeslice-rbac-worker-kubeslice-worker-1-token-h99pc -n kubeslice-demo -o jsonpath={.data}
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", secret, "-n", "kubeslice-"+projectName, "-o", "jsonpath={.data}")
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", secret, "-n", "kubeslice-"+projectName, "-o", "jsonpath={.data}")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}
@@ -141,7 +145,7 @@ func fetchSecret(clusterName string, cc Cluster, projectName string) map[string]
 
 func findSecret(workerName string, projectName string, cc Cluster) string {
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
 	}

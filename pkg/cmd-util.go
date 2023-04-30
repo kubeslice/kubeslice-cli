@@ -3,6 +3,7 @@ package pkg
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/go-yaml/yaml"
 	"github.com/kubeslice/kubeslice-cli/pkg/internal"
@@ -12,6 +13,8 @@ import (
 const (
 	ProfileFullDemo    = "full-demo"
 	ProfileMinimalDemo = "minimal-demo"
+	ProfileEntDemo     = "enterprise-demo"
+	ClusterTypeKind    = "kind"
 )
 
 type CliParams struct {
@@ -30,7 +33,7 @@ var CliOptions *internal.CliOptionsStruct
 
 func SetCliOptions(cliParams CliParams) {
 	var controllerCluster *internal.Cluster
-	configSpecs := ReadAndValidateConfiguration(cliParams.Config)
+	configSpecs := ReadAndValidateConfiguration(cliParams.Config, "")
 	if cliParams.Config != "" {
 		controllerCluster = &configSpecs.Configuration.ClusterConfiguration.ControllerCluster
 	}
@@ -83,6 +86,29 @@ var defaultConfiguration = &internal.ConfigurationSpecs{
 	},
 }
 
+var defaultEntConfiguration = &internal.HelmChartConfiguration{
+	RepoAlias: "kubeslice-ent-demo",
+	RepoUrl:   "https://kubeslice.aveshalabs.io/repository/kubeslice-helm-ent-prod/",
+	CertManagerChart: internal.HelmChart{
+		ChartName: "cert-manager",
+	},
+	ControllerChart: internal.HelmChart{
+		ChartName: "kubeslice-controller",
+	},
+	WorkerChart: internal.HelmChart{
+		ChartName: "kubeslice-worker",
+	},
+	UIChart: internal.HelmChart{
+		ChartName: "kubeslice-ui",
+		Values: map[string]interface{}{
+			"kubeslice.uiproxy.service.nodePort": 31000,
+		},
+	},
+	PrometheusChart: internal.HelmChart{
+		ChartName: "prometheus",
+	},
+}
+
 func readConfiguration(fileName string) *internal.ConfigurationSpecs {
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -105,13 +131,28 @@ func validateConfiguration(specs *internal.ConfigurationSpecs) []string {
 	cc := &specs.Configuration.ClusterConfiguration
 	ksc := &specs.Configuration.KubeSliceConfiguration
 	hc := &specs.Configuration.HelmChartConfiguration
+	if hc.ImagePullSecret.Password == "" {
+		hc.ImagePullSecret.Password = os.Getenv("KUBESLICE_IMAGE_PULL_PASSWORD")
+	}
+	if hc.ImagePullSecret.Username == "" {
+		if os.Getenv("KUBESLICE_IMAGE_PULL_USERNAME") == "" {
+			hc.ImagePullSecret.Username = "aveshaenterprise"
+		} else {
+			hc.ImagePullSecret.Username = os.Getenv("KUBESLICE_IMAGE_PULL_USERNAME")
+		}
+
+	}
 	if cc.Profile != "" {
 		switch cc.Profile {
 		case ProfileFullDemo:
 		case ProfileMinimalDemo:
+		case ProfileEntDemo:
+			if hc.ImagePullSecret.Password == "" {
+				errors = append(errors, fmt.Sprintf("%s Missing image pull secret password. Please set environment variable `KUBESLICE_IMAGE_PULL_PASSWORD`", util.Cross))
+			}
 		default:
 			errors = append(errors, fmt.Sprintf("%s Unknown profile: %s. Possible values %s", util.Cross, cc.Profile, []string{ProfileFullDemo,
-				ProfileMinimalDemo}))
+				ProfileMinimalDemo, ProfileEntDemo}))
 		}
 		if cc.KubeConfigPath != "" || cc.ControllerCluster.KubeConfigPath != "" {
 			errors = append(errors, fmt.Sprintf("%s Cannot specify configuration.cluster_configuration.kube_config_path or configuration.cluster_configuration.controller.kube_config_path when running a kind cluster demo", util.Cross))
@@ -185,12 +226,19 @@ func validateConfiguration(specs *internal.ConfigurationSpecs) []string {
 	return errors
 }
 
-func ReadAndValidateConfiguration(fileName string) *internal.ConfigurationSpecs {
+func ReadAndValidateConfiguration(fileName, profile string) *internal.ConfigurationSpecs {
 	var specs *internal.ConfigurationSpecs
 	if fileName != "" {
 		specs = readConfiguration(fileName)
 	} else {
 		specs = defaultConfiguration
+		specs.Configuration.ClusterConfiguration.ClusterType = ClusterTypeKind
+		// Set defaults for ent demo
+		if profile == ProfileEntDemo {
+			specs.Configuration.ClusterConfiguration.Profile = ProfileEntDemo
+			specs.Configuration.HelmChartConfiguration = *defaultEntConfiguration
+		}
+
 	}
 	errors := validateConfiguration(specs)
 	if len(errors) > 0 {

@@ -8,7 +8,7 @@ import (
 	// "github.com/spf13/cobra/doc"
 )
 
-var version = "0.5.0"
+var version = "0.5.1"
 var rootCmd = &cobra.Command{
 	Use:     "kubeslice-cli",
 	Version: version,
@@ -22,6 +22,7 @@ KubeSlice functionality`,
 		cmd.Help()
 	},
 }
+var RootCmd = rootCmd
 
 func Execute() {
 	rootCmd.PersistentFlags().StringVarP(&Config, "config", "c", "", `<path-to-topology-configuration-yaml-file>

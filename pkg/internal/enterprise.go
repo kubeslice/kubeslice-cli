@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -32,11 +33,17 @@ func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
 	time.Sleep(200 * time.Millisecond)
+
 	clusterType := ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType
+	filename := "helm-values-ui.yaml"
 	generateUIValuesFile(clusterType, cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration)
+	util.Printf("%s Generated Helm Values file for Kubeslice Manager Installation %s", util.Tick, filename)
+	time.Sleep(200 * time.Millisecond)
+
 	installKubeSliceUI(cc.ControllerCluster, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.UIChart.ChartName)
 	time.Sleep(200 * time.Millisecond)
+
 	util.Printf("%s Waiting for KubeSlice Manager Pods to be Healthy...", util.Wait)
 	PodVerification("Waiting for KubeSlice Manager Pods to be Healthy", cc.ControllerCluster, "kubernetes-dashboard")
 	util.Printf("%s Successfully installed KubeSlice Manager.\n", util.Tick)
@@ -100,7 +107,7 @@ func uninstallKubeSliceUI(cluster Cluster) (bool, error) {
 	return true, nil
 }
 
-func GetUIEndpoint(cc *Cluster) {
+func GetUIEndpoint(cc *Cluster, profile string) string {
 	util.Printf("\nFetching KubeSlice Manager Endpoint...")
 	ep := ""
 
@@ -114,18 +121,22 @@ func GetUIEndpoint(cc *Cluster) {
 		}
 		switch jsonMap["type"] {
 		case "NodePort":
-			ports := jsonMap["ports"].([]interface{})
-			for _, port := range ports {
-				portMap := port.(map[string]interface{})
-				if portMap["name"] == "http" { // Assuming that http is the name of the port that you want to use
-					nodePort := int(portMap["nodePort"].(float64))
-					nodeIP, err := getNodeIP(cc)
-					if err == nil {
-						ep = fmt.Sprintf("https://%s:%d", strings.Trim(nodeIP, "'"), nodePort)
-					} else {
-						util.Printf("%s Unable to get node IP. Err: %v", util.Cross, err)
+			if profile == ProfileEntDemo {
+				ep = fmt.Sprintf("https://%s:%d", "localhost", 8443)
+			} else {
+				ports := jsonMap["ports"].([]interface{})
+				for _, port := range ports {
+					portMap := port.(map[string]interface{})
+					if portMap["name"] == "http" { // Assuming that http is the name of the port that you want to use
+						nodePort := int(portMap["nodePort"].(float64))
+						nodeIP, err := getNodeIP(cc)
+						if err == nil {
+							ep = fmt.Sprintf("https://%s:%d", strings.Trim(nodeIP, "'"), nodePort)
+						} else {
+							util.Printf("%s Unable to get node IP. Err: %v", util.Cross, err)
+						}
+						break
 					}
-					break
 				}
 			}
 		case "LoadBalancer":
@@ -151,6 +162,46 @@ func GetUIEndpoint(cc *Cluster) {
 	} else {
 		util.Printf("%s Visit %v from your browser to access the Kubeslice Manager.", util.Tick, ep)
 	}
+	return ep
+}
+
+func findUserSecret(username string, projectName string, cc Cluster) string {
+	var outB, errB bytes.Buffer
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
+	if err != nil {
+		log.Fatalf("Process failed %v", err)
+	}
+
+	var secret string
+	for _, line := range strings.Split(outB.String(), "\n") {
+		if strings.Contains(line, "rbac-rw-"+username) {
+			secret = fmt.Sprintf("secrets/%s", strings.TrimPrefix(line, "serviceaccount/"))
+			break
+		}
+	}
+	if secret == "" {
+		log.Fatalf("failed to find secret for %s", username)
+	}
+	return secret
+}
+
+func GetUIAdminToken(cc *Cluster, username, projectName string) string {
+	util.Printf("\nFetching KubeSlice Manager Admin Token...")
+	secret := findUserSecret(username, projectName, *cc)
+
+	var outB, errB bytes.Buffer
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", secret, "-n", "kubeslice-"+projectName, "-o", "jsonpath={.data.token}")
+	if err != nil {
+		log.Fatalf("Process failed %v", err)
+	}
+	x := outB.String()
+	// base64 decode
+	data, err := base64.StdEncoding.DecodeString(x)
+	if err != nil {
+		log.Fatalf("Unable to decode token %v", err)
+	}
+	return string(data)
+
 }
 
 func getNodeIP(cc *Cluster) (string, error) {

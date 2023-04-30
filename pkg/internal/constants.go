@@ -15,6 +15,7 @@ const (
 	Worker_Component              = "worker"
 	Demo_Component                = "demo"
 	CertManager_Component         = "cert-manager"
+	Prometheus_Component          = "prometheus"
 	SecretObject                  = "secrets"
 	OutputFormatYaml              = "yaml"
 	OutputFormatJson              = "json"

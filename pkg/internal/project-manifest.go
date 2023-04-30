@@ -37,7 +37,7 @@ func CreateKubeSliceProject(ApplicationConfiguration *ConfigurationSpecs, cliOpt
 		ApplyKubectlManifest(kubesliceDirectory+"/"+projectFileName, KUBESLICE_CONTROLLER_NAMESPACE, &ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster)
 	}
 	util.Printf("%s Applied %s", util.Tick, projectFileName)
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(3 * time.Second)
 	util.Printf("Created KubeSlice Project.")
 }
 
