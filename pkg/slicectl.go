@@ -50,6 +50,13 @@ func entDemo() {
 	internal.ApplySliceConfiguration(ApplicationConfiguration)
 	util.Printf("%s Waiting for configuration propagation", util.Wait)
 	time.Sleep(20 * time.Second)
+	internal.GenerateIPerfManifests()
+	internal.GenerateIPerfServiceExportManifest(ApplicationConfiguration)
+	internal.InstallIPerf(ApplicationConfiguration)
+	internal.ApplyIPerfServiceExportManifest(ApplicationConfiguration)
+	util.Printf("%s Waiting for configuration propagation", util.Wait)
+	time.Sleep(20 * time.Second)
+	internal.RolloutRestartIPerf(ApplicationConfiguration)
 	internal.PrintNextSteps(true, ApplicationConfiguration)
 }
 

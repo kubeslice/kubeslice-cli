@@ -33,12 +33,21 @@ Note: The DNS propagation may take a minute or two.
 `
 const printEntVerificationStepsTemplate = `
 ========================================================================
-KubeSlice Enterprise Setup (1 Controller + 2 Worker) is complete.
+KubeSlice Enterprise Setup (1 Controller + 2 Worker) is complete 
+with a sample iPerf deployment.
 You can now access Kubeslice Manager UI using the following URL:
 
 %s %s
 
 To access Kubeslice Manager use the following token in the login screen:
+
+%s %s
+
+Verify the iPerf Connectivity.
+Here, the iPerf client, which is installed on Worker 1, will attempt to 
+reach out to iPerf service, which is installed on Worker 2.
+
+Note: The DNS propagation may take a minute or two.
 
 %s %s
 `
@@ -104,6 +113,9 @@ func PrintNextSteps(verificationOnly bool, ApplicationConfiguration *Configurati
 func printVerificationSteps(ApplicationConfiguration *ConfigurationSpecs) {
 	var template string
 	username := "admin"
+	clusters := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
+	iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+clusters[1].ContextName, "--kubeconfig="+clusters[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
+
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == ProfileEntDemo {
 		token := GetUIAdminToken(
 			&ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster,
@@ -113,12 +125,10 @@ func printVerificationSteps(ApplicationConfiguration *ConfigurationSpecs) {
 		template = fmt.Sprintf(printEntVerificationStepsTemplate,
 			util.Globe, endpoint,
 			util.Lock, token,
+			util.Run, iperfCommand.String(),
 		)
 
 	} else {
-
-		clusters := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
-		iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+clusters[1].ContextName, "--kubeconfig="+clusters[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
 		template = fmt.Sprintf(printVerificationStepsTemplate,
 			util.Run, iperfCommand.String(),
 		)
