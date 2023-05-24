@@ -88,7 +88,7 @@ var defaultConfiguration = &internal.ConfigurationSpecs{
 
 var defaultEntConfiguration = &internal.HelmChartConfiguration{
 	RepoAlias: "kubeslice-ent-demo",
-	RepoUrl:   "https://kubeslice.aveshalabs.io/repository/kubeslice-helm-ent-prod/",
+	RepoUrl:   "https://kubeslice.aveshalabs.io/repository/kubeslice-helm-ent-stage",
 	CertManagerChart: internal.HelmChart{
 		ChartName: "cert-manager",
 	},
