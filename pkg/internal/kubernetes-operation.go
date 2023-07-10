@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
@@ -41,6 +42,30 @@ func PodVerification(message string, cluster Cluster, namespace string) {
 			util.Printf("%s %s... %d seconds elapsed", util.Wait, message, i*5)
 		}
 	}
+}
+
+func LicenseVerification(message string, cluster Cluster, namespace string) {
+	err := Retry(5, 1*time.Second, func() (err error) {
+		util.Printf("%s %s...", util.Wait, message)
+		return fetchLicenseSecret(LicenseFileName, cluster, namespace)
+	})
+	if err != nil {
+		log.Fatalf("Unable to fetch License\n%s", err)
+	}
+}
+
+func fetchLicenseSecret(secretName string, cc Cluster, namespace string) error {
+	var outB, errB bytes.Buffer
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "secret", secretName, "-n", namespace)
+	if err != nil {
+		return err
+	}
+	for _, line := range strings.Split(outB.String(), "\n") {
+		if strings.Contains(line, secretName) {
+			return nil
+		}
+	}
+	return fmt.Errorf("license not found")
 }
 
 func ApplyKubectlManifest(fileName, namespace string, cluster *Cluster) {
