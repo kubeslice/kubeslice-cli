@@ -7,6 +7,8 @@ const (
 	SliceConfigObject              = "sliceconfigs.controller.kubeslice.io"
 	ServiceExportConfigObject      = "serviceexportconfigs.controller.kubeslice.io"
 
+	LicenseFileName = "kubeslice-license-file"
+
 	Kind_Component                = "kind"
 	Calico_Component              = "calico"
 	Controller_Component          = "controller"

@@ -32,10 +32,15 @@ func InstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) {
 
 	installKubeSliceController(cc.ControllerCluster, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.ControllerChart.ChartName)
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(2 * time.Second)
 
 	util.Printf("%s Waiting for KubeSlice Controller Pods to be Healthy...", util.Wait)
 	PodVerification("Waiting for KubeSlice Controller Pods to be Healthy", cc.ControllerCluster, KUBESLICE_CONTROLLER_NAMESPACE)
+
+	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" && ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == ProfileEntDemo {
+		util.Printf("%s Waiting for KubeSlice Trial License to be Ready...", util.Wait)
+		LicenseVerification("Waiting for KubeSlice Trial License to be Ready", cc.ControllerCluster, KUBESLICE_CONTROLLER_NAMESPACE)
+	}
 
 	util.Printf("%s Successfully installed KubeSlice Controller.\n", util.Tick)
 
