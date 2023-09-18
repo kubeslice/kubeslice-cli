@@ -7,3 +7,13 @@
 #   $ (head -n10 AUTHORS && git shortlog -se | sed -E 's/^\s+[0-9]+\t//') | tee AUTHORS
 
 # Please keep the list sorted.
+Eric Peterson <eric@avesha.io>
+Kranthi Kumar <kranthi@aveshasystems.com>
+Md Imran <imranaec@outlook.com>
+Priyank Upadhyay <105195271+priyank-upadhyay@users.noreply.github.com>
+Priyank Upadhyay <priyank@aveshasystems.com>
+Puran Adhikari <puran.adhikari@aveshasystems.com>
+Richie Sebastian <104349170+richiesebastian@users.noreply.github.com>
+priyupadhyay <priyupadhyay1994@gmail.com>
+roshanikk <roshani.khairnar@aveshasystems.com>
+that-backend-guy <107320806+that-backend-guy@users.noreply.github.com>
