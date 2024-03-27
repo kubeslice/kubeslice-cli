@@ -21,6 +21,7 @@ type HelmChartConfiguration struct {
 	HelmUsername     string           `yaml:"helm_username"`
 	HelmPassword     string           `yaml:"helm_password"`
 	ImagePullSecret  ImagePullSecrets `yaml:"image_pull_secret"`
+	UseLocal         bool             `yaml:"use_local"`
 }
 
 type HelmChart struct {
