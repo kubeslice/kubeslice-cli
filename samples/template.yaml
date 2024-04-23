@@ -33,8 +33,9 @@ configuration:
     project_name: #{the name of the KubeSlice Project}
     project_users: #{optional: specify KubeSlice Project users with Readw-Write access. Default is admin}
   helm_chart_configuration:
-    repo_alias: #{The alias of the helm repo for KubeSlice Charts}
-    repo_url: #{The URL of the Helm Charts for KubeSlice}
+    repo_alias: #{The alias of the helm repo for KubeSlice Charts. For local charts provide the local path to the charts.}
+    repo_url: #{The URL of the Helm Charts for KubeSlice. Not required if use_local is true}
+    use_local: #{Use local charts instead of remote charts. Default is false}
     cert_manager_chart:
       chart_name: #{The name of the Cert Manager Chart}
       version: #{The version of the chart to use. Leave blank for latest version}
@@ -45,15 +46,15 @@ configuration:
     worker_chart:
       chart_name: #{The name of the Worker Chart}
       version: #{The version of the chart to use. Leave blank for latest version}
-      values: #(Values to be passed as --set arguments to helm install)
+      values: #{Values to be passed as --set arguments to helm install}
     ui_chart:
       chart_name: #{The name of the UI/Enterprise Chart}
       version: #{The version of the chart to use. Leave blank for latest version}
-      values: #(Values to be passed as --set arguments to helm install)
+      values: #{Values to be passed as --set arguments to helm install}
     prometheus_chart:
       chart_name: #{The name of the Prometheus Chart}
       version: #{The version of the chart to use. Leave blank for latest version}
-      values: #(Values to be passed as --set arguments to helm install)
+      values: #{Values to be passed as --set arguments to helm install}
     helm_username: #{Helm Username if the repo is private}
     helm_password: #{Helm Password if the repo is private}
     image_pull_secret: #{The image pull secrets. Optional for OpenSource, required for enterprise}
