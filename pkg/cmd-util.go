@@ -211,7 +211,7 @@ func validateConfiguration(specs *internal.ConfigurationSpecs) []string {
 	if hc.RepoAlias == "" {
 		errors = append(errors, fmt.Sprintf("%s configuration.helm_chart_configuration.repo_alias must be specified", util.Cross))
 	}
-	if hc.RepoUrl == "" {
+	if hc.RepoUrl == "" && !hc.UseLocal {
 		errors = append(errors, fmt.Sprintf("%s configuration.helm_chart_configuration.repo_url must be specified", util.Cross))
 	}
 	if hc.CertManagerChart.ChartName == "" {
