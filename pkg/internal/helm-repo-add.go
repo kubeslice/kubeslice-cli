@@ -21,17 +21,21 @@ imagePullSecrets:
 func AddHelmCharts(ApplicationConfiguration *ConfigurationSpecs) {
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
 	// helm repo add avesha https://kubeslice.github.io/kubeslice/
-	util.Printf("\nAdding KubeSlice Helm Charts...")
+	if hc.UseLocal {
+		util.Printf("\nUsing Local Helm Charts...")
+	} else {
+		util.Printf("\nAdding KubeSlice Helm Charts...")
 
-	addHelmChart(ApplicationConfiguration)
-	util.Printf("%s Successfully added helm repo %s : %s", util.Tick, hc.RepoAlias, hc.RepoUrl)
-	time.Sleep(200 * time.Millisecond)
+		addHelmChart(ApplicationConfiguration)
+		util.Printf("%s Successfully added helm repo %s : %s", util.Tick, hc.RepoAlias, hc.RepoUrl)
+		time.Sleep(200 * time.Millisecond)
 
-	updateHelmChart()
-	util.Printf("%s Successfully updated helm repo", util.Tick)
-	time.Sleep(200 * time.Millisecond)
+		updateHelmChart()
+		util.Printf("%s Successfully updated helm repo", util.Tick)
+		time.Sleep(200 * time.Millisecond)
 
-	util.Printf("%s Successfully added helm charts.\n", util.Tick)
+		util.Printf("%s Successfully added helm charts.\n", util.Tick)
+	}
 }
 
 func addHelmChart(ApplicationConfiguration *ConfigurationSpecs) {
