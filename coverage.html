@@ -1,0 +1,621 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cmd: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/kubeslice/kubeslice-cli/cmd/common.go (100.0%)</option>
+				
+				<option value="file1">github.com/kubeslice/kubeslice-cli/cmd/create.go (22.2%)</option>
+				
+				<option value="file2">github.com/kubeslice/kubeslice-cli/cmd/delete.go (14.3%)</option>
+				
+				<option value="file3">github.com/kubeslice/kubeslice-cli/cmd/describe.go (13.3%)</option>
+				
+				<option value="file4">github.com/kubeslice/kubeslice-cli/cmd/edit.go (17.6%)</option>
+				
+				<option value="file5">github.com/kubeslice/kubeslice-cli/cmd/get.go (20.0%)</option>
+				
+				<option value="file6">github.com/kubeslice/kubeslice-cli/cmd/install.go (19.0%)</option>
+				
+				<option value="file7">github.com/kubeslice/kubeslice-cli/cmd/register.go (21.4%)</option>
+				
+				<option value="file8">github.com/kubeslice/kubeslice-cli/cmd/root.go (0.0%)</option>
+				
+				<option value="file9">github.com/kubeslice/kubeslice-cli/cmd/uninstall.go (15.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package cmd
+
+var (
+        profile      string
+        skipSteps    = []string{}
+        outputFormat string
+        Config       string
+)
+
+func mapFromSlice(slice []string) map[string]string <span class="cov8" title="1">{
+        resultantMap := make(map[string]string)
+        for _, step := range slice </span><span class="cov8" title="1">{
+                resultantMap[step] = ""
+        }</span>
+        <span class="cov8" title="1">return resultantMap</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var createCmd = &amp;cobra.Command{
+        Use:   "create",
+        Short: "Create Kubeslice resources.",
+        Args:  cobra.MinimumNArgs(1),
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                var objectName string
+                ns, _ := cmd.Flags().GetString("namespace")
+                if ns == "" </span><span class="cov0" title="0">{
+                        util.Fatalf("Namespace is required")
+                }</span>
+                <span class="cov0" title="0">filename, _ := cmd.Flags().GetString("filename")
+                workerList, _ := cmd.Flags().GetStringSlice("setWorker")
+                if len(args) &gt; 1 </span><span class="cov0" title="0">{
+                        objectName = args[1]
+                }</span>
+                <span class="cov0" title="0">pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename})
+                switch args[0] </span>{
+                case "project":<span class="cov0" title="0">
+                        pkg.CreateProject()</span>
+                case "sliceConfig":<span class="cov0" title="0">
+                        pkg.CreateSliceConfig(workerList)</span>
+                case "serviceExportConfig":<span class="cov0" title="0">
+                        pkg.CreateServiceExportConfig(filename)</span>
+                default:<span class="cov0" title="0">
+                        util.Fatalf("Invalid object type")</span>
+                }
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(createCmd)
+        createCmd.Flags().StringP("namespace", "n", "", "namespace")
+        createCmd.Flags().StringP("filename", "f", "", "Filename, directory, or URL to file to use to create the resource")
+        createCmd.Flags().StringSliceP("setWorker", "w", nil, "List of Worker Clusters to be registered in the SliceConfig")
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var deleteCmd = &amp;cobra.Command{
+        Use:     "delete",
+        Aliases: []string{"d, remove"},
+        Short:   "Delete Kubeslice resources.",
+        Args:    cobra.MinimumNArgs(2),
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                var objectName string
+                ns, _ := cmd.Flags().GetString("namespace")
+                if ns == "" </span><span class="cov0" title="0">{
+                        util.Fatalf("Namespace is required")
+                }</span>
+
+                <span class="cov0" title="0">objectName = args[1]
+
+                pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
+                switch args[0] </span>{
+                case "project":<span class="cov0" title="0">
+                        pkg.DeleteProject()</span>
+                case "sliceConfig":<span class="cov0" title="0">
+                        pkg.DeleteSliceConfig()</span>
+                case "serviceExportConfig":<span class="cov0" title="0">
+                        pkg.DeleteServiceExportConfig()</span>
+                case "worker":<span class="cov0" title="0">
+                        pkg.RemoveWorker()</span>
+                default:<span class="cov0" title="0">
+                        util.Fatalf("Invalid object type")</span>
+                }
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(deleteCmd)
+        deleteCmd.Flags().StringP("namespace", "n", "", "namespace")
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var describeCmd = &amp;cobra.Command{
+        Use:   "describe",
+        Short: "Describe Kubeslice resources.",
+        Long:  "Show details of a specific Kubeslice resource or group of resources.",
+        Args:  cobra.MinimumNArgs(1),
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                var objectName string
+                ns, _ := cmd.Flags().GetString("namespace")
+                if ns == "" </span><span class="cov0" title="0">{
+                        util.Fatalf("Namespace is required")
+                }</span>
+
+                <span class="cov0" title="0">if len(args) &gt; 1 </span><span class="cov0" title="0">{
+                        objectName = args[1]
+                }</span>
+
+                <span class="cov0" title="0">pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0]})
+                switch args[0] </span>{
+                case "project":<span class="cov0" title="0">
+                        pkg.DescribeProject()</span>
+                case "sliceConfig":<span class="cov0" title="0">
+                        pkg.DescribeSliceConfig()</span>
+                case "serviceExportConfig":<span class="cov0" title="0">
+                        pkg.DescribeServiceExportConfig()</span>
+                case "worker":<span class="cov0" title="0">
+                        pkg.DescribeWorker()</span>
+                default:<span class="cov0" title="0">
+                        util.Fatalf("Invalid object type")</span>
+                }
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(describeCmd)
+        describeCmd.Flags().StringP("namespace", "n", "", "namespace")
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var editCmd = &amp;cobra.Command{
+        Use:     "edit",
+        Aliases: []string{"e"},
+        Short:   "Edit Kubeslice resources.",
+        Long: `The edit command allows you to directly edit any Kubeslice resource you can retrieve via the command line tools. It will open the editor defined by your KUBE_EDITOR, or EDITOR environment variables, or fall back to ‘vi’ for Linux or ‘notepad’ for Windows. You can edit multiple objects, although changes are applied one at a time. The command accepts filenames as well as command line arguments, although the files you point to must be previously saved versions of resources.
+        The default format is YAML.
+        In the event an error occurs while updating, a temporary file will be created on disk that contains your unapplied changes. The most common error when updating a resource is another editor changing the resource on the server. When this occurs, you will have to apply your changes to the newer version of the resource, or update your temporary saved copy to include the latest resource version.`,
+        Args: cobra.ExactArgs(2),
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                var objectName string
+                ns, _ := cmd.Flags().GetString("namespace")
+                if ns == "" </span><span class="cov0" title="0">{
+                        util.Fatalf("Namespace is required")
+                }</span>
+                <span class="cov0" title="0">filename, _ := cmd.Flags().GetString("filename")
+
+                if len(args) &gt; 1 </span><span class="cov0" title="0">{
+                        objectName = args[1]
+                }</span>
+
+                <span class="cov0" title="0">pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename})
+                switch args[0] </span>{
+                case "project":<span class="cov0" title="0">
+                        pkg.EditProject()</span>
+                case "sliceConfig":<span class="cov0" title="0">
+                        pkg.EditSliceConfig()</span>
+                case "serviceExportConfig":<span class="cov0" title="0">
+                        pkg.EditServiceExportConfig()</span>
+                case "worker":<span class="cov0" title="0">
+                        pkg.EditWorker()</span>
+                default:<span class="cov0" title="0">
+                        util.Fatalf("Invalid object type")</span>
+                }
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(editCmd)
+        editCmd.Flags().StringP("namespace", "n", "", "namespace")
+        editCmd.Flags().StringP("filename", "f", "", "Filename, directory, or URL to file to use to create the resource")
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var getCmd = &amp;cobra.Command{
+        Use:     "get",
+        Aliases: []string{"g"},
+        Short:   "Get Kubeslice resources.",
+        Args:    cobra.RangeArgs(1, 2),
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                var objectName string
+                ns, _ := cmd.Flags().GetString("namespace")
+                if ns == "" &amp;&amp; args[0] != "ui-endpoint" </span><span class="cov0" title="0">{
+                        util.Fatalf("Namespace is required")
+                }</span>
+                <span class="cov0" title="0">worker, _ := cmd.Flags().GetString("worker")
+                if len(args) &gt; 1 </span><span class="cov0" title="0">{
+                        objectName = args[1]
+                }</span>
+
+                <span class="cov0" title="0">pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], OutputFormat: outputFormat})
+                switch args[0] </span>{
+                case "project":<span class="cov0" title="0">
+                        pkg.GetProject()</span>
+                case "sliceConfig":<span class="cov0" title="0">
+                        pkg.GetSliceConfig()</span>
+                case "serviceExportConfig":<span class="cov0" title="0">
+                        pkg.GetServiceExportConfig()</span>
+                case "secrets":<span class="cov0" title="0">
+                        pkg.GetSecrets(worker)</span>
+                case "worker":<span class="cov0" title="0">
+                        pkg.GetWorker()</span>
+                case "ui-endpoint":<span class="cov0" title="0">
+                        pkg.GetUIEndpoint()</span>
+                default:<span class="cov0" title="0">
+                        util.Fatalf("Invalid object type")</span>
+                }
+
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(getCmd)
+        getCmd.Flags().StringP("namespace", "n", "", "namespace")
+        getCmd.Flags().StringP("worker", "w", "", "worker")
+        getCmd.Flags().StringVarP(&amp;outputFormat, "output", "o", "", "supported values json, yaml")
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var withCertManager bool
+
+var installCmd = &amp;cobra.Command{
+        Use:     "install",
+        Aliases: []string{"i"},
+        Short:   "Installs workloads to run KubeSlice",
+        Long: `Installs the required workloads to run KubeSlice Controller and KubeSlice Worker.
+        Additional example applications are also installed in demo profiles to showcase the
+        KubeSlice functionality`,
+        Args: cobra.NoArgs,
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                // check if config and profile are both set, if so, error out
+                if Config != "" &amp;&amp; profile != "" </span><span class="cov0" title="0">{
+                        cmd.Help()
+                        util.Fatalf("\n %v Cannot use both --config and --profile options", util.Cross)
+                }</span>
+                // check if config and profile are both not set, if so, error out
+                <span class="cov0" title="0">if Config == "" &amp;&amp; profile == "" </span><span class="cov0" title="0">{
+                        cmd.Help()
+                        util.Fatalf("\n %v Please pass either --config or --profile option", util.Cross)
+                }</span>
+                <span class="cov0" title="0">if profile != "" </span><span class="cov0" title="0">{
+                        switch profile </span>{
+                        case pkg.ProfileFullDemo:<span class="cov0" title="0">
+                                skipSteps = append(skipSteps, "prometheus")</span>
+                        case pkg.ProfileMinimalDemo:<span class="cov0" title="0">
+                                skipSteps = append(skipSteps, "prometheus")</span>
+                        case pkg.ProfileEntDemo:<span class="cov0" title="0"></span>
+                        default:<span class="cov0" title="0">
+                                util.Fatalf("%v Unknown profile: %s. Possible values %s", util.Cross, profile, []string{pkg.ProfileFullDemo, pkg.ProfileMinimalDemo, pkg.ProfileEntDemo})</span>
+                        }
+                        <span class="cov0" title="0">pkg.ReadAndValidateConfiguration("", profile)</span>
+                } else<span class="cov0" title="0"> {
+                        pkg.ReadAndValidateConfiguration(Config, "")
+                }</span>
+                // Default behaviour is not ot install cert-manager
+                <span class="cov0" title="0">if !withCertManager </span><span class="cov0" title="0">{
+                        skipSteps = append(skipSteps, "cert-manager")
+                }</span>
+
+                <span class="cov0" title="0">stepsToSkipMap := mapFromSlice(skipSteps)
+                pkg.Install(stepsToSkipMap)</span>
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(installCmd)
+        installCmd.Flags().StringVarP(&amp;profile, "profile", "p", "", `&lt;profile-value&gt;
+The profile for installation/uninstallation.
+Supported values:
+        - full-demo:
+                Showcases the KubeSlice inter-cluster connectivity by spawning
+                3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers, 
+                and installing iPerf application to generate network traffic.
+        - minimal-demo:
+                Sets up 3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers. 
+                Generates the KubernetesManifests for user to manually apply, and verify 
+                the functionality
+        - enterprise-demo:
+                Showcases the KubeSlice Enterprise functionality by spawning
+                3 Kind Clusters, including 1 KubeSlice Controller and 2 KubeSlice Workers, 
+                installing the enterprise charts for Controller and Worker with KubeSlice Manager (UI),
+                and installing iPerf application to generate network traffic. 
+                Ensure that the imagePullSecrets (username and password) are set as environment variables.
+
+                KUBESLICE_IMAGE_PULL_USERNAME : optional : Default 'aveshaenterprise'
+                KUBESLICE_IMAGE_PULL_PASSWORD : required
+
+Cannot be used with --config flag.`)
+        installCmd.Flags().StringSliceVarP(&amp;skipSteps, "skip", "s", []string{}, `Skips the installation steps (comma-seperated). 
+Supported values:
+        - kind: Skips the creation of kind clusters
+        - calico: Skips the installation of Calico
+        - controller: Skips the installation of KubeSlice Controller
+        - worker-registration: Skips the registration of KubeSlice Workers on the Controller
+        - worker: Skips the installation of KubeSlice Worker
+        - demo: Skips the installation of additional example applications
+        - ui: Skips the installtion of enterprise UI components (Kubeslice-Manager)
+        - prometheus: Skips the installation of prometheus`)
+        installCmd.Flags().BoolVarP(&amp;withCertManager, "with-cert-manager", "", false, `Installs Cert-Manager for kubeslice controller (for versions &lt; 0.7.0)`)
+
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var registerCmd = &amp;cobra.Command{
+        Use:   "register",
+        Short: "Register a Kubeslice worker cluster.",
+        Args:  cobra.MinimumNArgs(1),
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                var objectName string
+                ns, _ := cmd.Flags().GetString("namespace")
+                if ns == "" </span><span class="cov0" title="0">{
+                        util.Fatalf("Namespace is required")
+                }</span>
+                <span class="cov0" title="0">filename, _ := cmd.Flags().GetString("filename")
+
+                if len(args) &gt; 1 </span><span class="cov0" title="0">{
+                        objectName = args[1]
+                }</span>
+
+                <span class="cov0" title="0">pkg.SetCliOptions(pkg.CliParams{Config: Config, Namespace: ns, ObjectName: objectName, ObjectType: args[0], FileName: filename})
+                switch args[0] </span>{
+                case "worker":<span class="cov0" title="0">
+                        pkg.RegisterWorker()</span>
+                default:<span class="cov0" title="0">
+                        util.Fatalf("Invalid object type")</span>
+                }
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(registerCmd)
+        registerCmd.Flags().StringP("namespace", "n", "", "namespace")
+        registerCmd.Flags().StringP("filename", "f", "", "Filename, directory, or URL to file to use to create the resource")
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package cmd
+
+import (
+        "fmt"
+        "os"
+
+        "github.com/spf13/cobra"
+        // "github.com/spf13/cobra/doc"
+)
+
+var version = "0.6.0"
+var rootCmd = &amp;cobra.Command{
+        Use:     "kubeslice-cli",
+        Version: version,
+        Short:   "kubeslice-cli - a simple CLI for KubeSlice Operations",
+        Long: `kubeslice-cli - a simple CLI for KubeSlice Operations
+    
+Use kubeslice-cli to install/uninstall required workloads to run KubeSlice Controller and KubeSlice Worker.
+Additional example applications can also be installed in demo profiles to showcase the
+KubeSlice functionality`,
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                cmd.Help()
+        }</span>,
+}
+var RootCmd = rootCmd
+
+func Execute() <span class="cov0" title="0">{
+        rootCmd.PersistentFlags().StringVarP(&amp;Config, "config", "c", "", `&lt;path-to-topology-configuration-yaml-file&gt;
+        The yaml file with topology configuration. 
+        Refer: https://github.com/kubeslice/kubeslice-cli/blob/master/samples/template.yaml`)
+        if err := rootCmd.Execute(); err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintf(os.Stderr, "Whoops. There was an error while executing kubeslice-cli '%s'", err)
+                os.Exit(1)
+        }</span>
+        //  Uncomment to generate docs for new commands/flags
+        // doc.GenMarkdownTree(rootCmd, "doc")
+
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package cmd
+
+import (
+        "github.com/kubeslice/kubeslice-cli/pkg"
+        "github.com/kubeslice/kubeslice-cli/util"
+        "github.com/spf13/cobra"
+)
+
+var (
+        uninstallAll          bool
+        uninstallController   bool
+        uninstallUI           bool
+        uninstallCertManager  bool
+        uninstallWorker       = []string{}
+        workersToUninstall    map[string]string
+        componentsToUninstall map[string]string
+)
+var uninstallCmd = &amp;cobra.Command{
+        Use:     "uninstall",
+        Aliases: []string{"cleanup"},
+        Short:   "Performs cleanup of Kubeslice components.",
+        Args:    cobra.NoArgs,
+        Run: func(cmd *cobra.Command, args []string) <span class="cov0" title="0">{
+                pkg.ReadAndValidateConfiguration(Config, "")
+                // if --all flag is passed, other flags should not be allowed
+                if uninstallAll &amp;&amp; uninstallUI </span><span class="cov0" title="0">{
+                        cmd.Help()
+                        util.Fatalf("\n %v Cannot use other options if --all is passed", util.Cross)
+                }</span>
+
+                // if no flags are passed, set uninstallAll true
+                <span class="cov0" title="0">if !uninstallAll &amp;&amp; !uninstallUI </span><span class="cov0" title="0">{
+                        uninstallAll = true
+                }</span>
+
+                <span class="cov0" title="0">componentsToUninstall = make(map[string]string)
+                workersToUninstall = make(map[string]string)
+
+                if uninstallAll </span><span class="cov0" title="0">{
+                        uninstallController = true
+                        uninstallUI = true
+                        uninstallWorker = []string{"*"}
+                }</span>
+                <span class="cov0" title="0">if uninstallController </span><span class="cov0" title="0">{
+                        componentsToUninstall["controller"] = ""
+                }</span>
+                <span class="cov0" title="0">if uninstallUI </span><span class="cov0" title="0">{
+                        componentsToUninstall["ui"] = ""
+                }</span>
+                <span class="cov0" title="0">if uninstallCertManager </span><span class="cov0" title="0">{
+                        componentsToUninstall["cert-manager"] = ""
+                }</span>
+                <span class="cov0" title="0">if len(uninstallWorker) &gt; 0 </span><span class="cov0" title="0">{
+                        componentsToUninstall["worker"] = ""
+                        workersToUninstall = mapFromSlice(uninstallWorker)
+                }</span>
+                <span class="cov0" title="0">pkg.Uninstall(componentsToUninstall, workersToUninstall)</span>
+        },
+}
+
+func init() <span class="cov8" title="1">{
+        rootCmd.AddCommand(uninstallCmd)
+        uninstallCmd.Flags().BoolVarP(&amp;uninstallAll, "all", "a", false, `Uninstalls all components (Worker, Controller, UI)`)
+        uninstallCmd.Flags().BoolVarP(&amp;uninstallUI, "ui", "u", false, `Uninstalls enterprise UI components (Kubeslice-Manager)`)
+        // TODO: update the controller version after release
+        uninstallCmd.Flags().BoolVarP(&amp;uninstallCertManager, "cert-manager", "", false, `Uninstalls Cert Manager (required for controller version &lt; 0.7.0)`)
+        // TODO: A discussion is needed for graceful cleanup of worker clusters
+        // uninstallCmd.Flags().StringSliceVarP(&amp;uninstallWorker, "worker", "", []string{}, `Uninstalls worker clusters`)
+        // uninstallCmd.Flags().Lookup("worker").NoOptDefVal = "*"
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
