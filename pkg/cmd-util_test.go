@@ -15,7 +15,7 @@ func TestSetCliOptions(t *testing.T) {
 		Config:       "",
 		OutputFormat: "json",
 	}
-
+	//set
 	SetCliOptions(cliParams)
 
 	if CliOptions.ObjectType != "project" {
