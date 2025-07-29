@@ -7,12 +7,18 @@ import (
 	"time"
 
 	"github.com/kubeslice/kubeslice-cli/util"
+	"github.com/schollz/progressbar/v3"
 )
 
 func InstallCalico(clusterConfig *ClusterConfiguration) {
 	util.Printf("\nInstalling Calico Networking...")
 
 	clusters := getAllClusters(clusterConfig)
+	bar := progressbar.NewOptions(len(clusters),
+		progressbar.OptionSetDescription("Installing Calico on clusters"),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSetWidth(15),
+	)
 	for _, cluster := range clusters {
 		if !calicoAlreadyInstalled(cluster) {
 			util.Printf("Installing on Cluster %s", cluster.Name)
@@ -27,6 +33,7 @@ func InstallCalico(clusterConfig *ClusterConfiguration) {
 			util.Printf("%s Waiting for Calico Pods to be Healthy on Cluster %s...", util.Wait, cluster.Name)
 			PodVerification("Waiting for Calico Pods to be Healthy", *cluster, "calico-system")
 		}
+		bar.Add(1)
 	}
 
 	util.Printf("%s Successfully installed Calico Networking", util.Tick)
