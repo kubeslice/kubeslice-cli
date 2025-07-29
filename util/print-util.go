@@ -23,6 +23,24 @@ func Printf(format string, a ...interface{}) {
 	}
 }
 
+// CliError is a structured error type for CLI errors with context and suggestions.
+type CliError struct {
+	Msg        string
+	Context    string
+	Suggestion string
+}
+
+func (e *CliError) Error() string {
+	return fmt.Sprintf("Error: %s\nContext: %s\nSuggestion: %s", e.Msg, e.Context, e.Suggestion)
+}
+
+// PrintCliError prints a CliError in a user-friendly way and exits.
+func PrintCliError(err *CliError) {
+	fmt.Fprintf(os.Stderr, "%s %s\nContext: %s\nSuggestion: %s\n", Cross, err.Msg, err.Context, err.Suggestion)
+	os.Exit(1)
+}
+
+// Deprecated: use PrintCliError for structured errors.
 func Fatalf(format string, a ...interface{}) {
 	if len(a) > 0 {
 		fmt.Printf(format+"\n", a...)

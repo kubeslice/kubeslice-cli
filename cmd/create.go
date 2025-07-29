@@ -14,7 +14,11 @@ var createCmd = &cobra.Command{
 		var objectName string
 		ns, _ := cmd.Flags().GetString("namespace")
 		if ns == "" {
-			util.Fatalf("Namespace is required")
+			util.PrintCliError(&util.CliError{
+				Msg:        "Namespace is required",
+				Context:    "create command",
+				Suggestion: "Use the --namespace or -n flag to specify the namespace.",
+			})
 		}
 		filename, _ := cmd.Flags().GetString("filename")
 		workerList, _ := cmd.Flags().GetStringSlice("setWorker")
@@ -30,7 +34,11 @@ var createCmd = &cobra.Command{
 		case "serviceExportConfig":
 			pkg.CreateServiceExportConfig(filename)
 		default:
-			util.Fatalf("Invalid object type")
+			util.PrintCliError(&util.CliError{
+				Msg:        "Invalid object type",
+				Context:    "create command",
+				Suggestion: "Valid types: project, sliceConfig, serviceExportConfig.",
+			})
 		}
 	},
 }

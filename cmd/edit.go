@@ -18,7 +18,11 @@ var editCmd = &cobra.Command{
 		var objectName string
 		ns, _ := cmd.Flags().GetString("namespace")
 		if ns == "" {
-			util.Fatalf("Namespace is required")
+			util.PrintCliError(&util.CliError{
+				Msg:        "Namespace is required",
+				Context:    "edit command",
+				Suggestion: "Use the --namespace or -n flag to specify the namespace.",
+			})
 		}
 		filename, _ := cmd.Flags().GetString("filename")
 
@@ -37,7 +41,11 @@ var editCmd = &cobra.Command{
 		case "worker":
 			pkg.EditWorker()
 		default:
-			util.Fatalf("Invalid object type")
+			util.PrintCliError(&util.CliError{
+				Msg:        "Invalid object type",
+				Context:    "edit command",
+				Suggestion: "Valid types: project, sliceConfig, serviceExportConfig, worker.",
+			})
 		}
 	},
 }

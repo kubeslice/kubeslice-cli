@@ -15,7 +15,11 @@ var getCmd = &cobra.Command{
 		var objectName string
 		ns, _ := cmd.Flags().GetString("namespace")
 		if ns == "" && args[0] != "ui-endpoint" {
-			util.Fatalf("Namespace is required")
+			util.PrintCliError(&util.CliError{
+				Msg:        "Namespace is required",
+				Context:    "get command",
+				Suggestion: "Use the --namespace or -n flag to specify the namespace.",
+			})
 		}
 		worker, _ := cmd.Flags().GetString("worker")
 		if len(args) > 1 {
@@ -37,7 +41,11 @@ var getCmd = &cobra.Command{
 		case "ui-endpoint":
 			pkg.GetUIEndpoint()
 		default:
-			util.Fatalf("Invalid object type")
+			util.PrintCliError(&util.CliError{
+				Msg:        "Invalid object type",
+				Context:    "get command",
+				Suggestion: "Valid types: project, sliceConfig, serviceExportConfig, secrets, worker, ui-endpoint.",
+			})
 		}
 
 	},
