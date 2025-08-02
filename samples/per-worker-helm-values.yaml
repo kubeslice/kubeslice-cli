@@ -1,0 +1,79 @@
+# Per-Worker Helm Values Example
+# This example demonstrates how to use per-worker helm values to customize
+# each worker cluster with specific configurations while maintaining global defaults.
+
+configuration:
+  cluster_configuration:
+    kube_config_path: ~/.kube/config
+    controller:
+      name: controller
+      context_name: controller-context
+    workers:
+      # Standard worker - uses global values only (backward compatibility)
+      - name: standard-worker
+        context_name: standard-worker-context
+        # No helm_values specified - inherits all global values
+
+      # OpenShift worker - platform-specific overrides
+      - name: openshift-worker
+        context_name: openshift-worker-context
+        helm_values:
+          global.profile.openshift: true # Override global setting
+          nodeSelector.node-role.kubernetes.io/worker: "" # OpenShift node selector
+          tolerations[0].key: "node-role.kubernetes.io/master" # Master node toleration
+          tolerations[0].effect: "NoSchedule"
+
+      # High-performance worker - resource and performance overrides
+      - name: high-perf-worker
+        context_name: high-perf-worker-context
+        helm_values:
+          resources.limits.cpu: "2000m" # 4x more CPU than global
+          resources.limits.memory: "4Gi" # 8x more memory than global
+          resources.requests.cpu: "1000m" # Higher CPU requests
+          nodeSelector.performance: "high" # Performance node selector
+          nodeSelector.zone: "us-west-1a" # Specific availability zone
+          replicaCount: 3 # More replicas for HA
+
+      # GPU worker - specialized hardware configuration
+      - name: gpu-worker
+        context_name: gpu-worker-context
+        helm_values:
+          nodeSelector.accelerator: "nvidia-tesla-k80" # GPU node selector
+          tolerations[0].key: "nvidia.com/gpu" # GPU toleration
+          tolerations[0].operator: "Exists"
+          tolerations[0].effect: "NoSchedule"
+          resources.limits.nvidia.com/gpu: 1 # GPU resource limit
+
+      # Edge worker - minimal resource configuration
+      - name: edge-worker
+        context_name: edge-worker-context
+        helm_values:
+          resources.limits.cpu: "200m" # Minimal CPU for edge
+          resources.limits.memory: "256Mi" # Minimal memory for edge
+          resources.requests.cpu: "100m" # Low CPU requests
+          resources.requests.memory: "128Mi" # Low memory requests
+          nodeSelector.node-type: "edge" # Edge node selector
+          replicaCount: 1 # Single replica for edge
+
+  kubeslice_configuration:
+    project_name: per-worker-demo
+
+  helm_chart_configuration:
+    repo_alias: kubeslice
+    repo_url: https://kubeslice.github.io/kubeslice/
+    cert_manager_chart:
+      chart_name: cert-manager
+    controller_chart:
+      chart_name: kubeslice-controller
+    worker_chart:
+      chart_name: kubeslice-worker
+      # Global values applied to all workers (unless overridden by helm_values)
+      values:
+        kubesliceNetworking.enabled: true # Enable networking by default
+        global.profile.openshift: false # Default to standard Kubernetes
+        resources.limits.cpu: "500m" # Default CPU limit
+        resources.limits.memory: "512Mi" # Default memory limit
+        resources.requests.cpu: "100m" # Default CPU request
+        resources.requests.memory: "128Mi" # Default memory request
+        replicaCount: 2 # Default replica count
+        image.pullPolicy: "IfNotPresent" # Default image pull policy
