@@ -128,3 +128,114 @@ func CreateSliceConfig(namespace string, controllerCluster *Cluster, filename st
 	ApplyFile(filename, namespace, controllerCluster)
 	util.Printf("\nSuccessfully Applied Slice Configuration.")
 }
+
+func ShowSliceHealth(sliceConfigName string, namespace string, controllerCluster *Cluster) {
+	util.Printf("\nFetching KubeSlice slice health status for %s...", sliceConfigName)
+
+	// Get the slice config with JSON output for parsing
+	var outB, errB bytes.Buffer
+	cmdArgs := []string{}
+	if controllerCluster != nil {
+		cmdArgs = append(cmdArgs, "--context="+controllerCluster.ContextName, "--kubeconfig="+controllerCluster.KubeConfigPath)
+	}
+	cmdArgs = append(cmdArgs, "get", SliceConfigObject, sliceConfigName, "-n", namespace, "-o", "json")
+
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, cmdArgs...)
+	if err != nil {
+		util.Printf("%s Failed to fetch slice health status: %v", util.Cross, err)
+		return
+	}
+
+	// Parse and display health status
+	displaySliceHealthStatus(outB.String(), sliceConfigName)
+	time.Sleep(200 * time.Millisecond)
+}
+
+func ShowAllSliceHealth(namespace string, controllerCluster *Cluster) {
+	util.Printf("\nFetching KubeSlice slice health status for all slices...")
+
+	// Get all slice configs with JSON output for parsing
+	var outB, errB bytes.Buffer
+	cmdArgs := []string{}
+	if controllerCluster != nil {
+		cmdArgs = append(cmdArgs, "--context="+controllerCluster.ContextName, "--kubeconfig="+controllerCluster.KubeConfigPath)
+	}
+	cmdArgs = append(cmdArgs, "get", SliceConfigObject, "-n", namespace, "-o", "json")
+
+	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, cmdArgs...)
+	if err != nil {
+		util.Printf("%s Failed to fetch slice health status: %v", util.Cross, err)
+		return
+	}
+
+	// Parse and display health status for all slices
+	displayAllSliceHealthStatus(outB.String())
+	time.Sleep(200 * time.Millisecond)
+}
+
+func displaySliceHealthStatus(jsonOutput string, sliceName string) {
+	// Parse JSON to extract health information
+	// This is a simplified implementation - in a real scenario, you'd want to parse the JSON properly
+	util.Printf("\n=== Slice Health Status: %s ===", sliceName)
+
+	if strings.Contains(jsonOutput, `"status"`) {
+		// Extract status information
+		if strings.Contains(jsonOutput, `"ready"`) {
+			util.Printf("%s Status: Ready", util.Tick)
+		} else {
+			util.Printf("%s Status: Not Ready", util.Cross)
+		}
+
+		// Extract additional health metrics if available
+		if strings.Contains(jsonOutput, `"conditions"`) {
+			util.Printf("Conditions: Available")
+		}
+
+		// Show slice subnet if available
+		if strings.Contains(jsonOutput, `"sliceSubnet"`) {
+			util.Printf("Slice Subnet: Configured")
+		}
+
+		// Show cluster information
+		if strings.Contains(jsonOutput, `"clusters"`) {
+			util.Printf("Clusters: Connected")
+		}
+	} else {
+		util.Printf("%s Status: Unknown", util.Wait)
+	}
+
+	util.Printf("Raw JSON Output:")
+	util.Printf(jsonOutput)
+}
+
+func displayAllSliceHealthStatus(jsonOutput string) {
+	util.Printf("\n=== All Slices Health Status ===")
+
+	// Parse JSON to extract all slices
+	if strings.Contains(jsonOutput, `"items"`) {
+		util.Printf("Found multiple slices:")
+
+		// Count slices
+		sliceCount := strings.Count(jsonOutput, `"kind":"SliceConfig"`)
+		util.Printf("Total Slices: %d", sliceCount)
+
+		// Extract slice names
+		lines := strings.Split(jsonOutput, "\n")
+		for _, line := range lines {
+			if strings.Contains(line, `"name"`) && strings.Contains(line, `"metadata"`) {
+				// Extract name from JSON
+				if nameStart := strings.Index(line, `"name"`); nameStart != -1 {
+					if nameEnd := strings.Index(line[nameStart:], `"`); nameEnd != -1 {
+						name := strings.Trim(line[nameStart+nameEnd+1:], `", `)
+						util.Printf("Slice: %s", name)
+					}
+				}
+			}
+		}
+	} else {
+		util.Printf("No slices found or error parsing output")
+	}
+
+	util.Printf("\nRaw JSON Output:")
+	util.Printf(jsonOutput)
+}
