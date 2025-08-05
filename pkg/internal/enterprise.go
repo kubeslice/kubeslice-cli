@@ -70,7 +70,7 @@ func generateUIValuesFile(clusterType string, cluster Cluster, hcConfig HelmChar
 	} else {
 		serviceType = "LoadBalancer"
 	}
-	err := generateValuesFile(kubesliceDirectory+"/"+uiValuesFileName, &hcConfig.UIChart, fmt.Sprintf(UIValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), serviceType))
+	err := GenerateValuesFile(kubesliceDirectory+"/"+uiValuesFileName, &hcConfig.UIChart, fmt.Sprintf(UIValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), serviceType))
 	if err != nil {
 		log.Fatalf("%s %s", util.Cross, err)
 	}

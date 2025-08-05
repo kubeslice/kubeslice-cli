@@ -58,7 +58,7 @@ func UninstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) 
 }
 
 func generateControllerValuesFile(cluster Cluster, hcConfig HelmChartConfiguration) {
-	err := generateValuesFile(kubesliceDirectory+"/"+controllerValuesFileName, &hcConfig.ControllerChart, fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), cluster.ControlPlaneAddress))
+	err := GenerateValuesFile(kubesliceDirectory+"/"+controllerValuesFileName, &hcConfig.ControllerChart, fmt.Sprintf(controllerValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), cluster.ControlPlaneAddress))
 	if err != nil {
 		log.Fatalf("%s %s", util.Cross, err)
 	}
