@@ -2,6 +2,8 @@ package pkg
 
 import "github.com/kubeslice/kubeslice-cli/pkg/internal"
 
+var getUIEndpointFunc = internal.GetUIEndpoint
+
 func GetUIEndpoint() {
-	internal.GetUIEndpoint(CliOptions.Cluster, ApplicationConfiguration.Configuration.ClusterConfiguration.Profile)
+	getUIEndpointFunc(CliOptions.Cluster, ApplicationConfiguration.Configuration.ClusterConfiguration.Profile)
 }
