@@ -33,6 +33,8 @@ KubeSlice functionality
   edit        Edit Kubeslice resources.
   get         Get Kubeslice resources.
   install     Installs workloads to run KubeSlice
+  register    Register a Kubeslice worker cluster.
+  show-health Show health status of KubeSlice resources.
   uninstall   Performs cleanup of Kubeslice components.
   help        Help about any command
 
@@ -57,6 +59,7 @@ KubeSlice functionality
 * [kubeslice-cli get](doc/kubeslice-cli_get.md)	 - Get Kubeslice resources.
 * [kubeslice-cli install](doc/kubeslice-cli_install.md)	 - Installs workloads to run KubeSlice.
 * [kubeslice-cli register](doc/kubeslice-cli_register.md)	 - Register a Kubeslice worker cluster.
+* [kubeslice-cli show-health](doc/kubeslice-cli_show-health.md)	 - Show health status of KubeSlice resources.
 * [kubeslice-cli uninstall](doc/kubeslice-cli_uninstall.md)	 - Performs cleanup of Kubeslice components.
 
 
