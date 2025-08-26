@@ -2,6 +2,7 @@ package internal
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -20,7 +21,11 @@ func GetSecretName(workerName string, namespace string, controllerCluster *Clust
 	cmdArgs := []string{}
 	cmdArgs = append(cmdArgs, "get", SecretObject, "-n", namespace)
 	var outB bytes.Buffer
-	c1 := exec.Command("/home/excellarate/.local/bin/kubectl", cmdArgs...)
+	kubectlPath := os.Getenv("KUBECTL_PATH")
+	if kubectlPath == "" {
+		kubectlPath = "/home/excellarate/.local/bin/kubectl"
+	}
+	c1 := exec.Command(kubectlPath, cmdArgs...)
 	c2 := exec.Command("grep", "worker-"+workerName)
 	c3 := exec.Command("awk", "{print $1}")
 	c2.Stdin, _ = c1.StdoutPipe()
