@@ -7,8 +7,8 @@ import (
 )
 
 var showHealthCmd = &cobra.Command{
-	Use:   "show-health",
-	Short: "Show health status of Kubeslice resources.",
+	Use:   "show-cluster-health",
+	Short: "Show health status of Kubeslice Cluster resources.",
 	Long:  "Display health status and diagnostics for Kubeslice clusters and components.",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
