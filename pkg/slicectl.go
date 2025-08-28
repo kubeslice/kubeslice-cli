@@ -57,6 +57,8 @@ func entDemo() {
 	util.Printf("%s Waiting for configuration propagation", util.Wait)
 	time.Sleep(20 * time.Second)
 	internal.RolloutRestartIPerf(ApplicationConfiguration)
+	// Deploy Bookinfo demo as part of enterprise demo
+	internal.DeployBookinfoDemo(ApplicationConfiguration)
 	internal.PrintNextSteps(true, ApplicationConfiguration)
 }
 
