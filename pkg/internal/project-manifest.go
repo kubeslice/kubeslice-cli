@@ -46,7 +46,7 @@ func GetKubeSliceProject(projectName string, namespace string, controllerCluster
 	GetKubectlResources(ProjectObject, projectName, namespace, controllerCluster, "")
 	time.Sleep(200 * time.Millisecond)
 }
-func generateKubeSliceProjectManifest(projectName string, users []string) {
+func generateKubeSliceProjectYAML(projectName string, users []string) string {
 	if len(users) == 0 {
 		users = []string{"admin"}
 	}
@@ -54,7 +54,12 @@ func generateKubeSliceProjectManifest(projectName string, users []string) {
 	for _, user := range users {
 		userString = fmt.Sprintf(`%s      - %s%s`, userString, user, "\n")
 	}
-	util.DumpFile(fmt.Sprintf(kubesliceProjectTemplate, projectName, userString), kubesliceDirectory+"/"+projectFileName)
+	return fmt.Sprintf(kubesliceProjectTemplate, projectName, userString)
+}
+
+func generateKubeSliceProjectManifest(projectName string, users []string) {
+	manifestContent := generateKubeSliceProjectYAML(projectName, users)
+	util.DumpFile(manifestContent, kubesliceDirectory+"/"+projectFileName)
 }
 
 func DeleteKubeSliceProject(projectName string, namespace string, controllerCluster *Cluster) {
