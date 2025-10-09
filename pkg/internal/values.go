@@ -8,12 +8,17 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func mergeMaps(dest, src map[interface{}]interface{}) map[interface{}]interface{} {
+func MergeMaps(dest, src map[interface{}]interface{}) map[interface{}]interface{} {
+	// If dest is nil, create a new map
+	if dest == nil {
+		dest = make(map[interface{}]interface{})
+	}
+
 	for k, v := range src {
 		if d, ok := dest[k]; ok {
 			switch d.(type) {
 			case map[interface{}]interface{}:
-				dest[k] = mergeMaps(d.(map[interface{}]interface{}), v.(map[interface{}]interface{}))
+				dest[k] = MergeMaps(d.(map[interface{}]interface{}), v.(map[interface{}]interface{}))
 			default:
 				dest[k] = v
 			}
@@ -24,7 +29,11 @@ func mergeMaps(dest, src map[interface{}]interface{}) map[interface{}]interface{
 	return dest
 }
 
-func generateValuesFile(filePath string, hc *HelmChart, defaults string) error {
+func GenerateValuesFile(filePath string, hc *HelmChart, defaults string) error {
+	if hc == nil {
+		return fmt.Errorf("helm chart cannot be nil")
+	}
+
 	valuesMap := make(map[interface{}]interface{})
 	for k, v := range hc.Values {
 		keys := strings.Split(k, ".")
@@ -46,7 +55,7 @@ func generateValuesFile(filePath string, hc *HelmChart, defaults string) error {
 		return fmt.Errorf("error parsing defaults: %v", err)
 	}
 
-	mergedMap := mergeMaps(valuesMap, defaultsMap)
+	mergedMap := MergeMaps(defaultsMap, valuesMap)
 
 	finalData, err := yaml.Marshal(mergedMap)
 	if err != nil {

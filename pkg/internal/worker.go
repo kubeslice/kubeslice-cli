@@ -96,7 +96,7 @@ func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configu
 	if err != nil {
 		log.Fatalf("Unable to fetch secrets\n%s", err)
 	}
-	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.ControlPlaneAddress))
+	err = GenerateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.ControlPlaneAddress))
 	if err != nil {
 		log.Fatalf("%s %s", util.Cross, err)
 	}

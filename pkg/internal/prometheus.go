@@ -42,7 +42,7 @@ func patchClusterObjectInControllerCluster(wc []Cluster, cc *Cluster, projectNS 
 }
 
 func generatePrometheusValuesFile(hcConfig HelmChartConfiguration) {
-	err := generateValuesFile(kubesliceDirectory+"/"+PrometheusValuesFileName, &hcConfig.PrometheusChart, "")
+	err := GenerateValuesFile(kubesliceDirectory+"/"+PrometheusValuesFileName, &hcConfig.PrometheusChart, "")
 	if err != nil {
 		log.Fatalf("%s %s", util.Cross, err)
 	}
