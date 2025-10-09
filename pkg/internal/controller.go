@@ -50,6 +50,13 @@ func UninstallKubeSliceController(ApplicationConfiguration *ConfigurationSpecs) 
 	util.Printf("\nUninstalling KubeSlice Controller...")
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	time.Sleep(200 * time.Millisecond)
+	
+	// First delete CRDs to trigger worker uninstallation
+	util.Printf("Deleting KubeSlice CRDs to trigger worker cleanup...")
+	deleteKubeSliceCRDs(cc.ControllerCluster)
+	time.Sleep(2 * time.Second) // Give time for workers to be cleaned up
+	
+	// Then uninstall the controller
 	uninstallKubeSliceController(cc.ControllerCluster)
 	time.Sleep(200 * time.Millisecond)
 	util.Printf("%s Successfully uninstalled KubeSlice Controller", util.Tick)
@@ -78,9 +85,32 @@ func installKubeSliceController(cluster Cluster, hc HelmChartConfiguration) {
 
 func uninstallKubeSliceController(cluster Cluster) {
 	args := make([]string, 0)
-	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", KUBESLICE_CONTROLLER_NAMESPACE, "--namespace", KUBESLICE_CONTROLLER_NAMESPACE)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", KUBESLICE_CONTROLLER_NAMESPACE, "--namespace", KUBESLICE_CONTROLLER_NAMESPACE, "--timeout", "2m")
 	err := util.RunCommand("helm", args...)
 	if err != nil {
 		log.Fatalf("Process failed %v", err)
+	}
+}
+
+func deleteKubeSliceCRDs(cluster Cluster) {
+	// List of KubeSlice CRDs to delete
+	crdNames := []string{
+		"projects.controller.kubeslice.io",
+		"clusters.controller.kubeslice.io",
+		"sliceconfigs.controller.kubeslice.io",
+		"serviceexportconfigs.controller.kubeslice.io",
+		"serviceexports.networking.kubeslice.io",
+	}
+
+	for _, crdName := range crdNames {
+		args := make([]string, 0)
+		args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "delete", "crd", crdName)
+		err := util.RunCommand("kubectl", args...)
+		if err != nil {
+			// Log error but continue with other CRDs
+			util.Printf("%s Warning: Failed to delete CRD %s: %v", util.Cross, crdName, err)
+		} else {
+			util.Printf("%s Deleted CRD: %s", util.Tick, crdName)
+		}
 	}
 }
