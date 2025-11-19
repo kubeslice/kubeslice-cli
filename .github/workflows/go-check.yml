@@ -10,19 +10,63 @@ on:
   pull_request:
    
 jobs:
-
-  build:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.17'
+      
+      - name: Run Linters
+        run: make lint
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.20'
+  test:
+    name: Test (Unit + Integration)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.17'
 
-    - name: Build
-      run: go build -v ./...
+      # --- Setup Integration Test Dependencies ---
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'v3.11.1'
 
-    - name: Test
-      run: go test -v ./...
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Install Kind
+        run: |
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      # --- Run Tests ---
+      - name: Run All Tests
+        run: make test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.17'
+      
+      - name: Build
+        run: go build -v ./...
