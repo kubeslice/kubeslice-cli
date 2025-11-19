@@ -2,11 +2,13 @@ package internal
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/kubeslice/kubeslice-cli/util"
 )
+
+// Function variable for testing - Allows mocking PodVerification in tests
+var podVerificationFunc = PodVerification
 
 func InstallCertManager(ApplicationConfiguration *ConfigurationSpecs) {
 
@@ -16,10 +18,10 @@ func InstallCertManager(ApplicationConfiguration *ConfigurationSpecs) {
 
 	installCertManager(cc.ControllerCluster, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.CertManagerChart.ChartName)
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 
 	util.Printf("%s Waiting for Cert Manager Pods to be Healthy...", util.Wait)
-	PodVerification("Waiting for Cert Manager Pods to be Healthy", cc.ControllerCluster, "cert-manager")
+	podVerificationFunc("Waiting for Cert Manager Pods to be Healthy", cc.ControllerCluster, "cert-manager")
 
 	util.Printf("%s Successfully installed cert manager.\n", util.Tick)
 
@@ -47,7 +49,7 @@ func installCertManager(cluster Cluster, hc HelmChartConfiguration) {
 	}
 	err := util.RunCommand("helm", args...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 func uninstallCertManager(cluster Cluster, hc HelmChartConfiguration) error {

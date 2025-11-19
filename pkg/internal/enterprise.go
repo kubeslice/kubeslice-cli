@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -24,6 +23,11 @@ kubeslice:
       type: %s
 `
 
+// Function variables for testing
+var (
+	getNodeIPFunc = getNodeIP
+)
+
 func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling KubeSlice Manager...")
 	if ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName == "" {
@@ -32,33 +36,35 @@ func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	}
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	hc := ApplicationConfiguration.Configuration.HelmChartConfiguration
-	time.Sleep(200 * time.Millisecond)
+
+	util.Sleep(200 * time.Millisecond)
 
 	clusterType := ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType
 	filename := "helm-values-ui.yaml"
 	generateUIValuesFile(clusterType, cc.ControllerCluster, ApplicationConfiguration.Configuration.HelmChartConfiguration)
 	util.Printf("%s Generated Helm Values file for Kubeslice Manager Installation %s", util.Tick, filename)
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 
 	installKubeSliceUI(cc.ControllerCluster, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s", util.Tick, hc.RepoAlias, hc.UIChart.ChartName)
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 
 	util.Printf("%s Waiting for KubeSlice Manager Pods to be Healthy...", util.Wait)
-	PodVerification("Waiting for KubeSlice Manager Pods to be Healthy", cc.ControllerCluster, "kubernetes-dashboard")
+	podVerificationFunc("Waiting for KubeSlice Manager Pods to be Healthy", cc.ControllerCluster, "kubernetes-dashboard")
 	util.Printf("%s Successfully installed KubeSlice Manager.\n", util.Tick)
 }
 
 func UninstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nUninstalling KubeSlice Manager...")
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
-	time.Sleep(200 * time.Millisecond)
+
+	util.Sleep(200 * time.Millisecond)
 	ok, err := uninstallKubeSliceUI(cc.ControllerCluster)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 	if ok {
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 		util.Printf("%s Successfully uninstalled KubeSlice Manager", util.Tick)
 	}
 }
@@ -70,9 +76,10 @@ func generateUIValuesFile(clusterType string, cluster Cluster, hcConfig HelmChar
 	} else {
 		serviceType = "LoadBalancer"
 	}
-	err := generateValuesFile(kubesliceDirectory+"/"+uiValuesFileName, &hcConfig.UIChart, fmt.Sprintf(UIValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), serviceType))
+
+	err := generateValuesFileFunc(kubesliceDirectory+"/"+uiValuesFileName, &hcConfig.UIChart, fmt.Sprintf(UIValuesTemplate+generateImagePullSecretsValue(hcConfig.ImagePullSecret), serviceType))
 	if err != nil {
-		log.Fatalf("%s %s", util.Cross, err)
+		util.Fatalf("%s %s", util.Cross, err)
 	}
 }
 
@@ -84,7 +91,7 @@ func installKubeSliceUI(cluster Cluster, hc HelmChartConfiguration) {
 	}
 	err := util.RunCommand("helm", args...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
@@ -127,9 +134,9 @@ func GetUIEndpoint(cc *Cluster, profile string) string {
 				ports := jsonMap["ports"].([]interface{})
 				for _, port := range ports {
 					portMap := port.(map[string]interface{})
-					if portMap["name"] == "http" { // Assuming that http is the name of the port that you want to use
+					if portMap["name"] == "http" {
 						nodePort := int(portMap["nodePort"].(float64))
-						nodeIP, err := getNodeIP(cc)
+						nodeIP, err := getNodeIPFunc(cc)
 						if err == nil {
 							ep = fmt.Sprintf("https://%s:%d", strings.Trim(nodeIP, "'"), nodePort)
 						} else {
@@ -145,7 +152,7 @@ func GetUIEndpoint(cc *Cluster, profile string) string {
 				ports := jsonMap["ports"].([]interface{})
 				for _, port := range ports {
 					portMap := port.(map[string]interface{})
-					if portMap["name"] == "http" { // Assuming that http is the name of the port that you want to use
+					if portMap["name"] == "http" {
 						nodePort := int(portMap["port"].(float64))
 						ep = fmt.Sprintf("https://%s:%d", lbIP, nodePort)
 						break
@@ -169,7 +176,7 @@ func findUserSecret(username string, projectName string, cc Cluster) string {
 	var outB, errB bytes.Buffer
 	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 
 	var secret string
@@ -180,7 +187,7 @@ func findUserSecret(username string, projectName string, cc Cluster) string {
 		}
 	}
 	if secret == "" {
-		log.Fatalf("failed to find secret for %s", username)
+		util.Fatalf("failed to find secret for %s", username)
 	}
 	return secret
 }
@@ -192,14 +199,15 @@ func GetUIAdminToken(cc *Cluster, username, projectName string) string {
 	var outB, errB bytes.Buffer
 	err := util.RunCommandCustomIO("kubectl", &outB, &errB, false, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", secret, "-n", "kubeslice-"+projectName, "-o", "jsonpath={.data.token}")
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 	x := outB.String()
 	// base64 decode
 	data, err := base64.StdEncoding.DecodeString(x)
 	if err != nil {
-		log.Fatalf("Unable to decode token %v", err)
+		util.Fatalf("Unable to decode token %v", err)
 	}
+
 	return string(data)
 
 }

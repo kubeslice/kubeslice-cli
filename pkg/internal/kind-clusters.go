@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -13,6 +12,11 @@ import (
 )
 
 const KubeconfigPath = kubesliceDirectory + "/kubeconfig.yaml"
+
+// Function variables for testing
+var (
+	setEnvFunc = os.Setenv
+)
 
 func CreateKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 
@@ -25,7 +29,7 @@ func CreateKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 			created = true
 			createKindCluster(cluster.Name + ".yaml")
 			util.Printf("%s Created Kind Cluster : %s", util.Tick, cluster.Name)
-			time.Sleep(200 * time.Millisecond)
+			util.Sleep(200 * time.Millisecond)
 		}
 	}
 	if !created {
@@ -36,23 +40,28 @@ func CreateKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 }
 
 func SetKubeConfigPath() {
-	os.Setenv("KUBECONFIG", KubeconfigPath)
+	err := setEnvFunc("KUBECONFIG", KubeconfigPath)
+	if err != nil {
+		util.Printf("%s Warning: Failed to set KUBECONFIG environment variable: %v", util.Warn, err)
+	}
 }
 
 func CreateKubeConfig() {
-	if _, err := os.Stat(KubeconfigPath); errors.Is(err, os.ErrNotExist) {
+	_, err := util.FileSystem.Stat(KubeconfigPath)
+	if errors.Is(err, os.ErrNotExist) {
 		util.DumpFile("", KubeconfigPath)
 		util.Printf("%s Created Empty KubeConfig file : %s", util.Tick, KubeconfigPath)
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 	}
 }
 
 func getExistingClusters(clusters []*Cluster) []bool {
-	result := make([]bool, len(clusters), len(clusters))
+	result := make([]bool, len(clusters))
+
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kind", &outB, &errB, true, "get", "clusters")
+	err := util.CommandExecutor.ExecuteWithOutput("kind", &outB, &errB, "get", "clusters")
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 	for i, cluster := range clusters {
 		for _, line := range strings.Split(outB.String(), "\n") {
@@ -66,16 +75,17 @@ func getExistingClusters(clusters []*Cluster) []bool {
 }
 
 func createKindCluster(configFile string) {
-	err := util.RunCommandOnStdIO("kind", "create", "cluster", fmt.Sprintf("--config=%s/%s/%s", kubesliceDirectory, kindSubDirectory, configFile))
+	err := util.CommandExecutor.Execute("kind", "create", "cluster", fmt.Sprintf("--config=%s/%s/%s", kubesliceDirectory, kindSubDirectory, configFile))
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
 func DeleteKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 	clusters := getAllClusters(&ApplicationConfiguration.Configuration.ClusterConfiguration)
 	existingClusters := getExistingClusters(clusters)
-	args := make([]string, 0, 0)
+
+	args := make([]string, 0)
 	args = append(args, "delete", "clusters")
 	cNames := make([]string, 0)
 	for i, cluster := range clusters {
@@ -88,9 +98,9 @@ func DeleteKindClusters(ApplicationConfiguration *ConfigurationSpecs) {
 		return
 	}
 	args = append(args, cNames...)
-	err := util.RunCommand("kind", args...)
+	err := util.CommandExecutor.Execute("kind", args...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 

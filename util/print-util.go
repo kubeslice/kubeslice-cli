@@ -1,10 +1,5 @@
 package util
 
-import (
-	"fmt"
-	"os"
-)
-
 const (
 	Cross = string(rune(0x274c))
 	Tick  = string(rune(0x2714))
@@ -16,18 +11,9 @@ const (
 )
 
 func Printf(format string, a ...interface{}) {
-	if len(a) > 0 {
-		fmt.Printf(format+"\n", a...)
-	} else {
-		fmt.Println(format)
-	}
+	Output.Infof(format, a...)
 }
 
 func Fatalf(format string, a ...interface{}) {
-	if len(a) > 0 {
-		fmt.Printf(format+"\n", a...)
-	} else {
-		fmt.Println(format + "\n")
-	}
-	os.Exit(1)
+	Output.Fatalf(format, a...)
 }

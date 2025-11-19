@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"os/exec"
+	"strings"
 
 	"github.com/kubeslice/kubeslice-cli/util"
 )
@@ -102,6 +102,29 @@ Note: The DNS propagation may take a minute or two.
 %s %s
 `
 
+// Function variables for testing
+var (
+	getUIAdminTokenFunc = GetUIAdminToken
+	getUIEndpointFunc   = GetUIEndpoint
+)
+
+// buildKubectlCommand constructs a kubectl command string for display
+func buildKubectlCommand(cluster *Cluster, args ...string) string {
+	kubectlPath := util.ExecutablePaths["kubectl"]
+	if kubectlPath == "" {
+		kubectlPath = "kubectl"
+	}
+	parts := []string{kubectlPath}
+
+	if cluster != nil {
+		parts = append(parts, "--context="+cluster.ContextName)
+		parts = append(parts, "--kubeconfig="+cluster.KubeConfigPath)
+	}
+
+	parts = append(parts, args...)
+	return strings.Join(parts, " ")
+}
+
 func PrintNextSteps(verificationOnly bool, ApplicationConfiguration *ConfigurationSpecs) {
 	if verificationOnly {
 		printVerificationSteps(ApplicationConfiguration)
@@ -114,23 +137,40 @@ func printVerificationSteps(ApplicationConfiguration *ConfigurationSpecs) {
 	var template string
 	username := "admin"
 	clusters := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
-	iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+clusters[1].ContextName, "--kubeconfig="+clusters[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
+	if len(clusters) < 2 {
+		util.Printf("Error: At least 2 worker clusters required\n")
+		return
+	}
+
+	iperfCommand := buildKubectlCommand(
+		&clusters[1],
+		"exec", "-it", "deploy/iperf-sleep",
+		"-c", "iperf",
+		"-n", "iperf",
+		"--",
+		"iperf", "-c", "iperf-server.iperf.svc.slice.local",
+		"-p", "5201",
+		"-i", "1",
+		"-b", "10Mb;",
+	)
 
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile == ProfileEntDemo {
-		token := GetUIAdminToken(
+		token := getUIAdminTokenFunc(
 			&ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster,
 			username,
 			ApplicationConfiguration.Configuration.KubeSliceConfiguration.ProjectName)
-		endpoint := GetUIEndpoint(&ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster, ProfileEntDemo)
+		endpoint := getUIEndpointFunc(
+			&ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster,
+			ProfileEntDemo)
+
 		template = fmt.Sprintf(printEntVerificationStepsTemplate,
 			util.Globe, endpoint,
 			util.Lock, token,
-			util.Run, iperfCommand.String(),
+			util.Run, iperfCommand,
 		)
-
 	} else {
 		template = fmt.Sprintf(printVerificationStepsTemplate,
-			util.Run, iperfCommand.String(),
+			util.Run, iperfCommand,
 		)
 	}
 	util.Printf(template)
@@ -139,22 +179,66 @@ func printVerificationSteps(ApplicationConfiguration *ConfigurationSpecs) {
 func printNamespaceIsolationSteps(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration.ControllerCluster
 	wc := ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters
-	iperfCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+wc[1].ContextName, "--kubeconfig="+wc[1].KubeConfigPath, "exec", "-it", "deploy/iperf-sleep", "-c", "iperf", "-n", "iperf", "--", "iperf", "-c", "iperf-server.iperf.svc.slice.local", "-p", "5201", "-i", "1", "-b", "10Mb;")
-	sliceApplyCommand := exec.Command(util.ExecutablePaths["kubectl"], "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "apply", "-f", kubesliceDirectory+"/"+sliceTemplateFileName)
-	sliceVerifyCommandWorker1 := exec.Command(util.ExecutablePaths["kubectl"], "--context="+wc[0].ContextName, "--kubeconfig="+wc[0].KubeConfigPath, "get", "slice", "-n", "kubeslice-system")
-	sliceVerifyCommandWorker2 := exec.Command(util.ExecutablePaths["kubectl"], "--context="+wc[1].ContextName, "--kubeconfig="+wc[1].KubeConfigPath, "get", "slice", "-n", "kubeslice-system")
-	applyIPerfWorker1 := exec.Command(util.ExecutablePaths["kubectl"], "rollout ", "restart", "deployment/iperf-server", "-n", "iperf", "--context="+wc[0].ContextName, "--kubeconfig="+wc[0].KubeConfigPath)
-	applyIPerfWorker2 := exec.Command(util.ExecutablePaths["kubectl"], "rollout ", "restart", "deployment/iperf-sleep", "-n", "iperf", "--context="+wc[1].ContextName, "--kubeconfig="+wc[1].KubeConfigPath)
-	applyIPerfServiceExportWorker2 := exec.Command(util.ExecutablePaths["kubectl"], "--context="+wc[0].ContextName, "--kubeconfig="+wc[0].KubeConfigPath, "apply ", "-f", kubesliceDirectory+"/"+iPerfServerServiceExportFileName, "-n", "iperf")
-	template := fmt.Sprintf(printNextStepsTemplateForSliceInstallation,
-		util.Run, iperfCommand.String(),
-		util.Run, sliceApplyCommand.String(),
-		util.Run, sliceVerifyCommandWorker1.String(),
-		util.Run, sliceVerifyCommandWorker2.String(),
-		util.Run, applyIPerfWorker1.String(),
-		util.Run, applyIPerfWorker2.String(),
-		util.Run, applyIPerfServiceExportWorker2.String(),
-		util.Run, iperfCommand.String(),
+	if len(wc) < 2 {
+		util.Printf("Error: At least 2 worker clusters required\n")
+		return
+	}
+
+	iperfCommand := buildKubectlCommand(
+		&wc[1],
+		"exec", "-it", "deploy/iperf-sleep",
+		"-c", "iperf",
+		"-n", "iperf",
+		"--",
+		"iperf", "-c", "iperf-server.iperf.svc.slice.local",
+		"-p", "5201",
+		"-i", "1",
+		"-b", "10Mb;",
 	)
+
+	sliceApplyCommand := buildKubectlCommand(
+		&cc,
+		"apply", "-f", kubesliceDirectory+"/"+sliceTemplateFileName,
+	)
+
+	sliceVerifyCommandWorker1 := buildKubectlCommand(
+		&wc[0],
+		"get", "slice", "-n", "kubeslice-system",
+	)
+
+	sliceVerifyCommandWorker2 := buildKubectlCommand(
+		&wc[1],
+		"get", "slice", "-n", "kubeslice-system",
+	)
+
+	applyIPerfWorker1 := buildKubectlCommand(
+		&wc[0],
+		"rollout", "restart", "deployment/iperf-server",
+		"-n", "iperf",
+	)
+
+	applyIPerfWorker2 := buildKubectlCommand(
+		&wc[1],
+		"rollout", "restart", "deployment/iperf-sleep",
+		"-n", "iperf",
+	)
+
+	applyIPerfServiceExportWorker2 := buildKubectlCommand(
+		&wc[0],
+		"apply", "-f", kubesliceDirectory+"/"+iPerfServerServiceExportFileName,
+		"-n", "iperf",
+	)
+
+	template := fmt.Sprintf(printNextStepsTemplateForSliceInstallation,
+		util.Run, iperfCommand,
+		util.Run, sliceApplyCommand,
+		util.Run, sliceVerifyCommandWorker1,
+		util.Run, sliceVerifyCommandWorker2,
+		util.Run, applyIPerfWorker1,
+		util.Run, applyIPerfWorker2,
+		util.Run, applyIPerfServiceExportWorker2,
+		util.Run, iperfCommand,
+	)
+
 	util.Printf(template)
 }

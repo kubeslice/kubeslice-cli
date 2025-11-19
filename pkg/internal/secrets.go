@@ -2,35 +2,61 @@ package internal
 
 import (
 	"bytes"
-	"os/exec"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/kubeslice/kubeslice-cli/util"
 )
 
+var (
+	getSecretNameFunc              = GetSecretName
+	getKubectlResourcesFuncSecrets = GetKubectlResources
+)
+
 func GetSecrets(workerName string, namespace string, controllerCluster *Cluster, outputFormat string) {
+	if controllerCluster == nil {
+		util.Printf("%s Controller cluster cannot be nil", util.Cross)
+		return
+	}
+
 	util.Printf("\nFetching KubeSlice secret...")
-	SecretName := GetSecretName(workerName, namespace, controllerCluster)
-	GetKubectlResources(SecretObject, SecretName, namespace, controllerCluster, outputFormat)
-	time.Sleep(200 * time.Millisecond)
+	SecretName := getSecretNameFunc(workerName, namespace, controllerCluster)
+	if SecretName == "" {
+		util.Printf("%s No secret found for worker %s", util.Cross, workerName)
+		return
+	}
+	getKubectlResourcesFuncSecrets(SecretObject, SecretName, namespace, controllerCluster, outputFormat)
+	util.SystemClock.Sleep(200 * time.Millisecond)
 }
 
 func GetSecretName(workerName string, namespace string, controllerCluster *Cluster) string {
-	cmdArgs := []string{}
-	cmdArgs = append(cmdArgs, "get", SecretObject, "-n", namespace)
-	var outB bytes.Buffer
-	c1 := exec.Command("/home/excellarate/.local/bin/kubectl", cmdArgs...)
-	c2 := exec.Command("grep", "worker-"+workerName)
-	c3 := exec.Command("awk", "{print $1}")
-	c2.Stdin, _ = c1.StdoutPipe()
-	c3.Stdin, _ = c2.StdoutPipe()
-	c3.Stdout = &outB
-	_ = c2.Start()
-	_ = c3.Start()
-	_ = c1.Run()
-	_ = c2.Wait()
-	_ = c3.Wait()
-	s := outB.String()
-	return strings.TrimSuffix(s, "\n")
+	if controllerCluster == nil {
+		util.Printf("%s Controller cluster cannot be nil", util.Cross)
+		return ""
+	}
+
+	jsonpath := fmt.Sprintf(`{.items[?(@.metadata.name contains "worker-%s")].metadata.name}`, workerName)
+	var outB, errB bytes.Buffer
+	err := util.CommandExecutor.ExecuteWithOutput(
+		"kubectl",
+		&outB,
+		&errB,
+		"--context="+controllerCluster.ContextName,
+		"--kubeconfig="+controllerCluster.KubeConfigPath,
+		"get", SecretObject,
+		"-n", namespace,
+		"-o", "jsonpath="+jsonpath,
+	)
+
+	if err != nil {
+		util.Printf("%s Failed to get secret: %v", util.Cross, err)
+		return ""
+	}
+
+	secretName := strings.TrimSpace(outB.String())
+	if secretName == "" {
+		util.Printf("%s No matching secret found for worker-%s", util.Cross, workerName)
+	}
+	return secretName
 }

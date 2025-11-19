@@ -1,201 +1,196 @@
 package util
 
 import (
+	"errors"
 	"os"
-	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateDirectoryPath(t *testing.T) {
-	t.Parallel()
-
-	testDir := filepath.Join(os.TempDir(), "kubeslice-test-"+t.Name())
-	t.Cleanup(func() {
-		os.RemoveAll(testDir)
-	})
-
 	tests := []struct {
-		name string
-		path string
+		name          string
+		path          string
+		statErr       error
+		mkdirErr      error
+		expectFatal   bool
+		fatalContains string
 	}{
 		{
-			name: "Create simple directory",
-			path: "simple-dir",
+			name:    "directory already exists",
+			path:    "/existing/path",
+			statErr: nil,
 		},
 		{
-			name: "Create nested directories",
-			path: filepath.Join("nested", "deep", "deeper", "deepest"),
+			name:    "directory does not exist - creates successfully",
+			path:    "/new/path",
+			statErr: os.ErrNotExist,
 		},
 		{
-			name: "Create directory with special characters",
-			path: "special-chars-dir_123",
+			name:          "mkdir fails - permission denied",
+			path:          "/restricted/path",
+			statErr:       os.ErrNotExist,
+			mkdirErr:      os.ErrPermission,
+			expectFatal:   true,
+			fatalContains: "Failed to create kubeslice directory",
 		},
 		{
-			name: "Handle directory that already exists",
-			path: "existing-dir",
+			name:          "mkdir fails - disk full",
+			path:          "/new/path",
+			statErr:       os.ErrNotExist,
+			mkdirErr:      errors.New("no space left on device"),
+			expectFatal:   true,
+			fatalContains: "Failed to create kubeslice directory",
+		},
+		{
+			name:    "stat returns non-ErrNotExist error - no mkdir attempted",
+			path:    "/some/path",
+			statErr: errors.New("disk error"),
 		},
 	}
 
-	for _, tc := range tests {
-		tc := tc // Capture range variable for parallel execution
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cleanup := NewTestEnvironment()
 
-			targetPath := filepath.Join(testDir, tc.path)
+			fakeFS := FileSystem.(*FakeFileSystem)
+			fakeOutput := Output.(*FakeOutput)
 
-			if tc.name == "Handle directory that already exists" {
-				if err := os.MkdirAll(targetPath, os.ModePerm); err != nil {
-					t.Fatalf("Failed to setup test: %v", err)
-				}
+			mkdirCalled := false
+			fakeFS.StatFunc = func(name string) (os.FileInfo, error) {
+				assert.Equal(t, tt.path, name)
+				return nil, tt.statErr
 			}
 
-			CreateDirectoryPath(targetPath)
+			fakeFS.MkdirAllFunc = func(path string, perm os.FileMode) error {
+				mkdirCalled = true
+				assert.Equal(t, tt.path, path)
+				assert.Equal(t, os.ModePerm, perm)
+				return tt.mkdirErr
+			}
 
-			info, err := os.Stat(targetPath)
-			if err != nil {
-				t.Errorf("CreateDirectoryPath() failed to create directory: %v", err)
-				return
+			CreateDirectoryPath(tt.path)
+
+			if tt.expectFatal {
+				require.NotEmpty(t, fakeOutput.FatalCalls, "Expected Fatalf to be called")
+				assert.Contains(t, fakeOutput.FatalCalls[0], tt.fatalContains)
+			} else {
+				assert.Empty(t, fakeOutput.FatalCalls, "Did not expect Fatalf to be called")
 			}
-			if !info.IsDir() {
-				t.Errorf("CreateDirectoryPath() created a file instead of directory")
+
+			if tt.statErr == os.ErrNotExist {
+				assert.True(t, mkdirCalled, "Expected MkdirAll to be called")
+			} else if tt.statErr != nil {
+				assert.False(t, mkdirCalled, "Did not expect MkdirAll to be called when Stat returns non-ErrNotExist error")
 			}
+
+			cleanup()
 		})
 	}
 }
 
 func TestDumpFile(t *testing.T) {
-	t.Parallel()
-
-	testDir := filepath.Join(os.TempDir(), "kubeslice-test-"+t.Name())
-	if err := os.MkdirAll(testDir, os.ModePerm); err != nil {
-		t.Fatalf("Failed to create test directory: %v", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(testDir)
-	})
-
 	tests := []struct {
-		name     string
-		content  string
-		filename string
+		name          string
+		template      string
+		filename      string
+		writeErr      error
+		expectFatal   bool
+		fatalContains string
 	}{
 		{
-			name:     "Write simple text file",
-			content:  "Hello, World!",
-			filename: "test-simple.txt",
+			name:     "writes simple text successfully",
+			template: "Hello, World!",
+			filename: "/test/file.txt",
 		},
 		{
-			name: "Write multi-line content",
-			content: `Line 1
-Line 2
-Line 3`,
-			filename: "test-multiline.txt",
-		},
-		{
-			name: "Write YAML content",
-			content: `apiVersion: v1
+			name: "writes multi-line YAML successfully",
+			template: `apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: test-config
-data:
-  key1: value1
-  key2: value2`,
-			filename: "test-config.yaml",
+  name: test-config`,
+			filename: "/test/config.yaml",
 		},
 		{
-			name:     "Write empty content",
-			content:  "",
-			filename: "test-empty.txt",
+			name:     "writes empty content successfully",
+			template: "",
+			filename: "/test/empty.txt",
 		},
 		{
-			name: "Write JSON content",
-			content: `{
+			name: "writes JSON content successfully",
+			template: `{
   "name": "test",
-  "version": "1.0.0",
-  "description": "test file"
+  "version": "1.0.0"
 }`,
-			filename: "test-config.json",
+			filename: "/test/config.json",
 		},
 		{
-			name:     "Overwrite existing file",
-			content:  "New content",
-			filename: "test-overwrite.txt",
+			name:     "writes content with special characters",
+			template: "Special: @#$%^&*()_+-=[]{}|;':\",./<>?",
+			filename: "/test/special.txt",
 		},
 		{
-			name:     "Write to nested directory",
-			content:  "Nested content",
-			filename: filepath.Join("nested", "dir", "test-nested.txt"),
+			name:          "write fails - permission denied",
+			template:      "test content",
+			filename:      "/restricted/file.txt",
+			writeErr:      os.ErrPermission,
+			expectFatal:   true,
+			fatalContains: "Failed to write /restricted/file.txt",
 		},
 		{
-			name:     "Write file with special characters in content",
-			content:  "Special chars: @#$%^&*()_+-=[]{}|;':\",./<>?",
-			filename: "test-special-chars.txt",
+			name:          "write fails - disk full",
+			template:      "test content",
+			filename:      "/test/file.txt",
+			writeErr:      errors.New("no space left on device"),
+			expectFatal:   true,
+			fatalContains: "Failed to write",
+		},
+		{
+			name:          "write fails - invalid path",
+			template:      "test content",
+			filename:      "/invalid\x00path/file.txt",
+			writeErr:      errors.New("invalid argument"),
+			expectFatal:   true,
+			fatalContains: "Failed to write",
 		},
 	}
 
-	for _, tc := range tests {
-		tc := tc // Capture range variable for parallel execution
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cleanup := NewTestEnvironment()
 
-			targetFile := filepath.Join(testDir, tc.filename)
+			fakeFS := FileSystem.(*FakeFileSystem)
+			fakeOutput := Output.(*FakeOutput)
 
-			if tc.name == "Overwrite existing file" {
-				if err := os.MkdirAll(filepath.Dir(targetFile), os.ModePerm); err != nil {
-					t.Fatalf("Failed to create directory: %v", err)
+			fakeFS.WriteFileFunc = func(filename string, data []byte, perm os.FileMode) error {
+				assert.Equal(t, tt.filename, filename)
+				assert.Equal(t, []byte(tt.template), data)
+				assert.Equal(t, os.FileMode(0644), perm)
+
+				if tt.writeErr != nil {
+					return tt.writeErr
 				}
-				if err := os.WriteFile(targetFile, []byte("Old content"), 0644); err != nil {
-					t.Fatalf("Failed to setup test: %v", err)
-				}
+
+				fakeFS.WrittenFiles[filename] = data
+				return nil
 			}
 
-			if tc.name == "Write to nested directory" {
-				if err := os.MkdirAll(filepath.Dir(targetFile), os.ModePerm); err != nil {
-					t.Fatalf("Failed to create nested directory: %v", err)
-				}
+			DumpFile(tt.template, tt.filename)
+
+			if tt.expectFatal {
+				require.NotEmpty(t, fakeOutput.FatalCalls, "Expected Fatalf to be called")
+				assert.Contains(t, fakeOutput.FatalCalls[0], tt.fatalContains)
+			} else {
+				assert.Empty(t, fakeOutput.FatalCalls, "Did not expect Fatalf to be called")
+
+				content, exists := fakeFS.WrittenFiles[tt.filename]
+				require.True(t, exists, "File should have been written")
+				assert.Equal(t, tt.template, string(content))
 			}
 
-			DumpFile(tc.content, targetFile)
-
-			actualContent, err := os.ReadFile(targetFile)
-			if err != nil {
-				t.Errorf("DumpFile() failed to create file: %v", err)
-				return
-			}
-			if string(actualContent) != tc.content {
-				t.Errorf("DumpFile() content mismatch\nwant: %q\ngot:  %q", tc.content, string(actualContent))
-			}
-
-			info, err := os.Stat(targetFile)
-			if err == nil && info.IsDir() {
-				t.Errorf("DumpFile() created a directory instead of a file")
-			}
+			cleanup()
 		})
-	}
-}
-
-func TestDumpFile_CreatesFileWithCorrectPermissions(t *testing.T) {
-	t.Parallel()
-
-	testDir := filepath.Join(os.TempDir(), "kubeslice-test-"+t.Name())
-	if err := os.MkdirAll(testDir, os.ModePerm); err != nil {
-		t.Fatalf("Failed to create test directory: %v", err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(testDir)
-	})
-
-	targetFile := filepath.Join(testDir, "test-permissions.txt")
-
-	DumpFile("test content", targetFile)
-
-	info, err := os.Stat(targetFile)
-	if err != nil {
-		t.Fatalf("Failed to stat file: %v", err)
-	}
-
-	mode := info.Mode()
-	if mode&0600 == 0 {
-		t.Errorf("File should be readable and writable by owner, got mode: %v", mode)
 	}
 }

@@ -1,10 +1,8 @@
 package util
 
 import (
-	"bytes"
 	"io"
 	"os"
-	"os/exec"
 )
 
 var ExecutablePaths map[string]string
@@ -16,34 +14,22 @@ var ExecutableVerifyCommands = map[string][]string{
 	"helm":    {"version"},
 }
 
+// RunCommand executes a command using the global CommandExecutor.
 func RunCommand(cli string, arg ...string) error {
-	var outB, errB bytes.Buffer
-	err := RunCommandCustomIO(cli, &outB, &errB, false, arg...)
-	if err != nil {
-		Printf("%s Failed to run command\nOutput: %s\nError: %s %v", Cross, outB.String(), errB.String(), err)
-	}
-	return err
+	return CommandExecutor.Execute(cli, arg...)
 }
 
+// RunCommandWithoutPrint executes a command without printing output.
 func RunCommandWithoutPrint(cli string, arg ...string) error {
-	var outB, errB bytes.Buffer
-	err := RunCommandCustomIO(cli, &outB, &errB, true, arg...)
-	// if err != nil {
-	// 	Printf("%s Failed to run command\nOutput: %s\nError: %s %v", Cross, outB.String(), errB.String(), err)
-	// }
-	return err
+	return CommandExecutor.Execute(cli, arg...)
 }
 
+// RunCommandOnStdIO executes a command with stdout/stderr.
 func RunCommandOnStdIO(cli string, arg ...string) error {
-	return RunCommandCustomIO(cli, os.Stdout, os.Stderr, false, arg...)
+	return CommandExecutor.ExecuteWithOutput(cli, os.Stdout, os.Stderr, arg...)
 }
 
+// RunCommandCustomIO executes a command with custom IO writers.
 func RunCommandCustomIO(cli string, stdout, stderr io.Writer, suppressPrint bool, arg ...string) error {
-	cmd := exec.Command(ExecutablePaths[cli], arg...)
-	if !suppressPrint {
-		Printf("%s Running command: %s", Run, cmd.String())
-	}
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	return cmd.Run()
+	return CommandExecutor.ExecuteWithOutput(cli, stdout, stderr, arg...)
 }

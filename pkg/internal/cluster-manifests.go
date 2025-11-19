@@ -42,6 +42,15 @@ var regionTemplates = map[string]string{
 	"ks-w-2": regionTemplate2,
 }
 
+// Function variables for testing - Allows mocking kubectl operations
+var (
+	applyManifestFunc    = ApplyKubectlManifest
+	getResourceFunc      = GetKubectlResources
+	deleteResourceFunc   = DeleteKubectlResources
+	editResourceFunc     = EditKubectlResources
+	describeResourceFunc = DescribeKubectlResources
+)
+
 func RegisterWorkerClusters(ApplicationConfiguration *ConfigurationSpecs, cliOptions *CliOptionsStruct) {
 	util.Printf("\nRegistering Worker Clusters with Project...")
 
@@ -51,19 +60,19 @@ func RegisterWorkerClusters(ApplicationConfiguration *ConfigurationSpecs, cliOpt
 			generateClusterRegistrationManifest(ApplicationConfiguration, cliOptions.FileName, cliOptions.Namespace)
 		}
 		util.Printf("%s Generated cluster registration manifest %s", util.Tick, cliOptions.FileName)
-		time.Sleep(200 * time.Millisecond)
-		ApplyKubectlManifest(cliOptions.FileName, cliOptions.Namespace, cliOptions.Cluster)
+		util.Sleep(200 * time.Millisecond)
+		applyManifestFunc(cliOptions.FileName, cliOptions.Namespace, cliOptions.Cluster)
 		util.Printf("%s Applied %s", util.Tick, cliOptions.FileName)
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 	} else {
 		ac := ApplicationConfiguration.Configuration
 		generateClusterRegistrationManifest(ApplicationConfiguration, kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-"+ac.KubeSliceConfiguration.ProjectName)
 		util.Printf("%s Generated cluster registration manifest %s", util.Tick, clusterRegistrationFileName)
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 
-		ApplyKubectlManifest(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-"+ac.KubeSliceConfiguration.ProjectName, &ac.ClusterConfiguration.ControllerCluster)
+		applyManifestFunc(kubesliceDirectory+"/"+clusterRegistrationFileName, "kubeslice-"+ac.KubeSliceConfiguration.ProjectName, &ac.ClusterConfiguration.ControllerCluster)
 		util.Printf("%s Applied %s", util.Tick, clusterRegistrationFileName)
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 	}
 	util.Printf("Registered Worker Clusters with Project.")
 }
@@ -85,24 +94,27 @@ func generateClusterRegistrationManifest(ApplicationConfiguration *Configuration
 
 func GetKubeSliceCluster(clusterName string, namespace string, controllerCluster *Cluster, outputFormat string) {
 	util.Printf("\nFetching KubeSlice Worker...")
-	GetKubectlResources(ClusterObject, clusterName, namespace, controllerCluster, outputFormat)
-	time.Sleep(200 * time.Millisecond)
+	getResourceFunc(ClusterObject, clusterName, namespace, controllerCluster, outputFormat)
+	util.Sleep(200 * time.Millisecond)
 }
 
 func DeleteKubeSliceCluster(clusterName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nDeleting KubeSlice Worker...")
-	DeleteKubectlResources(ClusterObject, clusterName, namespace, controllerCluster)
-	time.Sleep(200 * time.Millisecond)
+	deleteResourceFunc(ClusterObject, clusterName, namespace, controllerCluster)
+
+	util.Sleep(200 * time.Millisecond)
 }
 
 func EditKubeSliceCluster(clusterName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nEditing KubeSlice Worker...")
-	EditKubectlResources(ClusterObject, clusterName, namespace, controllerCluster)
-	time.Sleep(200 * time.Millisecond)
+	editResourceFunc(ClusterObject, clusterName, namespace, controllerCluster)
+
+	util.Sleep(200 * time.Millisecond)
 }
 
 func DescribeKubeSliceCluster(clusterName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nDescribe KubeSlice Worker...")
-	DescribeKubectlResources(ClusterObject, clusterName, namespace, controllerCluster)
-	time.Sleep(200 * time.Millisecond)
+	describeResourceFunc(ClusterObject, clusterName, namespace, controllerCluster)
+
+	util.Sleep(200 * time.Millisecond)
 }

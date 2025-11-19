@@ -2,9 +2,9 @@ package internal
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strings"
 
+	"github.com/kubeslice/kubeslice-cli/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -46,14 +46,14 @@ func generateValuesFile(filePath string, hc *HelmChart, defaults string) error {
 		return fmt.Errorf("error parsing defaults: %v", err)
 	}
 
-	mergedMap := mergeMaps(valuesMap, defaultsMap)
+	mergedMap := mergeMaps(defaultsMap, valuesMap)
 
 	finalData, err := yaml.Marshal(mergedMap)
 	if err != nil {
 		return fmt.Errorf("error encoding final data as YAML: %v", err)
 	}
 
-	if err := ioutil.WriteFile(filePath, finalData, 0644); err != nil {
+	if err := util.FileSystem.WriteFile(filePath, finalData, 0644); err != nil {
 		return fmt.Errorf("error writing values file: %v", err)
 	}
 

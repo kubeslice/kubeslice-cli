@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"log"
 	"time"
 
 	"github.com/kubeslice/kubeslice-cli/util"
@@ -11,6 +10,7 @@ const (
 	iPerfClientFileName              = "iperf-client.yaml"
 	iPerfServerFileName              = "iperf-server.yaml"
 	iPerfServerServiceExportFileName = "iperf-server-service-export.yaml"
+	iPerfNamespace                   = "iperf"
 )
 
 const iPerfServiceExportTemplate = `
@@ -118,6 +118,12 @@ spec:
           privileged: true
 `
 
+// Function variables for testing
+var (
+	applyKubectlManifestFunc = ApplyKubectlManifest
+	podVerificationFuncIPerf = PodVerification
+)
+
 func InstallIPerf(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling iPerf Application...")
 
@@ -126,21 +132,21 @@ func InstallIPerf(ApplicationConfiguration *ConfigurationSpecs) {
 	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
 	wc := cc.WorkerClusters
 
-	ApplyKubectlManifest(kubesliceDirectory+"/"+serverFileName, "iperf", &wc[0])
+	applyKubectlManifestFunc(kubesliceDirectory+"/"+serverFileName, iPerfNamespace, &wc[0])
 	util.Printf("%s Applied %s to %s", util.Tick, serverFileName, wc[0].Name)
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 
 	util.Printf("%s Waiting for iPerf Server pod to be running...", util.Wait)
-	PodVerification("Waiting for iPerf Server pod to be running", wc[0], "iperf")
+	podVerificationFuncIPerf("Waiting for iPerf Server pod to be running", wc[0], iPerfNamespace)
 	util.Printf("%s Successfully installed iPerf Server on %s...", util.Tick, wc[0].Name)
 
 	for i := 1; i < len(wc); i++ {
-		ApplyKubectlManifest(kubesliceDirectory+"/"+clientFileName, "iperf", &wc[i])
+		applyKubectlManifestFunc(kubesliceDirectory+"/"+clientFileName, iPerfNamespace, &wc[i])
 		util.Printf("%s Applied %s to %s", util.Tick, clientFileName, wc[i].Name)
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 
 		util.Printf("%s Waiting for iPerf Client pod to be running...", util.Wait)
-		PodVerification("Waiting for iPerf Client pod to be running", wc[i], "iperf")
+		podVerificationFuncIPerf("Waiting for iPerf Client pod to be running", wc[i], iPerfNamespace)
 		util.Printf("%s Successfully installed iPerf Client on %s...", util.Tick, wc[i].Name)
 	}
 
@@ -151,34 +157,36 @@ func GenerateIPerfManifests() {
 	// --- Client Manifests
 	util.DumpFile(iPerfClientTemplate, kubesliceDirectory+"/"+iPerfClientFileName)
 	util.Printf("%s Generated iPerf Client manifest %s", util.Tick, iPerfClientFileName)
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 
 	// --- Server Manifests
 	util.DumpFile(iPerfServerTemplate, kubesliceDirectory+"/"+iPerfServerFileName)
 	util.Printf("%s Generated iPerf Server manifest %s", util.Tick, iPerfServerFileName)
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 }
 
 func GenerateIPerfServiceExportManifest(ApplicationConfiguration *ConfigurationSpecs) {
 	util.DumpFile(iPerfServiceExportTemplate, kubesliceDirectory+"/"+iPerfServerServiceExportFileName)
 	util.Printf("%s Generated iPerf Server Service Export manifest %s for cluster %s", util.Tick, iPerfServerServiceExportFileName, ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters[0].Name)
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 }
 
 func ApplyIPerfServiceExportManifest(ApplicationConfiguration *ConfigurationSpecs) {
-	ApplyKubectlManifest(kubesliceDirectory+"/"+iPerfServerServiceExportFileName, "iperf", &ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters[0])
+	applyKubectlManifestFunc(kubesliceDirectory+"/"+iPerfServerServiceExportFileName, iPerfNamespace, &ApplicationConfiguration.Configuration.ClusterConfiguration.WorkerClusters[0])
 }
 
 func RolloutRestartIPerf(ApplicationConfiguration *ConfigurationSpecs) {
 	clusters := getAllClusters(&ApplicationConfiguration.Configuration.ClusterConfiguration)[1:]
-	err := util.RunCommand("kubectl", "rollout", "restart", "deployment/iperf-server", "-n", "iperf", "--context="+clusters[0].ContextName, "--kubeconfig="+clusters[0].KubeConfigPath)
+
+	err := util.CommandExecutor.Execute("kubectl", "rollout", "restart", "deployment/iperf-server", "-n", iPerfNamespace, "--context="+clusters[0].ContextName, "--kubeconfig="+clusters[0].KubeConfigPath)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
+
 	for i := 1; i < len(clusters); i++ {
-		err = util.RunCommand("kubectl", "rollout", "restart", "deployment/iperf-sleep", "-n", "iperf", "--context="+clusters[i].ContextName, "--kubeconfig="+clusters[i].KubeConfigPath)
+		err = util.CommandExecutor.Execute("kubectl", "rollout", "restart", "deployment/iperf-sleep", "-n", iPerfNamespace, "--context="+clusters[i].ContextName, "--kubeconfig="+clusters[i].KubeConfigPath)
 		if err != nil {
-			log.Fatalf("Process failed %v", err)
+			util.Fatalf("Process failed %v", err)
 		}
 	}
 

@@ -3,8 +3,6 @@ package internal
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -36,7 +34,7 @@ func PodVerification(message string, cluster Cluster, namespace string) {
 			backoffCount = backoffCount + 1
 			util.Printf("%s %s... Pod(s) in error state, waiting to recover... %d seconds elapsed", util.Wait, message, i*5)
 			if backoffCount > backoffLimit {
-				log.Fatalf("Pod(s) in error state,\n%s", output)
+				util.Fatalf("Pod(s) in error state,\n%s", output)
 			}
 		} else {
 			util.Printf("%s %s... %d seconds elapsed", util.Wait, message, i*5)
@@ -50,7 +48,7 @@ func LicenseVerification(message string, cluster Cluster, namespace string) {
 		return fetchLicenseSecret(LicenseFileName, cluster, namespace)
 	})
 	if err != nil {
-		log.Fatalf("Unable to fetch License\n%s", err)
+		util.Fatalf("Unable to fetch License\n%s", err)
 	}
 }
 
@@ -76,7 +74,7 @@ func ApplyKubectlManifest(fileName, namespace string, cluster *Cluster) {
 	cmdArgs = append(cmdArgs, "apply", "-f", fileName, "-n", namespace)
 	err := util.RunCommand("kubectl", cmdArgs...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
@@ -91,12 +89,11 @@ func GetKubectlResources(resourceType string, resourceName string, namespace str
 		cmdArgs = append(cmdArgs, "get", resourceType, resourceName, "-n", namespace)
 	}
 	if outputFormat != "" {
-
 		cmdArgs = append(cmdArgs, "-o", outputFormat)
 	}
 	err := util.RunCommandOnStdIO("kubectl", cmdArgs...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
@@ -108,7 +105,7 @@ func DeleteKubectlResources(resourceType string, resourceName string, namespace 
 	cmdArgs = append(cmdArgs, "delete", resourceType, resourceName, "-n", namespace)
 	err := util.RunCommandOnStdIO("kubectl", cmdArgs...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
@@ -120,7 +117,7 @@ func EditKubectlResources(resourceType string, resourceName string, namespace st
 	cmdArgs = append(cmdArgs, "edit", resourceType, resourceName, "-n", namespace)
 	err := util.RunCommandOnStdIO("kubectl", cmdArgs...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
@@ -132,7 +129,7 @@ func DescribeKubectlResources(resourceType string, resourceName string, namespac
 	cmdArgs = append(cmdArgs, "describe", resourceType, resourceName, "-n", namespace)
 	err := util.RunCommandOnStdIO("kubectl", cmdArgs...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
@@ -140,7 +137,7 @@ func verifyPods(cluster Cluster, namespace string) (PodVerificationStatus, strin
 	var outB, errB bytes.Buffer
 	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cluster.ContextName, "--kubeconfig="+cluster.KubeConfigPath, "get", "pods", "-n", namespace)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 	var count = 0
 	var lines = 0
@@ -175,34 +172,30 @@ func ApplyFile(fileName, namespace string, cluster *Cluster) {
 	cmdArgs = append(cmdArgs, "apply", "-f", fileName, "-n", namespace)
 	err := util.RunCommandOnStdIO("kubectl", cmdArgs...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
 func SetWorker(worker []string, filename string) {
-	//controllerv1alpha1
 	jsonByte := getConf(filename)
 	var value string
 	value = string(jsonByte)
-	log.Println("roshani", len(worker))
+	util.Printf("roshani %d", len(worker))
 	if len(worker) != 0 {
 		for i := 0; i < len(worker); i++ {
 			value, _ = sjson.Set(value, "spec.clusters."+strconv.Itoa(i), worker[i])
 		}
 	}
-	err := ioutil.WriteFile(filename, []byte(value), 0644)
+	err := util.FileSystem.WriteFile(filename, []byte(value), 0644)
 	if err != nil {
-		log.Fatalf("file writing error #%v ", err)
+		util.Fatalf("file writing error #%v ", err)
 	}
 }
 
-// func SetKeys(filename string){
-
-// }
 func getConf(filename string) []byte {
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := util.FileSystem.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("yamlFile.Get err   #%v ", err)
+		util.Fatalf("yamlFile.Get err   #%v ", err)
 	}
 	jsonByte, err := YAML.YAMLToJSON(yamlFile)
 	return jsonByte

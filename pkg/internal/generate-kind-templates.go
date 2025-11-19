@@ -2,8 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"time"
 
 	"github.com/kubeslice/kubeslice-cli/util"
@@ -60,10 +58,13 @@ nodes:
             node-labels: "kubeslice.io/node-type=gateway"
 `
 
+// Function variable for testing
+var removeAllFunc = util.FileSystem.RemoveAll
+
 func DeleteKubeSliceDirectory() {
-	err := os.RemoveAll(kubesliceDirectory)
+	err := removeAllFunc(kubesliceDirectory)
 	if err != nil {
-		log.Fatalf("\nFailed to delete directory %s\n", kubesliceDirectory)
+		util.Fatalf("\nFailed to delete directory %s\n", kubesliceDirectory)
 	}
 }
 
@@ -85,11 +86,11 @@ func GenerateKindConfiguration(ApplicationConfiguration *ConfigurationSpecs) {
 
 	util.DumpFile(fmt.Sprintf(controllerTemplate, cc.ControllerCluster.Name), directory+"/"+cc.ControllerCluster.Name+".yaml")
 	util.Printf("%s Generated %s", util.Tick, directory+"/"+cc.ControllerCluster.Name+".yaml")
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 
 	for _, cluster := range cc.WorkerClusters {
 		util.DumpFile(fmt.Sprintf(kubesliceWorkerTemplate, cluster.Name), directory+"/"+cluster.Name+".yaml")
 		util.Printf("%s Generated %s", util.Tick, directory+"/"+cluster.Name+".yaml")
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 	}
 }

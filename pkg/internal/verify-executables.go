@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -11,9 +10,16 @@ import (
 	"github.com/kubeslice/kubeslice-cli/util"
 )
 
+var (
+	lookPathFunc    = exec.LookPath
+	getEnvFunc      = os.Getenv
+	runtimeGOOSFunc = func() string { return runtime.GOOS }
+)
+
 func VerifyExecutables(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("Verifying Executables...")
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
+
 	if ApplicationConfiguration.Configuration.ClusterConfiguration.Profile != "" || ApplicationConfiguration.Configuration.ClusterConfiguration.ClusterType == "kind" {
 		util.ExecutablePaths = map[string]string{
 			"kind":    "kind",
@@ -28,11 +34,11 @@ func VerifyExecutables(ApplicationConfiguration *ConfigurationSpecs) {
 		}
 	}
 	for key := range util.ExecutablePaths {
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 		verificationResult(verifyBinary(key), key)
 	}
 
-	time.Sleep(200 * time.Millisecond)
+	util.Sleep(200 * time.Millisecond)
 	util.Printf("All required executables were found\n")
 }
 
@@ -42,14 +48,16 @@ func verifyBinary(name string) int {
 
 func _verifyBinary(name, environmentVariable string, executable []string) int {
 	cli := name
-	if os.Getenv(environmentVariable) != "" {
-		cli = strings.Trim(os.Getenv(environmentVariable), "\"")
+	if envPath := getEnvFunc(environmentVariable); envPath != "" {
+		cli = strings.Trim(envPath, "\"")
 	}
-	path, err := exec.LookPath(cli)
+
+	path, err := lookPathFunc(cli)
 	if err != nil || path == "" {
 		return 1
 	}
-	if err = exec.Command(path, executable...).Run(); err != nil {
+	args := append([]string{}, executable...)
+	if err = util.CommandExecutor.Execute(name, args...); err != nil {
 		return 2
 	}
 	util.ExecutablePaths[name] = path
@@ -57,15 +65,16 @@ func _verifyBinary(name, environmentVariable string, executable []string) int {
 }
 
 func executableDownloadMessage(executable string) string {
+	goos := runtimeGOOSFunc()
 	switch executable {
 	case "kind":
-		return kindExecutableMessage[fmt.Sprintf("%s", runtime.GOOS)]
+		return kindExecutableMessage[goos]
 	case "kubectl":
-		return kubectlExecutableMessage[fmt.Sprintf("%s", runtime.GOOS)]
+		return kubectlExecutableMessage[goos]
 	case "helm":
-		return helmExecutableMessage[fmt.Sprintf("%s", runtime.GOOS)]
+		return helmExecutableMessage[goos]
 	case "docker":
-		return dockerExecutableMessage[fmt.Sprintf("%s", runtime.GOOS)]
+		return dockerExecutableMessage[goos]
 	}
 	return ""
 }

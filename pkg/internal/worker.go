@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -23,8 +22,17 @@ metrics:
 cluster:
   name: %s
   endpoint: %s
-
 `
+
+const (
+	workerNamespace = "kubeslice-system"
+)
+
+var (
+	podVerificationFuncWorker = PodVerification
+	retryFunc                 = Retry
+	fetchSecretFunc           = fetchSecret
+)
 
 func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling KubeSlice Worker...")
@@ -40,13 +48,12 @@ func InstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs) {
 		)
 
 		util.Printf("%s Generated Helm Values file for Worker Installation %s", util.Tick, filename)
-		time.Sleep(200 * time.Millisecond)
-
+		util.SystemClock.Sleep(200 * time.Millisecond)
 		installWorker(cluster, filename, ApplicationConfiguration.Configuration.HelmChartConfiguration)
 	}
 
 	util.Printf("%s Successfully Installed Kubeslice Worker", util.Tick)
-	time.Sleep(200 * time.Millisecond)
+	util.SystemClock.Sleep(200 * time.Millisecond)
 }
 
 func UninstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs, workersToUninstall map[string]string) {
@@ -59,20 +66,17 @@ func UninstallKubeSliceWorker(ApplicationConfiguration *ConfigurationSpecs, work
 		_, found := workersToUninstall[cluster.Name]
 		if found || uninstallAllWorker {
 			uninstallKubeSliceWorkerHelm(cluster)
-			time.Sleep(200 * time.Millisecond)
+			util.SystemClock.Sleep(200 * time.Millisecond)
 		}
 	}
-
-	// util.Printf("%s Successfully Installed Kubeslice Worker", util.Tick)
-	time.Sleep(200 * time.Millisecond)
+	util.SystemClock.Sleep(200 * time.Millisecond)
 }
 
-// Retry tries to execute the funtion, If failed reattempts till backoffLimit
 func Retry(backoffLimit int, sleep time.Duration, f func() error) (err error) {
 	start := time.Now()
 	for i := 0; i < backoffLimit; i++ {
 		if i > 0 {
-			time.Sleep(sleep)
+			util.SystemClock.Sleep(sleep)
 			sleep *= 2
 		}
 		err = f()
@@ -86,19 +90,19 @@ func Retry(backoffLimit int, sleep time.Duration, f func() error) (err error) {
 
 func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configuration, insecureMetrics bool) {
 	var secrets map[string]string
-	err := Retry(3, 1*time.Second, func() (err error) {
-		secrets = fetchSecret(cluster.Name, config.ClusterConfiguration.ControllerCluster, config.KubeSliceConfiguration.ProjectName)
+	err := retryFunc(3, 1*time.Second, func() (err error) {
+		secrets = fetchSecretFunc(cluster.Name, config.ClusterConfiguration.ControllerCluster, config.KubeSliceConfiguration.ProjectName)
 		if secrets["namespace"] == "" || secrets["controllerEndpoint"] == "" || secrets["ca.crt"] == "" || secrets["token"] == "" {
 			return fmt.Errorf("secret is empty")
 		}
 		return nil
 	})
 	if err != nil {
-		log.Fatalf("Unable to fetch secrets\n%s", err)
+		util.Fatalf("Unable to fetch secrets\n%s", err)
 	}
-	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.ControlPlaneAddress))
+	err = generateValuesFileFunc(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.ControlPlaneAddress))
 	if err != nil {
-		log.Fatalf("%s %s", util.Cross, err)
+		util.Fatalf("%s %s", util.Cross, err)
 	}
 }
 
@@ -106,23 +110,21 @@ func installWorker(cluster Cluster, valuesName string, helmChartConfig HelmChart
 	hc := helmChartConfig
 	installKubeSliceWorkerHelm(cluster, valuesName, hc)
 	util.Printf("%s Successfully installed helm chart %s/%s on %s", util.Tick, hc.RepoAlias, hc.WorkerChart.ChartName, cluster.Name)
-	time.Sleep(200 * time.Millisecond)
-
+	util.SystemClock.Sleep(200 * time.Millisecond)
 	util.Printf("%s Waiting for KubeSlice Worker Pods to be Healthy...", util.Wait)
-	PodVerification("Waiting for KubeSlice Worker Pods to be Healthy", cluster, "kubeslice-system")
-
+	podVerificationFuncWorker("Waiting for KubeSlice Worker Pods to be Healthy", cluster, workerNamespace)
 	util.Printf("%s Successfully installed KubeSlice Worker %s.", util.Tick, cluster.Name)
 }
 
 func installKubeSliceWorkerHelm(cluster Cluster, valuesFile string, hc HelmChartConfiguration) {
 	args := make([]string, 0)
-	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", "kubeslice-worker", fmt.Sprintf("%s/%s", hc.RepoAlias, hc.WorkerChart.ChartName), "--namespace", "kubeslice-system", "--create-namespace", "-f", kubesliceDirectory+"/"+valuesFile)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "upgrade", "-i", "kubeslice-worker", fmt.Sprintf("%s/%s", hc.RepoAlias, hc.WorkerChart.ChartName), "--namespace", workerNamespace, "--create-namespace", "-f", kubesliceDirectory+"/"+valuesFile)
 	if hc.WorkerChart.Version != "" {
 		args = append(args, "--version", hc.WorkerChart.Version)
 	}
-	err := util.RunCommand("helm", args...)
+	err := util.CommandExecutor.Execute("helm", args...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
@@ -131,23 +133,23 @@ func fetchSecret(clusterName string, cc Cluster, projectName string) map[string]
 	secret := findSecret(clusterName, projectName, cc)
 	//kubectl get secret/kubeslice-rbac-worker-kubeslice-worker-1-token-h99pc -n kubeslice-demo -o jsonpath={.data}
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", secret, "-n", "kubeslice-"+projectName, "-o", "jsonpath={.data}")
+	err := util.CommandExecutor.ExecuteWithOutput("kubectl", &outB, &errB, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", secret, "-n", "kubeslice-"+projectName, "-o", "jsonpath={.data}")
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 	x := map[string]string{}
 	err = json.Unmarshal(outB.Bytes(), &x)
 	if err != nil {
-		log.Fatalf("failed to read secret %s", secret)
+		util.Fatalf("failed to read secret %s", secret)
 	}
 	return x
 }
 
 func findSecret(workerName string, projectName string, cc Cluster) string {
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
+	err := util.CommandExecutor.ExecuteWithOutput("kubectl", &outB, &errB, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "sa", "-n", "kubeslice-"+projectName, "-o", "name")
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 
 	var secret string
@@ -158,16 +160,15 @@ func findSecret(workerName string, projectName string, cc Cluster) string {
 		}
 	}
 	if secret == "" {
-		log.Fatalf("failed to find secret for %s", workerName)
+		util.Fatalf("failed to find secret for %s", workerName)
 	}
 	return secret
 }
 
 func uninstallKubeSliceWorkerHelm(cluster Cluster) {
 	args := make([]string, 0)
-	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "kubeslice-worker", "--namespace", "kubeslice-system")
-
-	err := util.RunCommand("helm", args...)
+	args = append(args, "--kube-context", cluster.ContextName, "--kubeconfig", cluster.KubeConfigPath, "uninstall", "kubeslice-worker", "--namespace", workerNamespace)
+	err := util.CommandExecutor.Execute("helm", args...)
 	if err != nil {
 		util.Printf("%s Uninstall failed. %v", util.Cross, err)
 	}

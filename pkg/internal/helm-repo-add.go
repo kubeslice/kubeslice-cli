@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/kubeslice/kubeslice-cli/util"
@@ -28,11 +27,11 @@ func AddHelmCharts(ApplicationConfiguration *ConfigurationSpecs) {
 
 		addHelmChart(ApplicationConfiguration)
 		util.Printf("%s Successfully added helm repo %s : %s", util.Tick, hc.RepoAlias, hc.RepoUrl)
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 
 		updateHelmChart()
 		util.Printf("%s Successfully updated helm repo", util.Tick)
-		time.Sleep(200 * time.Millisecond)
+		util.Sleep(200 * time.Millisecond)
 
 		util.Printf("%s Successfully added helm charts.\n", util.Tick)
 	}
@@ -47,14 +46,14 @@ func addHelmChart(ApplicationConfiguration *ConfigurationSpecs) {
 	}
 	err := util.RunCommand("helm", repoAddCommands...)
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 
 func updateHelmChart() {
 	err := util.RunCommand("helm", "repo", "update")
 	if err != nil {
-		log.Fatalf("Process failed %v", err)
+		util.Fatalf("Process failed %v", err)
 	}
 }
 

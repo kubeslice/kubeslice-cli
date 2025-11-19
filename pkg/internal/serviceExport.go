@@ -10,34 +10,44 @@ const (
 	serviceExportConfigFileName = "serviceExportConfig.yaml"
 )
 
+// Function variables for testing
+var (
+	applyFileFuncServiceExport                = ApplyFile
+	getKubectlResourcesFuncServiceExport      = GetKubectlResources
+	deleteKubectlResourcesFuncServiceExport   = DeleteKubectlResources
+	editKubectlResourcesFuncServiceExport     = EditKubectlResources
+	describeKubectlResourcesFuncServiceExport = DescribeKubectlResources
+)
+
 func CreateServiceExportConfig(namespace string, controllerCluster *Cluster, filename string) {
-	ApplyFile(filename, namespace, controllerCluster)
-	util.Printf("\nSuccessfully Applied Slice Configuration.")
+	applyFileFuncServiceExport(filename, namespace, controllerCluster)
+	util.Printf("\nSuccessfully Applied Service Export Configuration.")
 }
 
 func GetServiceExportConfig(serviceExportConfigName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nFetching KubeSlice serviceExportConfig...")
-	GetKubectlResources(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster, "")
-	time.Sleep(200 * time.Millisecond)
+	getKubectlResourcesFuncServiceExport(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster, "")
+	util.SystemClock.Sleep(200 * time.Millisecond)
 }
+
 func generateServiceExportConfigManifest(serviceExportConfigName string) {
 	//util.DumpFile(fmt.Sprintf(ServiceExportConfigTemplate, serviceExportConfigName), kubesliceDirectory+"/"+serviceExportConfigFileName)
 }
 
 func DeleteServiceExportConfig(serviceExportConfigName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nDeleting KubeSlice serviceExportConfig...")
-	DeleteKubectlResources(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster)
-	time.Sleep(200 * time.Millisecond)
+	deleteKubectlResourcesFuncServiceExport(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster)
+	util.SystemClock.Sleep(200 * time.Millisecond)
 }
 
 func EditServiceExportConfig(serviceExportConfigName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nEditing KubeSlice serviceExportConfig...")
-	EditKubectlResources(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster)
-	time.Sleep(200 * time.Millisecond)
+	editKubectlResourcesFuncServiceExport(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster)
+	util.SystemClock.Sleep(200 * time.Millisecond)
 }
 
 func DescribeServiceExportConfig(serviceExportConfigName string, namespace string, controllerCluster *Cluster) {
 	util.Printf("\nDescribe KubeSlice serviceExportConfig...")
-	DescribeKubectlResources(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster)
-	time.Sleep(200 * time.Millisecond)
+	describeKubectlResourcesFuncServiceExport(ServiceExportConfigObject, serviceExportConfigName, namespace, controllerCluster)
+	util.SystemClock.Sleep(200 * time.Millisecond)
 }
