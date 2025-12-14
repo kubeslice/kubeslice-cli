@@ -216,3 +216,60 @@ func getNodeIP(cc *Cluster) (string, error) {
 	}
 	return "", err
 }
+
+// Bookinfo demo manifest (minimal, for demo purposes)
+const bookinfoManifest = `
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bookinfo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productpage-v1
+  namespace: bookinfo
+  labels:
+    app: productpage
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productpage
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: productpage
+        version: v1
+    spec:
+      containers:
+      - name: productpage
+        image: docker.io/istio/examples-bookinfo-productpage-v1:1.16.2
+        ports:
+        - containerPort: 9080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: productpage
+  namespace: bookinfo
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: productpage
+`
+
+func DeployBookinfoDemo(ApplicationConfiguration *ConfigurationSpecs) {
+	util.Printf("\nDeploying Bookinfo demo application to first worker cluster...")
+	cc := ApplicationConfiguration.Configuration.ClusterConfiguration
+	wc := cc.WorkerClusters
+	manifestFile := kubesliceDirectory + "/bookinfo-demo.yaml"
+	util.DumpFile(bookinfoManifest, manifestFile)
+	ApplyKubectlManifest(manifestFile, "bookinfo", &wc[0])
+	util.Printf("%s Bookinfo demo deployed to cluster %s in namespace 'bookinfo'. Access productpage service on port 9080.", util.Tick, wc[0].Name)
+}
