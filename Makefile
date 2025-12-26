@@ -1,4 +1,4 @@
-.PHONEY: build
+.PHONY: build
 build:
 	GOOS=windows GOARCH=amd64 go build -o bin/kubeslice-cli-windows-amd64.exe main.go
 	GOOS=linux GOARCH=amd64 go build -o bin/kubeslice-cli-linux-amd64 main.go
