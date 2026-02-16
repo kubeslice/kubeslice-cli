@@ -24,6 +24,9 @@ kubeslice:
       type: %s
 `
 
+var runCommandCustomIO = util.RunCommandCustomIO
+var getNodeIPFunc = getNodeIP
+
 func InstallKubeSliceUI(ApplicationConfiguration *ConfigurationSpecs) {
 	util.Printf("\nInstalling KubeSlice Manager...")
 	if ApplicationConfiguration.Configuration.HelmChartConfiguration.UIChart.ChartName == "" {
@@ -112,7 +115,7 @@ func GetUIEndpoint(cc *Cluster, profile string) string {
 	ep := ""
 
 	var outB, errB bytes.Buffer
-	err := util.RunCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "services", "kubeslice-ui-proxy", "-n", KUBESLICE_CONTROLLER_NAMESPACE, "-o", "jsonpath='{.spec}'")
+	err := runCommandCustomIO("kubectl", &outB, &errB, true, "--context="+cc.ContextName, "--kubeconfig="+cc.KubeConfigPath, "get", "services", "kubeslice-ui-proxy", "-n", KUBESLICE_CONTROLLER_NAMESPACE, "-o", "jsonpath='{.spec}'")
 	if err == nil {
 		jsonMap := make(map[string]interface{})
 		err = json.Unmarshal(outB.Bytes()[1:len(outB.Bytes())-1], &jsonMap)
@@ -129,7 +132,7 @@ func GetUIEndpoint(cc *Cluster, profile string) string {
 					portMap := port.(map[string]interface{})
 					if portMap["name"] == "http" { // Assuming that http is the name of the port that you want to use
 						nodePort := int(portMap["nodePort"].(float64))
-						nodeIP, err := getNodeIP(cc)
+						nodeIP, err := getNodeIPFunc(cc)
 						if err == nil {
 							ep = fmt.Sprintf("https://%s:%d", strings.Trim(nodeIP, "'"), nodePort)
 						} else {
