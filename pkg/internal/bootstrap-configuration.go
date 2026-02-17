@@ -45,11 +45,12 @@ type ClusterConfiguration struct {
 }
 
 type Cluster struct {
-	Name                string `yaml:"name"`
-	ContextName         string `yaml:"context_name"`
-	KubeConfigPath      string `yaml:"kube_config_path"`
-	ControlPlaneAddress string `yaml:"control_plane_address"`
-	NodeIP              string `yaml:"node_ip"`
+	Name                string                 `yaml:"name"`
+	ContextName         string                 `yaml:"context_name"`
+	KubeConfigPath      string                 `yaml:"kube_config_path"`
+	ControlPlaneAddress string                 `yaml:"control_plane_address"`
+	NodeIP              string                 `yaml:"node_ip"`
+	HelmValues          map[string]interface{} `yaml:"helm_values,omitempty"`
 }
 
 type ImagePullSecrets struct {

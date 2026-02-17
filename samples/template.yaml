@@ -21,6 +21,11 @@ configuration:
                              #{Override this flag if the address in kubeconfig is not reachable by other clusters in topology}
       node_ip: #{the IP address of one of the node in this cluster. kubeslice-cli determines this address from kubectl get nodes}
                #{Override this flag to an address which is discoverable by other clusters in the topology}
+      helm_values: #{optional: per-worker helm values that override global values}
+                   #{These values are specific to this worker cluster}
+                   #{Example: resources.limits.cpu: "2000m"}
+                   #{Example: nodeSelector.zone: "us-west-1a"}
+                   #{Leave empty or omit entirely for backward compatibility}
     - name: #{the user defined name of the worker cluster}
       context_name: #{the name of the context to use from the kubeconfig file; for topology only}
       kube_config_path: #{the path to kube config file to use for worker installation; for topology only.}
@@ -29,6 +34,11 @@ configuration:
                              #{Override this flag if the address in kubeconfig is not reachable by other clusters in topology}
       node_ip: #{the IP address of one of the node in this cluster. kubeslice-cli determines this address from kubectl get nodes}
                #{Override this flag to an address which is discoverable by other clusters in the topology}
+      helm_values: #{optional: per-worker helm values that override global values}
+                   #{These values are specific to this worker cluster}
+                   #{Example: resources.limits.cpu: "2000m"}
+                   #{Example: nodeSelector.zone: "us-west-1a"}
+                   #{Leave empty or omit entirely for backward compatibility}
   kubeslice_configuration:
     project_name: #{the name of the KubeSlice Project}
     project_users: #{optional: specify KubeSlice Project users with Readw-Write access. Default is admin}

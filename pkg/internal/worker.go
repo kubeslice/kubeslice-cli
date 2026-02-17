@@ -84,6 +84,30 @@ func Retry(backoffLimit int, sleep time.Duration, f func() error) (err error) {
 	return fmt.Errorf("retry failed after %d attempts (took %d seconds), last error: %s", backoffLimit, int(elapsed.Seconds()), err)
 }
 
+// CreateWorkerSpecificHelmChart merges global worker chart values with cluster-specific values
+func CreateWorkerSpecificHelmChart(globalChart HelmChart, cluster Cluster) HelmChart {
+	// Start with a copy of the global chart
+	workerChart := HelmChart{
+		ChartName: globalChart.ChartName,
+		Version:   globalChart.Version,
+		Values:    make(map[string]interface{}),
+	}
+
+	// Copy global values first
+	for k, v := range globalChart.Values {
+		workerChart.Values[k] = v
+	}
+
+	// Override with cluster-specific values if they exist
+	if cluster.HelmValues != nil {
+		for k, v := range cluster.HelmValues {
+			workerChart.Values[k] = v
+		}
+	}
+
+	return workerChart
+}
+
 func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configuration, insecureMetrics bool) {
 	var secrets map[string]string
 	err := Retry(3, 1*time.Second, func() (err error) {
@@ -96,7 +120,11 @@ func generateWorkerValuesFile(cluster Cluster, valuesFile string, config Configu
 	if err != nil {
 		log.Fatalf("Unable to fetch secrets\n%s", err)
 	}
-	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &config.HelmChartConfiguration.WorkerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.ControlPlaneAddress))
+
+	// Create a worker-specific helm chart configuration
+	workerChart := CreateWorkerSpecificHelmChart(config.HelmChartConfiguration.WorkerChart, cluster)
+	
+	err = generateValuesFile(kubesliceDirectory+"/"+valuesFile, &workerChart, fmt.Sprintf(workerValuesTemplate+generateImagePullSecretsValue(config.HelmChartConfiguration.ImagePullSecret), secrets["namespace"], secrets["controllerEndpoint"], secrets["ca.crt"], secrets["token"], insecureMetrics, cluster.Name, cluster.ControlPlaneAddress))
 	if err != nil {
 		log.Fatalf("%s %s", util.Cross, err)
 	}
