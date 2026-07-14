@@ -2,7 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -53,7 +53,7 @@ func generateValuesFile(filePath string, hc *HelmChart, defaults string) error {
 		return fmt.Errorf("error encoding final data as YAML: %v", err)
 	}
 
-	if err := ioutil.WriteFile(filePath, finalData, 0644); err != nil {
+	if err := os.WriteFile(filePath, finalData, 0644); err != nil {
 		return fmt.Errorf("error writing values file: %v", err)
 	}
 
