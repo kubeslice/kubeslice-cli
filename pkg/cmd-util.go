@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/go-yaml/yaml"
@@ -110,7 +109,7 @@ var defaultEntConfiguration = &internal.HelmChartConfiguration{
 }
 
 func readConfiguration(fileName string) *internal.ConfigurationSpecs {
-	file, err := ioutil.ReadFile(fileName)
+	file, err := os.ReadFile(fileName)
 	if err != nil {
 		util.Fatalf("%s Failed to read configuration file %v", util.Cross, err)
 

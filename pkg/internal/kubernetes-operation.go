@@ -3,8 +3,8 @@ package internal
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -190,7 +190,7 @@ func SetWorker(worker []string, filename string) {
 			value, _ = sjson.Set(value, "spec.clusters."+strconv.Itoa(i), worker[i])
 		}
 	}
-	err := ioutil.WriteFile(filename, []byte(value), 0644)
+	err := os.WriteFile(filename, []byte(value), 0644)
 	if err != nil {
 		log.Fatalf("file writing error #%v ", err)
 	}
@@ -200,7 +200,7 @@ func SetWorker(worker []string, filename string) {
 
 // }
 func getConf(filename string) []byte {
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatalf("yamlFile.Get err   #%v ", err)
 	}
